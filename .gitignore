@@ -1,0 +1,34 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+*.pyo
+*.pyd
+*.so
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+.venv
+venv/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Scraper runtime artifacts
+data/edcs_checkpoint.json
+
+# Generated export data (uncomment if you don't want to commit snapshots)
+data/*.json
+data/*.tsv
