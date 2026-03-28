@@ -1,37 +1,53 @@
-"""EDCS incremental scraper.
+"""
+EDCS Scraper — edcs.hist.uzh.ch
+================================
+Scrapes all inscriptions from the Epigraphy Database Clauss/Slaby.
 
-Project layout:
-EDCS-Analytics/
-    data/
-        edcs_inscriptions.json
-        edcs_inscriptions.tsv
-    src/
-        edcs_scraper.py
+FOLDER STRUCTURE:
+    EDCS-Analytics/
+    ├── data/
+    │   ├── edcs_inscriptions.json
+    │   ├── edcs_inscriptions.tsv
+    │   └── edcs_lookup.json
+    └── src/
+        └── edcs_scraper.py   ← this file
 
-Behavior:
-- If local data exists, only fetches and appends new rows from the website.
-- If no local data exists, creates fresh JSON/TSV outputs.
-- Checkpoint is used to resume interrupted runs safely.
+LOGIC:
+    1. Check if data files exist
+    2. If not → fresh scrape
+    3. If yes → check recordsTotal against local count
+    4. If new records exist → scrape only new ones
+    5. If no new records → print info and exit
+
+SETUP:
+    pip install requests
+
+RUN (from project root):
+    python src/edcs_scraper.py
 """
 
-import csv
+import requests
 import json
+import csv
+import time
+import sys
 import os
 import re
-import sys
-import time
 
-import requests
+# ─── PATHS ────────────────────────────────────────────────────────────────────
+# Script is in src/ — data folder is one level up
+SRC_DIR      = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR  = os.path.dirname(SRC_DIR)
+DATA_DIR     = os.path.join(PROJECT_DIR, "data")
 
-# ─── CONFIG ───────────────────────────────────────────────────────────────────
+OUTPUT_JSON  = os.path.join(DATA_DIR, "edcs_inscriptions.json")
+OUTPUT_TSV   = os.path.join(DATA_DIR, "edcs_inscriptions.tsv")
+LOOKUP_FILE  = os.path.join(DATA_DIR, "edcs_lookup.json")
+CHECKPOINT   = os.path.join(DATA_DIR, "edcs_checkpoint.json")
 
-API_URL = "https://edcs.hist.uzh.ch/api/query"
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(ROOT_DIR, "data")
-OUTPUT_JSON = os.path.join(DATA_DIR, "edcs_inscriptions.json")
-OUTPUT_TSV = os.path.join(DATA_DIR, "edcs_inscriptions.tsv")
-CHECKPOINT = os.path.join(DATA_DIR, "edcs_checkpoint.json")
-DELAY = 1.5
+# ─── API CONFIG ───────────────────────────────────────────────────────────────
+API_URL    = "https://edcs.hist.uzh.ch/api/query"
+DELAY      = 1.5
 PAGE_SIZES = [500, 100]
 
 HEADERS = {
@@ -42,30 +58,28 @@ HEADERS = {
     "Referer":          "https://edcs.hist.uzh.ch/en/search",
 }
 
+# ─── FINAL 14 COLUMNS ─────────────────────────────────────────────────────────
 TSV_FIELDS = [
-    "edcs_id", "monument_id", "province", "place",
-    "latitude", "longitude", "material", "dating",
-    "not_before", "not_after", "inscription_text",
-    "inscription_text_original", "language", "category",
-    "subcategory", "praenomen", "nomen", "cognomen",
-    "references", "images", "image_count", "links",
+    "edcs_id",
+    "province",
+    "place",
+    "latitude",
+    "longitude",
+    "material",
+    "material_en",
+    "not_before",
+    "not_after",
+    "inscription_text",
+    "language",
+    "category",
+    "category_en",
+    "references",
 ]
 
 # ─── BUILD REQUEST PARAMS ─────────────────────────────────────────────────────
 
 def build_params(draw, start, length):
-    """
-    Exact column structure confirmed from Firefox Network tab:
-      col 0 = obj.edcs-id
-      col 1 = (obj.ort — blank name)
-      col 2 = obj.inschriften
-      col 3 = obj.material
-      col 4 = obj.datierung
-      col 5 = obj.anzahl_bilder
-    """
-    import time as t
-    cache_buster = int(t.time() * 1000)
-
+    cache_buster = int(time.time() * 1000)
     return {
         "draw":   draw,
         "start":  start,
@@ -119,299 +133,214 @@ def build_params(draw, start, length):
 
         "search[value]": "",
         "search[regex]": "false",
-
-        "_": cache_buster,   # cache buster — same as browser sends
+        "_":             cache_buster,
     }
+
+# ─── LOOKUP HELPERS ───────────────────────────────────────────────────────────
+
+def fetch_lookup(session):
+    """Fetch one page just to extract the lookup dictionary."""
+    params = build_params(draw=1, start=0, length=1)
+    r = session.get(API_URL, params=params, timeout=30)
+    r.raise_for_status()
+    data = r.json()
+    return data.get("lookup", {})
+
+def load_or_update_lookup(session):
+    """
+    Load lookup from file if exists.
+    Fetch fresh copy from API and compare.
+    Save only if changed.
+    """
+    fresh_lookup = fetch_lookup(session)
+
+    if os.path.exists(LOOKUP_FILE):
+        with open(LOOKUP_FILE, "r", encoding="utf-8") as f:
+            existing_lookup = json.load(f)
+
+        if existing_lookup == fresh_lookup:
+            print("[lookup] No changes in lookup dictionary — using existing file.")
+            return existing_lookup
+        else:
+            print("[lookup] Lookup dictionary updated — saving new version.")
+            with open(LOOKUP_FILE, "w", encoding="utf-8") as f:
+                json.dump(fresh_lookup, f, ensure_ascii=False, indent=2)
+            return fresh_lookup
+    else:
+        print("[lookup] No lookup file found — saving fresh copy.")
+        with open(LOOKUP_FILE, "w", encoding="utf-8") as f:
+            json.dump(fresh_lookup, f, ensure_ascii=False, indent=2)
+        return fresh_lookup
+
+def get_material_en(lookup, material_code):
+    """Translate material code to English using lookup."""
+    if not material_code:
+        return ""
+    material_dict = lookup.get("material", {})
+    entry = material_dict.get(material_code, {})
+    return entry.get("en", material_code)
+
+def get_category_en(lookup, category_code):
+    """Translate category code to English using lookup."""
+    if not category_code:
+        return ""
+    gattung_dict = lookup.get("gattung", {})
+    entry = gattung_dict.get(category_code, {})
+    return entry.get("en", category_code)
 
 # ─── PARSE ONE RECORD ─────────────────────────────────────────────────────────
 
-def parse_record(item):
+def parse_record(item, lookup):
     obj = item.get("obj", {})
 
-    row = {
-        "edcs_id":                   obj.get("edcs-id", ""),
-        "monument_id":               item.get("monument_id", ""),
-        "province":                  obj.get("provinz", ""),
-        "place":                     obj.get("ort", ""),
-        "material":                  obj.get("material", ""),
-        "dating":                    obj.get("datierung", "") or "",
-        "image_count":               obj.get("anzahl_bilder", 0),
-        "longitude":                 "",
-        "latitude":                  "",
-        "inscription_text":          "",
-        "inscription_text_original": "",
-        "language":                  "",
-        "category":                  "",
-        "subcategory":               "",
-        "praenomen":                 "",
-        "nomen":                     "",
-        "cognomen":                  "",
-        "not_before":                "",
-        "not_after":                 "",
-        "references":                "",
-        "images":                    "",
-        "links":                     "",
-    }
+    # ── Coordinates ──
+    coord     = obj.get("coord") or []
+    longitude = coord[0] if len(coord) > 0 else ""
+    latitude  = coord[1] if len(coord) > 1 else ""
 
-    # Coordinates
-    coord = obj.get("coord") or []
-    if len(coord) > 0:
-        row["longitude"] = coord[0]
-    if len(coord) > 1:
-        row["latitude"] = coord[1]
+    # ── Dating ──
+    datierung = obj.get("datierung") or []
+    not_before = datierung[0] if len(datierung) > 0 else ""
+    not_after  = datierung[1] if len(datierung) > 1 else ""
 
-    # Inscription text
-    # inschriften: [ [standard_text, original_text, [languages], [categories]], ... ]
+    # ── Material ──
+    material    = obj.get("material", "") or ""
+    material_en = get_material_en(lookup, material)
+
+    # ── Inscription text, language, category ──
+    inscription_text = ""
+    language         = ""
+    category         = ""
+    category_en      = ""
+
     inschriften = obj.get("inschriften") or []
     if inschriften:
         first = inschriften[0] if isinstance(inschriften[0], list) else inschriften
-        row["inscription_text"]          = first[0] if len(first) > 0 else ""
-        row["inscription_text_original"] = first[1] if len(first) > 1 else ""
 
-        langs = first[2] if len(first) > 2 else []
-        row["language"] = "|".join(langs) if isinstance(langs, list) else str(langs or "")
+        # index[0] → inscription text
+        inscription_text = first[0] if len(first) > 0 else ""
 
+        # index[1] → date range (not text — confirmed from JSON)
+        # index[2] → language list
+        langs    = first[2] if len(first) > 2 else []
+        language = ", ".join(langs) if isinstance(langs, list) else str(langs or "")
+
+        # index[3] → category list — ALL values joined as a list
         cats = first[3] if len(first) > 3 else []
-        if isinstance(cats, list):
-            row["category"]    = cats[0] if len(cats) > 0 else ""
-            row["subcategory"] = "|".join(cats[1:]) if len(cats) > 1 else ""
+        if isinstance(cats, list) and cats:
+            category    = cats  # keep as list for JSON
+            # translate first item (main category) to English
+            category_en = get_category_en(lookup, cats[0])
 
-    # Not before / not after from dating string
-    dating_str = str(row["dating"])
-    years = re.findall(r'-?\d{1,4}', dating_str)
-    row["not_before"] = years[0] if len(years) > 0 else ""
-    row["not_after"]  = years[1] if len(years) > 1 else ""
-
-    # References (belege)
+    # ── References — all belege joined as single string ──
     belege = obj.get("belege") or []
-    refs = []
+    refs   = []
     for b in belege:
         if isinstance(b, list):
             refs.append(" ".join(str(x) for x in b if x is not None))
         else:
             refs.append(str(b))
-    row["references"] = " | ".join(refs)
+    references = " | ".join(refs)
 
-    # Images
-    bilder = obj.get("bilder") or []
-    imgs = []
-    for b in bilder:
-        if isinstance(b, list) and b[0]:
-            imgs.append(str(b[0]))
-        elif isinstance(b, str):
-            imgs.append(b)
-    row["images"] = " | ".join(imgs)
+    return {
+        "edcs_id":          obj.get("edcs-id", ""),
+        "province":         obj.get("provinz", ""),
+        "place":            obj.get("ort", ""),
+        "latitude":         latitude,
+        "longitude":        longitude,
+        "material":         material,
+        "material_en":      material_en,
+        "not_before":       not_before,
+        "not_after":        not_after,
+        "inscription_text": inscription_text,
+        "language":         language,
+        "category":         category,       # list in JSON
+        "category_en":      category_en,
+        "references":       references,
+    }
 
-    # Links
-    links = obj.get("links") or []
-    if isinstance(links, list):
-        row["links"] = " | ".join(str(l) for l in links if l)
-    elif links:
-        row["links"] = str(links)
+# ─── LOCAL RECORD COUNT ───────────────────────────────────────────────────────
 
-    return row
+def count_local_records():
+    """Count how many records are in the existing JSON file."""
+    if not os.path.exists(OUTPUT_JSON):
+        return 0
+    count = 0
+    with open(OUTPUT_JSON, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip().rstrip(",")
+            if not line or line in ("[", "]"):
+                continue
+            try:
+                json.loads(line)
+                count += 1
+            except json.JSONDecodeError:
+                continue
+    return count
 
-# ─── LOCAL DATA HELPERS ──────────────────────────────────────────────────────
+def get_last_edcs_int():
+    """Get the highest EDCS ID integer from existing JSON file."""
+    if not os.path.exists(OUTPUT_JSON):
+        return 0
+    last_int = 0
+    with open(OUTPUT_JSON, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip().rstrip(",")
+            if not line or line in ("[", "]"):
+                continue
+            try:
+                rec = json.loads(line)
+                eid = edcs_id_to_int(rec.get("edcs_id", "0"))
+                if eid > last_int:
+                    last_int = eid
+            except json.JSONDecodeError:
+                continue
+    return last_int
 
 def edcs_id_to_int(edcs_id):
     m = re.search(r'\d+', str(edcs_id))
     return int(m.group()) if m else 0
 
-def ensure_data_dir():
-    os.makedirs(DATA_DIR, exist_ok=True)
-
-
-def load_existing_state():
-    """Returns (existing_count, max_edcs_int)."""
-    ensure_data_dir()
-
-    # TSV is the fastest/cleanest source of truth for existing rows.
-    if os.path.exists(OUTPUT_TSV):
-        print(f"[resume] Scanning existing TSV: {OUTPUT_TSV}")
-        count = 0
-        max_edcs_int = 0
-        with open(OUTPUT_TSV, "r", encoding="utf-8", newline="") as tsv_file:
-            reader = csv.DictReader(tsv_file, delimiter="\t")
-            for row in reader:
-                count += 1
-                eid_int = edcs_id_to_int(row.get("edcs_id", ""))
-                if eid_int > max_edcs_int:
-                    max_edcs_int = eid_int
-
-        if count > 0:
-            print(f"[resume] Existing rows: {count:,} | Last EDCS ID: EDCS-{max_edcs_int:08d}")
-            return count, max_edcs_int
-
-    # Fallback to line-by-line scan of JSON if TSV is missing.
-    if os.path.exists(OUTPUT_JSON):
-        print(f"[resume] TSV missing; scanning JSON: {OUTPUT_JSON}")
-        count = 0
-        max_edcs_int = 0
-        with open(OUTPUT_JSON, "r", encoding="utf-8") as json_file:
-            for line in json_file:
-                line = line.strip().rstrip(",")
-                if not line or line in ("[", "]"):
-                    continue
-                try:
-                    rec = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                count += 1
-                eid_int = edcs_id_to_int(rec.get("edcs_id", ""))
-                if eid_int > max_edcs_int:
-                    max_edcs_int = eid_int
-
-        if count > 0:
-            print(f"[resume] Existing rows: {count:,} | Last EDCS ID: EDCS-{max_edcs_int:08d}")
-            return count, max_edcs_int
-
-    return 0, 0
-
-
-def load_checkpoint():
-    if not os.path.exists(CHECKPOINT):
-        return None
-
-    try:
-        with open(CHECKPOINT, "r", encoding="utf-8") as cp_file:
-            cp = json.load(cp_file)
-    except (OSError, json.JSONDecodeError):
-        return None
-
-    start = int(cp.get("start", 0))
-    last_edcs_int = int(cp.get("last_edcs_int", 0))
-    last_edcs_id = cp.get("last_edcs_id", f"EDCS-{last_edcs_int:08d}" if last_edcs_int else "")
-    return {
-        "start": max(0, start),
-        "last_edcs_int": max(0, last_edcs_int),
-        "last_edcs_id": str(last_edcs_id or ""),
-    }
-
+# ─── CHECKPOINT ───────────────────────────────────────────────────────────────
 
 def save_checkpoint(start, last_edcs_id):
-    ensure_data_dir()
-    with open(CHECKPOINT, "w", encoding="utf-8") as cp_file:
-        json.dump(
-            {
-                "start": start,
-                "last_edcs_id": last_edcs_id,
-                "last_edcs_int": edcs_id_to_int(last_edcs_id),
-            },
-            cp_file,
-            indent=2,
-        )
+    with open(CHECKPOINT, "w") as f:
+        json.dump({
+            "start":         start,
+            "last_edcs_id":  last_edcs_id,
+            "last_edcs_int": edcs_id_to_int(last_edcs_id),
+        }, f, indent=2)
 
+def load_checkpoint():
+    if os.path.exists(CHECKPOINT):
+        with open(CHECKPOINT, "r") as f:
+            cp = json.load(f)
+        print(f"[resume] Checkpoint found — last EDCS ID: {cp['last_edcs_id']} | start: {cp['start']}")
+        return cp["start"], cp["last_edcs_int"]
+    return None, None
 
-def open_json_output(existing_count):
-    """Open JSON file for append while preserving valid JSON array format."""
-    ensure_data_dir()
+# ─── SCRAPE ───────────────────────────────────────────────────────────────────
 
-    # Fresh file.
-    if existing_count == 0 or not os.path.exists(OUTPUT_JSON) or os.path.getsize(OUTPUT_JSON) == 0:
-        json_file = open(OUTPUT_JSON, "w", encoding="utf-8")
-        json_file.write("[\n")
-        return json_file, True
+def scrape(session, lookup, start, last_edcs_int, total, page_size, is_resume):
+    """Core scrape loop — writes to JSON and TSV."""
 
-    # Append to existing array: remove trailing ']' and continue writing.
-    json_file = open(OUTPUT_JSON, "r+", encoding="utf-8")
-    json_file.seek(0, os.SEEK_END)
-    pos = json_file.tell() - 1
-
-    while pos >= 0:
-        json_file.seek(pos)
-        ch = json_file.read(1)
-        if ch in " \t\r\n":
-            pos -= 1
-            continue
-        break
-
-    if pos >= 0 and ch == "]":
-        json_file.truncate(pos)
-
-    json_file.seek(0, os.SEEK_END)
-    return json_file, False
-
-# ─── MAIN ─────────────────────────────────────────────────────────────────────
-
-def main():
-    ensure_data_dir()
-
-    session = requests.Session()
-    session.headers.update(HEADERS)
-
-    # ── Detect working page size ──
-    page_size = None
-    total     = None
-    print("[+] Connecting to EDCS API and testing page size...")
-
-    for size in PAGE_SIZES:
-        try:
-            params = build_params(draw=1, start=0, length=size)
-            r = session.get(API_URL, params=params, timeout=30)
-            r.raise_for_status()
-            data = r.json()
-            if "data" in data and len(data["data"]) > 0:
-                page_size = size
-                total     = data["recordsTotal"]
-                print(f"[+] Page size {size} works! Total records in EDCS: {total:,}")
-                break
-            else:
-                print(f"[!] Page size {size} returned no data, trying {PAGE_SIZES[-1]}...")
-        except Exception as e:
-            print(f"[!] Page size {size} failed: {e}")
-        time.sleep(DELAY)
-
-    if not page_size or not total:
-        print("[!] Could not connect to EDCS API. Check your internet connection.")
-        sys.exit(1)
-
-    # ── Existing local data state + checkpoint state ──
-    existing_count, file_last_edcs_int = load_existing_state()
-    start = existing_count
-    last_edcs_int = file_last_edcs_int
-
-    checkpoint = load_checkpoint()
-    if checkpoint:
-        cp_start = checkpoint["start"]
-        cp_last_edcs_int = checkpoint["last_edcs_int"]
-
-        # Use the farthest safe progress marker seen between file scan and checkpoint.
-        start = max(start, cp_start)
-        last_edcs_int = max(last_edcs_int, cp_last_edcs_int)
-        print(
-            "[resume] Checkpoint found: "
-            f"start={cp_start:,}, last_id={checkpoint['last_edcs_id']} "
-            f"(using start={start:,}, last_int={last_edcs_int})"
-        )
-
-    if total <= start:
-        print(f"[✓] Local data is up to date. Website rows: {total:,} | Local rows/checkpoint: {start:,}")
-        if os.path.exists(CHECKPOINT):
-            os.remove(CHECKPOINT)
-            print(f"[✓] Removed stale checkpoint: {CHECKPOINT}")
-        return
-
-    is_resume = start > 0
-
-    # ── Open output files ──
-    json_file, first_record = open_json_output(existing_count)
-    tsv_file = open(OUTPUT_TSV, "a" if is_resume else "w", encoding="utf-8", newline="")
+    json_file  = open(OUTPUT_JSON, "a" if is_resume else "w", encoding="utf-8")
+    tsv_file   = open(OUTPUT_TSV,  "a" if is_resume else "w", encoding="utf-8", newline="")
     tsv_writer = csv.DictWriter(tsv_file, fieldnames=TSV_FIELDS, delimiter="\t", extrasaction="ignore")
 
     if not is_resume:
+        json_file.write("[\n")
         tsv_writer.writeheader()
 
+    first_record  = not is_resume
     records_saved = 0
-    skipped       = 0
     draw          = 1
     last_edcs_id  = f"EDCS-{last_edcs_int:08d}" if last_edcs_int else ""
 
-    print(f"\n[+] Starting from offset  : {start:,}")
+    print(f"\n[+] Scraping from offset  : {start:,}")
     print(f"[+] Total records in EDCS : {total:,}")
     print(f"[+] Page size             : {page_size}")
-    print(f"[+] Output JSON           : {OUTPUT_JSON}")
-    print(f"[+] Output TSV            : {OUTPUT_TSV}")
-    print(f"[+] Press Ctrl+C anytime to stop — progress saved every page\n")
+    print(f"[+] Press Ctrl+C anytime  — progress saved every page\n")
 
     try:
         while start < total:
@@ -436,38 +365,38 @@ def main():
                 break
 
             for item in records:
-                row     = parse_record(item)
+                row     = parse_record(item, lookup)
                 eid_int = edcs_id_to_int(row["edcs_id"])
 
-                # Skip rows that are already in local data.
-                if eid_int <= last_edcs_int:
-                    skipped += 1
+                # Skip already saved records on resume
+                if is_resume and eid_int <= last_edcs_int:
                     continue
 
-                # JSON
+                # Write JSON — category as list, rest as values
                 if not first_record:
                     json_file.write(",\n")
                 json.dump(row, json_file, ensure_ascii=False)
                 first_record = False
 
-                # TSV
-                tsv_writer.writerow(row)
+                # Write TSV — category as pipe separated string
+                tsv_row = row.copy()
+                if isinstance(tsv_row["category"], list):
+                    tsv_row["category"] = " | ".join(tsv_row["category"])
+                tsv_writer.writerow(tsv_row)
 
                 records_saved += 1
                 last_edcs_id   = row["edcs_id"]
                 last_edcs_int  = eid_int
 
-            # Progress
-            pct           = min(100.0, (start + page_size) / total * 100)
-            est_min       = int(((total - start - page_size) / page_size) * DELAY / 60)
-
-            # Save resume state every page.
+            # Save checkpoint after every page
             save_checkpoint(start + page_size, last_edcs_id)
 
+            # Progress
+            pct     = min(100.0, (start + page_size) / total * 100)
+            est_min = int(((total - start - page_size) / page_size) * DELAY / 60)
             print(
                 f"  offset={start + page_size:>7,}/{total:,} | "
                 f"saved={records_saved:>7,} | "
-                f"skipped={skipped:>5,} | "
                 f"{pct:5.1f}% | "
                 f"~{est_min}min left      ",
                 end="\r"
@@ -478,24 +407,124 @@ def main():
             time.sleep(DELAY)
 
     except KeyboardInterrupt:
-        print(f"\n\n[!] Stopped by user. Run again to resume from {last_edcs_id}.")
+        print(f"\n\n[!] Stopped. Run again to resume from {last_edcs_id}.")
 
     finally:
         json_file.write("\n]")
         json_file.close()
         tsv_file.close()
 
-    if records_saved == 0:
-        print("\n[=] No new rows were found to append.")
-
-    print(f"\n[✓] New records saved : {records_saved:,}")
+    print(f"\n[✓] Records saved : {records_saved:,}")
     print(f"[✓] Last EDCS ID  : {last_edcs_id}")
-    print(f"[✓] JSON          : {OUTPUT_JSON}")
-    print(f"[✓] TSV           : {OUTPUT_TSV}")
 
     if start >= total and os.path.exists(CHECKPOINT):
         os.remove(CHECKPOINT)
         print(f"[✓] Checkpoint deleted — full scrape complete!")
+
+# ─── MAIN ─────────────────────────────────────────────────────────────────────
+
+def main():
+    # Ensure data directory exists
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    session = requests.Session()
+    session.headers.update(HEADERS)
+
+    # ── Step 1: Detect working page size and get total ──
+    page_size = None
+    total     = None
+    print("[+] Connecting to EDCS API...")
+
+    for size in PAGE_SIZES:
+        try:
+            params = build_params(draw=1, start=0, length=size)
+            r      = session.get(API_URL, params=params, timeout=30)
+            r.raise_for_status()
+            data = r.json()
+            if "data" in data and len(data["data"]) > 0:
+                page_size = size
+                total     = data["recordsTotal"]
+                print(f"[+] Connected. Page size {size} works. Total records in EDCS: {total:,}")
+                break
+            else:
+                print(f"[!] Page size {size} returned no data, trying smaller...")
+        except Exception as e:
+            print(f"[!] Page size {size} failed: {e}")
+        time.sleep(DELAY)
+
+    if not page_size or not total:
+        print("[!] Could not connect to EDCS API. Check your internet connection.")
+        sys.exit(1)
+
+    # ── Step 2: Load or update lookup dictionary ──
+    print()
+    lookup = load_or_update_lookup(session)
+
+    # ── Step 3: Check local data files ──
+    json_exists = os.path.exists(OUTPUT_JSON)
+    tsv_exists  = os.path.exists(OUTPUT_TSV)
+    files_exist = json_exists and tsv_exists
+
+    print()
+    if not files_exist:
+        # ── Fresh scrape ──
+        print("[+] No existing data files found in data/ folder.")
+        print("[+] Starting fresh scrape...")
+        scrape(
+            session      = session,
+            lookup       = lookup,
+            start        = 0,
+            last_edcs_int= 0,
+            total        = total,
+            page_size    = page_size,
+            is_resume    = False,
+        )
+
+    else:
+        # ── Check for resume checkpoint first ──
+        cp_start, cp_last_int = load_checkpoint()
+
+        if cp_start is not None:
+            # Interrupted scrape — resume it
+            print(f"[+] Resuming interrupted scrape from offset {cp_start:,}...")
+            scrape(
+                session      = session,
+                lookup       = lookup,
+                start        = cp_start,
+                last_edcs_int= cp_last_int,
+                total        = total,
+                page_size    = page_size,
+                is_resume    = True,
+            )
+
+        else:
+            # ── Compare local count vs API total ──
+            print("[+] Data files found. Checking for updates...")
+            local_count = count_local_records()
+            print(f"    Local records  : {local_count:,}")
+            print(f"    EDCS total     : {total:,}")
+
+            if total > local_count:
+                new_records = total - local_count
+                print(f"[+] {new_records:,} new records found. Scraping updates...")
+                last_edcs_int = get_last_edcs_int()
+                scrape(
+                    session      = session,
+                    lookup       = lookup,
+                    start        = local_count,
+                    last_edcs_int= last_edcs_int,
+                    total        = total,
+                    page_size    = page_size,
+                    is_resume    = True,
+                )
+            else:
+                print(f"\n[✓] No new records found.")
+                print(f"[✓] Local data is up to date — {local_count:,} records.")
+                print(f"[✓] Last checked: EDCS total = {total:,}")
+
+    print(f"\n[✓] JSON : {OUTPUT_JSON}")
+    print(f"[✓] TSV  : {OUTPUT_TSV}")
+    print(f"[✓] Lookup: {LOOKUP_FILE}")
 
 
 if __name__ == "__main__":
