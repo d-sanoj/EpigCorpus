@@ -32,4 +32,4 @@ Each run checks the EDCS API for new records and appends only those not already 
 
 - Data files are generated on-demand and excluded from git (see `.gitignore`)
 - The checkpoint file is used for safely resuming interrupted scraping runs
-- `edcs_lookup.json` is a static reference file and does not change between scrape runs
+- `edcs_lookup.json` is a reference file and only updates when there are is new information.
