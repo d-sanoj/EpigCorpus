@@ -6,11 +6,20 @@ Scrapes all inscriptions from the Epigraphy Database Clauss/Slaby.
 FOLDER STRUCTURE:
     EDCS-Analytics/
     ├── data/
-    │   ├── edcs_inscriptions.jsonl   ← one record per line, append safe
+    │   ├── edcs_inscriptions.jsonl   ← one record per line
     │   ├── edcs_inscriptions.tsv
     │   └── edcs_lookup.json
     └── src/
         └── edcs_scraper.py           ← this file
+
+KEY DESIGN DECISIONS:
+    - One row per inscription (not per monument)
+    - record_id = edcs_id + inscription index e.g. EDCS-00000001-0
+    - dating, language, category all come from inside each inscription
+    - all categories translated to English via lookup
+    - image_urls stored as last column
+    - JSONL: category and category_en as lists
+    - TSV:   category and category_en pipe separated
 
 LOGIC:
     1. Check if data files exist
@@ -19,7 +28,7 @@ LOGIC:
     4. If new records → scrape only new ones
     5. If no new records → print info and exit
 
-READING THE JSONL IN PYTHON:
+READING IN PYTHON:
     import pandas as pd
     df = pd.read_json("data/edcs_inscriptions.jsonl", lines=True)
 
@@ -39,9 +48,9 @@ import os
 import re
 
 # ─── PATHS ────────────────────────────────────────────────────────────────────
-SRC_DIR     = os.path.dirname(os.path.abspath(__file__))
-PROJECT_DIR = os.path.dirname(SRC_DIR)
-DATA_DIR    = os.path.join(PROJECT_DIR, "data")
+SRC_DIR      = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR  = os.path.dirname(SRC_DIR)
+DATA_DIR     = os.path.join(PROJECT_DIR, "data")
 
 OUTPUT_JSONL = os.path.join(DATA_DIR, "edcs_inscriptions.jsonl")
 OUTPUT_TSV   = os.path.join(DATA_DIR, "edcs_inscriptions.tsv")
@@ -61,9 +70,11 @@ HEADERS = {
     "Referer":          "https://edcs.hist.uzh.ch/en/search",
 }
 
-# ─── 14 COLUMNS ───────────────────────────────────────────────────────────────
+# ─── 16 COLUMNS ───────────────────────────────────────────────────────────────
 TSV_FIELDS = [
+    "record_id",
     "edcs_id",
+    "inscription_index",
     "province",
     "place",
     "latitude",
@@ -76,7 +87,7 @@ TSV_FIELDS = [
     "language",
     "category",
     "category_en",
-    "references",
+    "image_urls",
 ]
 
 # ─── BUILD REQUEST PARAMS ─────────────────────────────────────────────────────
@@ -149,8 +160,8 @@ def fetch_lookup(session):
 
 def load_or_update_lookup(session):
     """
-    Load lookup from file if it exists.
-    Compare with fresh API version.
+    Load lookup from file if exists.
+    Fetch fresh from API and compare.
     Save only if changed.
     """
     fresh = fetch_lookup(session)
@@ -171,101 +182,148 @@ def load_or_update_lookup(session):
     return fresh
 
 def get_material_en(lookup, code):
+    """Translate material code to English."""
     if not code:
         return ""
     return lookup.get("material", {}).get(code, {}).get("en", code)
 
-def get_category_en(lookup, code):
-    if not code:
-        return ""
-    return lookup.get("gattung", {}).get(code, {}).get("en", code)
+def translate_categories(lookup, cats):
+    """
+    Translate ALL category codes to English.
+    Returns a list of English translations.
+    Falls back to original term if not found in lookup.
+    """
+    if not cats or not isinstance(cats, list):
+        return []
+    gattung = lookup.get("gattung", {})
+    return [
+        gattung.get(cat, {}).get("en", cat)   # fallback to original if not found
+        for cat in cats
+    ]
 
-# ─── PARSE ONE RECORD ─────────────────────────────────────────────────────────
+# ─── PARSE ONE MONUMENT → MULTIPLE INSCRIPTION ROWS ──────────────────────────
 
-def parse_record(item, lookup):
+def parse_monument(item, lookup):
+    """
+    One monument can have multiple inscriptions.
+    Returns a LIST of rows — one per inscription.
+    Each row has a unique record_id = edcs_id-inscription_index.
+    """
     obj = item.get("obj", {})
 
-    # Coordinates
+    # ── Monument level fields (shared across all inscriptions) ──
+    edcs_id  = obj.get("edcs-id", "")
+    province = obj.get("provinz", "")
+    place    = obj.get("ort", "")
+
     coord     = obj.get("coord") or []
     longitude = coord[0] if len(coord) > 0 else ""
     latitude  = coord[1] if len(coord) > 1 else ""
 
-    # Dating — confirmed as [not_before, not_after] integers
-    datierung  = obj.get("datierung") or []
-    not_before = datierung[0] if len(datierung) > 0 else ""
-    not_after  = datierung[1] if len(datierung) > 1 else ""
-
-    # Material
     material    = obj.get("material", "") or ""
     material_en = get_material_en(lookup, material)
 
-    # Inscription text, language, category
-    inscription_text = ""
-    language         = ""
-    category         = []
-    category_en      = ""
+    # ── Image URLs — shared across all inscriptions ──
+    bilder     = obj.get("bilder") or []
+    image_list = []
+    for b in bilder:
+        if isinstance(b, list) and b[0]:
+            image_list.append(str(b[0]))
+        elif isinstance(b, str) and b:
+            image_list.append(b)
+    image_urls = " | ".join(image_list)
 
+    # ── Inscriptions — one row per inscription ──
     inschriften = obj.get("inschriften") or []
-    if inschriften:
-        first = inschriften[0] if isinstance(inschriften[0], list) else inschriften
+    rows        = []
+
+    for i, insc in enumerate(inschriften):
+        if not isinstance(insc, list):
+            continue
 
         # index[0] → inscription text
-        inscription_text = first[0] if len(first) > 0 else ""
+        inscription_text = insc[0] if len(insc) > 0 else ""
 
-        # index[1] → date range — confirmed, not text, skip
+        # index[1] → [not_before, not_after] — confirmed from JSON
+        dating     = insc[1] if len(insc) > 1 else []
+        not_before = ""
+        not_after  = ""
+        if isinstance(dating, list):
+            not_before = dating[0] if len(dating) > 0 else ""
+            not_after  = dating[1] if len(dating) > 1 else ""
 
-        # index[2] → language
-        langs    = first[2] if len(first) > 2 else []
+        # index[2] → language list
+        langs    = insc[2] if len(insc) > 2 else []
         language = ", ".join(langs) if isinstance(langs, list) else str(langs or "")
 
-        # index[3] → all category values as list
-        cats = first[3] if len(first) > 3 else []
-        if isinstance(cats, list) and cats:
-            category    = cats
-            category_en = get_category_en(lookup, cats[0])
+        # index[3] → category list — ALL values
+        cats        = insc[3] if len(insc) > 3 else []
+        category    = cats if isinstance(cats, list) else []
+        category_en = translate_categories(lookup, category)
 
-    # References — all belege joined as single string
-    belege = obj.get("belege") or []
-    refs   = []
-    for b in belege:
-        if isinstance(b, list):
-            refs.append(" ".join(str(x) for x in b if x is not None))
-        else:
-            refs.append(str(b))
-    references = " | ".join(refs)
+        rows.append({
+            "record_id":         f"{edcs_id}-{i}",
+            "edcs_id":           edcs_id,
+            "inscription_index": i,
+            "province":          province,
+            "place":             place,
+            "latitude":          latitude,
+            "longitude":         longitude,
+            "material":          material,
+            "material_en":       material_en,
+            "not_before":        not_before,
+            "not_after":         not_after,
+            "inscription_text":  inscription_text,
+            "language":          language,
+            "category":          category,       # list in JSONL
+            "category_en":       category_en,    # list in JSONL
+            "image_urls":        image_urls,
+        })
 
-    return {
-        "edcs_id":          obj.get("edcs-id", ""),
-        "province":         obj.get("provinz", ""),
-        "place":            obj.get("ort", ""),
-        "latitude":         latitude,
-        "longitude":        longitude,
-        "material":         material,
-        "material_en":      material_en,
-        "not_before":       not_before,
-        "not_after":        not_after,
-        "inscription_text": inscription_text,
-        "language":         language,
-        "category":         category,       # list → jsonl keeps as list, tsv joins
-        "category_en":      category_en,
-        "references":       references,
-    }
+    # If monument has no inschriften at all — still save one row
+    if not rows:
+        rows.append({
+            "record_id":         f"{edcs_id}-0",
+            "edcs_id":           edcs_id,
+            "inscription_index": 0,
+            "province":          province,
+            "place":             place,
+            "latitude":          latitude,
+            "longitude":         longitude,
+            "material":          material,
+            "material_en":       material_en,
+            "not_before":        "",
+            "not_after":         "",
+            "inscription_text":  "",
+            "language":          "",
+            "category":          [],
+            "category_en":       [],
+            "image_urls":        image_urls,
+        })
+
+    return rows
 
 # ─── LOCAL FILE HELPERS ───────────────────────────────────────────────────────
 
 def count_local_records():
-    """Count lines in JSONL file — each line is one record."""
+    """Count monuments (not inscription rows) in JSONL by unique edcs_id."""
     if not os.path.exists(OUTPUT_JSONL):
         return 0
-    count = 0
+    seen = set()
     with open(OUTPUT_JSONL, "r", encoding="utf-8") as f:
         for line in f:
-            if line.strip():
-                count += 1
-    return count
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+                seen.add(rec.get("edcs_id", ""))
+            except json.JSONDecodeError:
+                continue
+    return len(seen)
 
 def get_last_edcs_int():
-    """Get the highest EDCS ID integer from JSONL file."""
+    """Get highest EDCS ID integer from existing JSONL."""
     if not os.path.exists(OUTPUT_JSONL):
         return 0
     last_int = 0
@@ -308,12 +366,6 @@ def load_checkpoint():
 # ─── CORE SCRAPE LOOP ─────────────────────────────────────────────────────────
 
 def scrape(session, lookup, start, last_edcs_int, total, page_size, is_resume):
-    """
-    Writes to JSONL — one record per line, plain append.
-    No brackets, no bracket bugs, resume safe.
-    """
-    # JSONL — always append, never overwrite
-    # TSV   — write header only on fresh start
     jsonl_file = open(OUTPUT_JSONL, "a", encoding="utf-8")
     tsv_file   = open(OUTPUT_TSV, "a" if is_resume else "w", encoding="utf-8", newline="")
     tsv_writer = csv.DictWriter(tsv_file, fieldnames=TSV_FIELDS, delimiter="\t", extrasaction="ignore")
@@ -321,9 +373,10 @@ def scrape(session, lookup, start, last_edcs_int, total, page_size, is_resume):
     if not is_resume:
         tsv_writer.writeheader()
 
-    records_saved = 0
-    draw          = 1
-    last_edcs_id  = f"EDCS-{last_edcs_int:08d}" if last_edcs_int else ""
+    monuments_saved  = 0
+    rows_saved       = 0
+    draw             = 1
+    last_edcs_id     = f"EDCS-{last_edcs_int:08d}" if last_edcs_int else ""
 
     print(f"\n[+] Starting from offset  : {start:,}")
     print(f"[+] Total records in EDCS : {total:,}")
@@ -353,25 +406,33 @@ def scrape(session, lookup, start, last_edcs_int, total, page_size, is_resume):
                 break
 
             for item in records:
-                row     = parse_record(item, lookup)
-                eid_int = edcs_id_to_int(row["edcs_id"])
+                edcs_id = item.get("obj", {}).get("edcs-id", "")
+                eid_int = edcs_id_to_int(edcs_id)
 
-                # Skip already saved records on resume
+                # Skip already saved monuments on resume
                 if is_resume and eid_int <= last_edcs_int:
                     continue
 
-                # JSONL — one line per record, no brackets ever
-                jsonl_file.write(json.dumps(row, ensure_ascii=False) + "\n")
+                # Parse monument into one or more inscription rows
+                rows = parse_monument(item, lookup)
 
-                # TSV — category list joined with pipe
-                tsv_row = row.copy()
-                if isinstance(tsv_row["category"], list):
-                    tsv_row["category"] = " | ".join(tsv_row["category"])
-                tsv_writer.writerow(tsv_row)
+                for row in rows:
+                    # JSONL — category and category_en as lists
+                    jsonl_file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-                records_saved += 1
-                last_edcs_id   = row["edcs_id"]
-                last_edcs_int  = eid_int
+                    # TSV — lists joined with pipe
+                    tsv_row = row.copy()
+                    if isinstance(tsv_row["category"], list):
+                        tsv_row["category"] = " | ".join(tsv_row["category"])
+                    if isinstance(tsv_row["category_en"], list):
+                        tsv_row["category_en"] = " | ".join(tsv_row["category_en"])
+                    tsv_writer.writerow(tsv_row)
+
+                    rows_saved += 1
+
+                monuments_saved += 1
+                last_edcs_id     = edcs_id
+                last_edcs_int    = eid_int
 
             # Save checkpoint after every page
             save_checkpoint(start + page_size, last_edcs_id)
@@ -381,7 +442,8 @@ def scrape(session, lookup, start, last_edcs_int, total, page_size, is_resume):
             est_min = int(((total - start - page_size) / page_size) * DELAY / 60)
             print(
                 f"  offset={start + page_size:>7,}/{total:,} | "
-                f"saved={records_saved:>7,} | "
+                f"monuments={monuments_saved:>7,} | "
+                f"rows={rows_saved:>7,} | "
                 f"{pct:5.1f}% | "
                 f"~{est_min}min left      ",
                 end="\r"
@@ -398,8 +460,9 @@ def scrape(session, lookup, start, last_edcs_int, total, page_size, is_resume):
         jsonl_file.close()
         tsv_file.close()
 
-    print(f"\n[✓] Records saved : {records_saved:,}")
-    print(f"[✓] Last EDCS ID  : {last_edcs_id}")
+    print(f"\n[✓] Monuments saved : {monuments_saved:,}")
+    print(f"[✓] Total rows      : {rows_saved:,}  (more than monuments due to multi-inscription records)")
+    print(f"[✓] Last EDCS ID    : {last_edcs_id}")
 
     if start >= total and os.path.exists(CHECKPOINT):
         os.remove(CHECKPOINT)
@@ -408,7 +471,6 @@ def scrape(session, lookup, start, last_edcs_int, total, page_size, is_resume):
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 def main():
-    # Ensure data directory exists
     os.makedirs(DATA_DIR, exist_ok=True)
 
     session = requests.Session()
@@ -449,7 +511,6 @@ def main():
     files_exist = os.path.exists(OUTPUT_JSONL) and os.path.exists(OUTPUT_TSV)
 
     if not files_exist:
-        # Fresh scrape
         print("[+] No existing data files found — starting fresh scrape.")
         scrape(
             session       = session,
@@ -466,7 +527,6 @@ def main():
         cp_start, cp_last_int = load_checkpoint()
 
         if cp_start is not None:
-            # Resume interrupted scrape
             print(f"[+] Resuming interrupted scrape from offset {cp_start:,}...")
             scrape(
                 session       = session,
@@ -479,11 +539,11 @@ def main():
             )
 
         else:
-            # Compare local vs API
+            # Compare local monument count vs API total
             print("[+] Data files found. Checking for updates...")
             local_count = count_local_records()
-            print(f"    Local records  : {local_count:,}")
-            print(f"    EDCS total     : {total:,}")
+            print(f"    Local monuments : {local_count:,}")
+            print(f"    EDCS total      : {total:,}")
 
             if total > local_count:
                 new_count     = total - local_count
@@ -500,8 +560,8 @@ def main():
                 )
             else:
                 print(f"\n[✓] No new records found — local data is up to date.")
-                print(f"[✓] Local records : {local_count:,}")
-                print(f"[✓] EDCS total    : {total:,}")
+                print(f"[✓] Local monuments : {local_count:,}")
+                print(f"[✓] EDCS total      : {total:,}")
 
     print(f"\n[✓] JSONL  : {OUTPUT_JSONL}")
     print(f"[✓] TSV    : {OUTPUT_TSV}")
