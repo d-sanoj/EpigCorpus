@@ -32,3 +32,4 @@ data/edcs_checkpoint.json
 # Generated export data (uncomment if you don't want to commit snapshots)
 data/*.json
 data/*.tsv
+data/*.jsonl
