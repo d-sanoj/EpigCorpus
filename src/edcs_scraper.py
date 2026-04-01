@@ -18,8 +18,8 @@ KEY DESIGN DECISIONS:
     - dating, language, category all come from inside each inscription
     - all categories translated to English via lookup
     - image_urls stored as last column
-    - JSONL: category and category_en as lists
-    - TSV:   category and category_en pipe separated
+    - JSONL: category and category_en as lists, belege as list
+    - TSV:   category and category_en pipe separated, belege pipe separated
 
 LOGIC:
     1. Check if data files exist
@@ -70,7 +70,7 @@ HEADERS = {
     "Referer":          "https://edcs.hist.uzh.ch/en/search",
 }
 
-# ─── 16 COLUMNS ───────────────────────────────────────────────────────────────
+# ─── 17 COLUMNS ───────────────────────────────────────────────────────────────
 TSV_FIELDS = [
     "record_id",
     "edcs_id",
@@ -87,6 +87,7 @@ TSV_FIELDS = [
     "language",
     "category",
     "category_en",
+    "belege",         # ← NEW
     "image_urls",
 ]
 
@@ -201,6 +202,22 @@ def translate_categories(lookup, cats):
         for cat in cats
     ]
 
+# ─── PARSE BELEGE ─────────────────────────────────────────────────────────────
+
+def parse_belege(obj):
+    """
+    Parse obj.belege into a list of strings like ["CIL 16 00041", "AE 1913 00179"].
+    Each belege entry is a 3-element array: [journal, volume, number].
+    """
+    raw = obj.get("belege") or []
+    result = []
+    for entry in raw:
+        if isinstance(entry, list) and len(entry) >= 3:
+            parts = [str(p).strip() for p in entry[:3] if p]
+            if parts:
+                result.append(" ".join(parts))
+    return result
+
 # ─── PARSE ONE MONUMENT → MULTIPLE INSCRIPTION ROWS ──────────────────────────
 
 def parse_monument(item, lookup):
@@ -222,6 +239,9 @@ def parse_monument(item, lookup):
 
     material    = obj.get("material", "") or ""
     material_en = get_material_en(lookup, material)
+
+    # ── Belege — shared across all inscriptions ──
+    belege = parse_belege(obj)
 
     # ── Image URLs — shared across all inscriptions ──
     bilder     = obj.get("bilder") or []
@@ -277,6 +297,7 @@ def parse_monument(item, lookup):
             "language":          language,
             "category":          category,       # list in JSONL
             "category_en":       category_en,    # list in JSONL
+            "belege":            belege,          # list in JSONL ← NEW
             "image_urls":        image_urls,
         })
 
@@ -298,6 +319,7 @@ def parse_monument(item, lookup):
             "language":          "",
             "category":          [],
             "category_en":       [],
+            "belege":            belege,          # ← NEW
             "image_urls":        image_urls,
         })
 
@@ -417,7 +439,7 @@ def scrape(session, lookup, start, last_edcs_int, total, page_size, is_resume):
                 rows = parse_monument(item, lookup)
 
                 for row in rows:
-                    # JSONL — category and category_en as lists
+                    # JSONL — category, category_en, belege as lists
                     jsonl_file.write(json.dumps(row, ensure_ascii=False) + "\n")
 
                     # TSV — lists joined with pipe
@@ -426,6 +448,8 @@ def scrape(session, lookup, start, last_edcs_int, total, page_size, is_resume):
                         tsv_row["category"] = " | ".join(tsv_row["category"])
                     if isinstance(tsv_row["category_en"], list):
                         tsv_row["category_en"] = " | ".join(tsv_row["category_en"])
+                    if isinstance(tsv_row["belege"], list):          # ← NEW
+                        tsv_row["belege"] = " | ".join(tsv_row["belege"])
                     tsv_writer.writerow(tsv_row)
 
                     rows_saved += 1
