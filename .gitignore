@@ -33,3 +33,4 @@ data/edcs_checkpoint.json
 data/*.json
 data/*.tsv
 data/*.jsonl
+data/edcs_inscriptions_cleaned.csv
