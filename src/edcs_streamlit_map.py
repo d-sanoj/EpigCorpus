@@ -14,13 +14,7 @@ BASE_RAW = "https://raw.githubusercontent.com/mqAncientHistory/Lat-Epig/main"
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
 SUPPORT_DIR = DATA_DIR / "lat_epig_support"
-RAW_JSONL_FILE = DATA_DIR / "edcs_inscriptions.jsonl"
 CLEANED_JSONL_FILE = DATA_DIR / "edcs_inscriptions_cleaned.jsonl"
-
-TEXT_FIELD_OPTIONS = [
-    "inscription_text_interpretive",
-    "inscription_text_conservative",
-]
 
 
 def download_if_missing(url: str, destination: Path) -> Path:
@@ -87,17 +81,18 @@ def load_layers() -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame, gpd.GeoDataFrame]
 
 @st.cache_data(show_spinner=False)
 def load_inscriptions() -> pd.DataFrame:
-    source_file = CLEANED_JSONL_FILE if CLEANED_JSONL_FILE.exists() else RAW_JSONL_FILE
+    source_file = CLEANED_JSONL_FILE
     if not source_file.exists():
-        raise FileNotFoundError(f"Missing dataset: {source_file}")
+        raise FileNotFoundError(
+            f"Missing cleaned dataset: {source_file}. Run main.py first to generate cleaned outputs."
+        )
 
     source_data = pd.read_json(source_file, lines=True)
 
-    # If only raw text exists, keep Streamlit usable by deriving both display fields.
-    if "inscription_text_interpretive" not in source_data.columns and "inscription_text" in source_data.columns:
-        source_data["inscription_text_interpretive"] = source_data["inscription_text"]
-    if "inscription_text_conservative" not in source_data.columns and "inscription_text" in source_data.columns:
-        source_data["inscription_text_conservative"] = source_data["inscription_text"]
+    required_cols = ["inscription_text", "inscription_text_interpretive", "inscription_text_conservative"]
+    missing_cols = [col for col in required_cols if col not in source_data.columns]
+    if missing_cols:
+        raise ValueError(f"Cleaned dataset is missing required columns: {', '.join(missing_cols)}")
 
     source_data = source_data.replace(r"^\s*$", pd.NA, regex=True)
     source_data["latitude"] = pd.to_numeric(source_data["latitude"], errors="coerce")
@@ -113,16 +108,18 @@ def load_inscriptions() -> pd.DataFrame:
 def prepare_filtered_data(
     source_data: pd.DataFrame,
     provinces: gpd.GeoDataFrame,
-    text_column: str,
+    search_column: str,
     term: str,
-    limit: int,
 ) -> gpd.GeoDataFrame:
-    if text_column not in source_data.columns:
-        raise ValueError(f"Column '{text_column}' not found in dataset.")
+    map_df = source_data.copy()
+    if search_column not in map_df.columns:
+        raise ValueError(f"Search column '{search_column}' not found in dataset.")
 
-    map_df = source_data.dropna(subset=[text_column]).copy()
+    search_text = map_df[search_column].fillna("").astype(str)
+
     if term:
-        map_df = map_df[map_df[text_column].astype(str).str.contains(term, case=False, na=False, regex=False)]
+        matches = search_text.str.contains(term, case=False, na=False, regex=False)
+        map_df = map_df[matches]
 
     inscriptions = gpd.GeoDataFrame(
         map_df,
@@ -133,13 +130,10 @@ def prepare_filtered_data(
     roman_union = provinces.geometry.union_all()
     inscriptions = inscriptions[inscriptions.geometry.within(roman_union)]
 
-    if limit > 0:
-        inscriptions = inscriptions.head(limit)
-
     return inscriptions
 
 
-def _format_popup(record: pd.Series, text_column: str) -> str:
+def _format_popup(record: pd.Series) -> str:
     def text(value: object) -> str:
         if value is None or value is pd.NA:
             return ""
@@ -155,14 +149,21 @@ def _format_popup(record: pd.Series, text_column: str) -> str:
     if isinstance(belege, list):
         belege = " | ".join(str(item) for item in belege)
 
-    popup_text = text(record.get(text_column, ""))
-    popup_text = popup_text[:500] + ("..." if len(popup_text) > 500 else "")
+    raw_text = text(record.get("inscription_text", ""))
+    interpretive_text = text(record.get("inscription_text_interpretive", ""))
+    conservative_text = text(record.get("inscription_text_conservative", ""))
+
+    raw_text = raw_text[:500] + ("..." if len(raw_text) > 500 else "")
+    interpretive_text = interpretive_text[:500] + ("..." if len(interpretive_text) > 500 else "")
+    conservative_text = conservative_text[:500] + ("..." if len(conservative_text) > 500 else "")
 
     date_range = " - ".join(part for part in [text(record.get("not_before")), text(record.get("not_after"))] if part)
 
     return (
         f"<b>{text(record.get('edcs_id', record.get('record_id', 'Inscription')))}</b><br>"
-        f"<span style='font-family:serif;'>{popup_text}</span><br><br>"
+        f"<b>Raw inscription_text:</b><br><span style='font-family:serif;'>{raw_text or '-'}</span><br><br>"
+        f"<b>Interpretive:</b><br><span style='font-family:serif;'>{interpretive_text or '-'}</span><br><br>"
+        f"<b>Conservative:</b><br><span style='font-family:serif;'>{conservative_text or '-'}</span><br><br>"
         f"<b>Place:</b> {text(record.get('place')) or '-'}<br>"
         f"<b>Province:</b> {text(record.get('province')) or '-'}<br>"
         f"<b>Dates:</b> {date_range or '-'}<br>"
@@ -173,12 +174,34 @@ def _format_popup(record: pd.Series, text_column: str) -> str:
     )
 
 
+def _format_hover_text(record: pd.Series) -> str:
+    def text(value: object) -> str:
+        if value is None or value is pd.NA:
+            return ""
+        if isinstance(value, float) and pd.isna(value):
+            return ""
+        return str(value)
+
+    raw = text(record.get("inscription_text", "")).replace("\n", " ").strip()
+    interp = text(record.get("inscription_text_interpretive", "")).replace("\n", " ").strip()
+    cons = text(record.get("inscription_text_conservative", "")).replace("\n", " ").strip()
+
+    if len(raw) > 80:
+        raw = raw[:77] + "..."
+    if len(interp) > 120:
+        interp = interp[:117] + "..."
+    if len(cons) > 120:
+        cons = cons[:117] + "..."
+
+    label = text(record.get("edcs_id", record.get("record_id", "Inscription")))
+    return f"{label} | Raw: {raw or '-'} | I: {interp or '-'} | C: {cons or '-'}"
+
+
 def build_map(
     provinces: gpd.GeoDataFrame,
     roads: gpd.GeoDataFrame,
     cities: gpd.GeoDataFrame,
     inscriptions: gpd.GeoDataFrame,
-    text_column: str,
     show_provinces: bool,
     show_roads: bool,
     show_cities: bool,
@@ -187,22 +210,30 @@ def build_map(
     m = folium.Map(
         location=[41.9, 12.5],
         zoom_start=4,
-        tiles="https://stamen-tiles.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}.png",
-        attr=(
-            "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL."
-        ),
+        tiles=None,
         prefer_canvas=True,
     )
 
+    # Keep a neutral, publication-like white backdrop.
+    folium.Rectangle(
+        bounds=[[-90, -180], [90, 180]],
+        color="#ffffff",
+        weight=0,
+        fill=True,
+        fill_color="#ffffff",
+        fill_opacity=1.0,
+        interactive=False,
+    ).add_to(m)
+
     province_colors = [
-        "#f6dce0",
-        "#dff0e2",
-        "#f6f2df",
-        "#e7def6",
-        "#e8f4da",
-        "#f2e6d8",
-        "#e4d6ef",
-        "#f3dfec",
+        "#f8dfd0",
+        "#d9ebf6",
+        "#e7f3dc",
+        "#f3e4f8",
+        "#f9edc9",
+        "#dcefe9",
+        "#fde2ea",
+        "#e5e9fb",
     ]
 
     provinces_colored = provinces.reset_index(drop=True).copy()
@@ -214,9 +245,9 @@ def build_map(
             name="Roman Provinces",
             style_function=lambda feat: {
                 "fillColor": feat["properties"]["_color"],
-                "color": "#c4c4c4",
-                "weight": 0.5,
-                "fillOpacity": 0.45,
+                "color": "#000000",
+                "weight": 0,
+                "fillOpacity": 0.55,
             },
         ).add_to(m)
 
@@ -224,36 +255,44 @@ def build_map(
         folium.GeoJson(
             roads.to_json(),
             name="Roads",
-            style_function=lambda _: {"color": "#666666", "weight": 1.4, "opacity": 0.9},
+            style_function=lambda _: {"color": "#4e5d72", "weight": 0.4, "opacity": 0.92},
         ).add_to(m)
 
     if show_cities:
         cities_fg = folium.FeatureGroup(name="Cities", show=True)
         for _, city in cities.iterrows():
-            folium.CircleMarker(
+            folium.Marker(
                 location=[city.geometry.y, city.geometry.x],
-                radius=1.8,
-                color="#7a7a7a",
-                weight=0.7,
-                fill=True,
-                fill_color="#7a7a7a",
-                fill_opacity=0.45,
+                icon=folium.DivIcon(
+                    icon_size=(20, 20),
+                    icon_anchor=(10, 10),
+                    html=(
+                        "<div style='font-size:7.5px; line-height:7.5px; "
+                        "color:rgba(34,107,107,0.35); font-weight:700;'>x</div>"
+                    ),
+                ),
             ).add_to(cities_fg)
         cities_fg.add_to(m)
 
     if show_inscriptions:
         ins_fg = folium.FeatureGroup(name="Inscriptions", show=True)
         for _, row in inscriptions.iterrows():
-            folium.CircleMarker(
+            marker = folium.Marker(
                 location=[row.geometry.y, row.geometry.x],
-                radius=3,
-                color="#2f2f2f",
-                weight=0.4,
-                fill=True,
-                fill_color="#cb2f2f",
-                fill_opacity=0.86,
-                popup=folium.Popup(_format_popup(row, text_column), max_width=420),
-            ).add_to(ins_fg)
+                icon=folium.DivIcon(
+                    icon_size=(20, 20),
+                    icon_anchor=(10, 10),
+                    html=(
+                        "<div style='width:20px;height:20px;display:flex;align-items:center;justify-content:center;'>"
+                        "<div style='width:5px;height:5px;border-radius:50%;"
+                        "background:#e33d2e;opacity:0.9;pointer-events:none;"
+                        "border:0.01px solid #5a1212;box-sizing:border-box;'></div>"
+                        "</div>"
+                    ),
+                ),
+            )
+            marker.add_child(folium.Popup(_format_popup(row), max_width=420, auto_pan=True))
+            marker.add_to(ins_fg)
         ins_fg.add_to(m)
 
     folium.LayerControl(collapsed=False).add_to(m)
@@ -262,30 +301,62 @@ def build_map(
         bounds = [[inscriptions.geometry.y.min(), inscriptions.geometry.x.min()], [inscriptions.geometry.y.max(), inscriptions.geometry.x.max()]]
         m.fit_bounds(bounds)
 
+        # Lock zoom-out at the initial fitted extent so users cannot zoom out farther.
+        lock_extent_script = f"""
+        <script>
+        (function() {{
+            var map = {m.get_name()};
+            function lockExtent() {{
+                var fittedBounds = map.getBounds();
+                var minZoom = map.getZoom();
+
+                map.setMaxBounds(fittedBounds);
+                map.options.maxBoundsViscosity = 1.0;
+                map.setMinZoom(minZoom);
+
+                map.on('zoomend', function() {{
+                    if (map.getZoom() < minZoom) {{
+                        map.setZoom(minZoom);
+                    }}
+                }});
+
+                map.on('dragend', function() {{
+                    map.panInsideBounds(fittedBounds, {{ animate: false }});
+                }});
+            }}
+            map.whenReady(lockExtent);
+            setTimeout(lockExtent, 0);
+        }})();
+        </script>
+        """
+        m.get_root().html.add_child(folium.Element(lock_extent_script))
+
     return m
 
 
 def main() -> None:
     st.set_page_config(page_title="EDCS Streamlit Map", page_icon="🗺️", layout="wide")
 
-    st.title("EDCS Interactive Map")
-    st.caption("Roman Empire inscription explorer powered by Streamlit and Folium")
-
     source_data = load_inscriptions()
     provinces, roads, cities = load_layers()
 
-    available_text_fields = [field for field in TEXT_FIELD_OPTIONS if field in source_data.columns]
-    if not available_text_fields:
+    required_text_fields = ["inscription_text_interpretive", "inscription_text_conservative"]
+    missing_text_fields = [field for field in required_text_fields if field not in source_data.columns]
+    if missing_text_fields:
         st.error(
-            "Neither inscription_text_interpretive nor inscription_text_conservative is available in the dataset."
+            "Required cleaned columns are missing in cleaned dataset: " + ", ".join(missing_text_fields)
         )
         return
 
     with st.sidebar:
+        st.title("EDCS Interactive Map")
         st.header("Filters")
-        text_column = st.selectbox("Text field", available_text_fields, index=0)
+        search_mode = st.selectbox(
+            "Search in",
+            options=["raw", "interpretive", "conservative"],
+            index=0,
+        )
         term = st.text_input("Search term", value="viator", placeholder="Type a term")
-        limit = st.slider("Maximum records shown", min_value=50, max_value=5000, value=500, step=50)
 
         st.header("Layers")
         show_provinces = st.checkbox("Roman provinces", value=True)
@@ -293,17 +364,23 @@ def main() -> None:
         show_cities = st.checkbox("Cities", value=True)
         show_inscriptions = st.checkbox("Inscriptions", value=True)
 
+    search_column_map = {
+        "raw": "inscription_text",
+        "interpretive": "inscription_text_interpretive",
+        "conservative": "inscription_text_conservative",
+    }
+    search_column = search_column_map[search_mode]
+
     inscriptions = prepare_filtered_data(
         source_data=source_data,
         provinces=provinces,
-        text_column=text_column,
+        search_column=search_column,
         term=term.strip(),
-        limit=limit,
     )
 
     stat_col_1, stat_col_2, stat_col_3 = st.columns(3)
     stat_col_1.metric("Matches", f"{len(inscriptions):,}")
-    stat_col_2.metric("Text field", text_column)
+    stat_col_2.metric("Search field", search_column)
     stat_col_3.metric("Search term", term if term else "(none)")
 
     if inscriptions.empty:
@@ -315,7 +392,6 @@ def main() -> None:
         roads=roads,
         cities=cities,
         inscriptions=inscriptions,
-        text_column=text_column,
         show_provinces=show_provinces,
         show_roads=show_roads,
         show_cities=show_cities,
@@ -334,7 +410,9 @@ def main() -> None:
             "place",
             "not_before",
             "not_after",
-            text_column,
+            "inscription_text",
+            "inscription_text_interpretive",
+            "inscription_text_conservative",
         ]
         if col in inscriptions.columns
     ]
