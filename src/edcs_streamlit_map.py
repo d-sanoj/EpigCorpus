@@ -335,7 +335,34 @@ def build_map(
 
 
 def main() -> None:
-    st.set_page_config(page_title="EDCS Streamlit Map", page_icon="🗺️", layout="wide")
+    st.set_page_config(page_title="EpigCorpus - EDCS Data Interactive Map", layout="wide")
+
+    with st.sidebar:
+        st.title("EpigCorpus - EDCS Data Interactive Map")
+        st.header("Filters")
+        search_mode = st.selectbox(
+            "Search in",
+            options=["Raw Inscriptions", "Interpretive Cleaned", "Conservative Cleaned"],
+            index=0,
+        )
+        term = st.text_input("Search term", value="viator", placeholder="Type a term")
+
+        st.header("Layers")
+        show_provinces = st.checkbox("Roman Provinces", value=True)
+        show_roads = st.checkbox("Roads", value=True)
+        show_cities = st.checkbox("Cities", value=True)
+        show_inscriptions = st.checkbox("Inscriptions", value=True)
+
+        if not term.strip():
+            st.error("Please enter a search term to run the map.")
+
+    if not term.strip():
+        st.warning("Search term is required. Enter a term to continue.")
+        st.info(
+            "For the entire dataset, check the data folder in your project root. "
+            "It is scraped and saved when you run the program."
+        )
+        return
 
     source_data = load_inscriptions()
     provinces, roads, cities = load_layers()
@@ -348,26 +375,10 @@ def main() -> None:
         )
         return
 
-    with st.sidebar:
-        st.title("EDCS Interactive Map")
-        st.header("Filters")
-        search_mode = st.selectbox(
-            "Search in",
-            options=["raw", "interpretive", "conservative"],
-            index=0,
-        )
-        term = st.text_input("Search term", value="viator", placeholder="Type a term")
-
-        st.header("Layers")
-        show_provinces = st.checkbox("Roman provinces", value=True)
-        show_roads = st.checkbox("Roads", value=True)
-        show_cities = st.checkbox("Cities", value=True)
-        show_inscriptions = st.checkbox("Inscriptions", value=True)
-
     search_column_map = {
-        "raw": "inscription_text",
-        "interpretive": "inscription_text_interpretive",
-        "conservative": "inscription_text_conservative",
+        "Raw Inscriptions": "inscription_text",
+        "Interpretive Cleaned": "inscription_text_interpretive",
+        "Conservative Cleaned": "inscription_text_conservative",
     }
     search_column = search_column_map[search_mode]
 
@@ -384,7 +395,7 @@ def main() -> None:
     stat_col_3.metric("Search term", term if term else "(none)")
 
     if inscriptions.empty:
-        st.warning("No inscriptions matched your filter. Try a broader term.")
+        st.warning("No inscriptions matched your filter. Try a broader search term.")
         return
 
     map_object = build_map(
