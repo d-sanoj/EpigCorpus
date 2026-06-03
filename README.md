@@ -1,37 +1,43 @@
-# EpigCorpus (EDCS-Analytics)
+# EpigCorpus
 
-EpigCorpus is an updated, end-to-end Latin epigraphy workflow for extracting inscriptions from EDCS, cleaning epigraphic text into analysis-ready variants, and exploring results in an interactive Roman Empire map.
+EpigCorpus is a reproducible Latin epigraphy pipeline for extracting inscriptions from the Epigraphik-Datenbank Clauss / Slaby (EDCS), cleaning inscription text into research-ready variants, and exploring results on an interactive Roman Empire map.
 
-This repository implements a full local pipeline:
-1. Scrape data from the current EDCS interface/API.
-2. Clean inscriptions with conservative and interpretive text normalization.
-3. Launch a Streamlit map for interactive exploration and export.
+The repository is designed as a practical, end-to-end workflow:
+1. Scrape EDCS data incrementally with checkpoint resume.
+2. Generate conservative and interpretive cleaned text.
+3. Explore and export results through a Streamlit map interface.
+
+## One-Command Launch
+
+Run the full pipeline with a single command:
+
+```bash
+./epigcorpus.sh
+```
+
+This launcher handles environment checks and starts the project end-to-end.
 
 ## Author
 
 - Sanoj Doddapaneni
 
-## Citation
-
-If you use this software, cite:
+## Software Citation
 
 Sanoj Doddapaneni. (2026). EpigCorpus (Version 1.0) [Computer software]. GitHub. https://github.com/d-sanoj/EpigCorpus
 
-## What This Project Does
+## Highlights
 
-- Incremental EDCS scraping with checkpoint resume and append-only updates.
-- Per-inscription record modeling (one row per inscription, not only per monument).
-- Metadata harmonization (material/category lookup translation where available).
-- Dual cleaned text outputs:
-	- conservative cleaned inscriptions
-	- interpretive cleaned inscriptions
-- Interactive map interface with:
-	- Roman provinces, roads, cities, inscription points
-	- keyword search across raw and cleaned text
-	- results table export (TSV)
-	- publication-style PNG map export with citation footer
+- Incremental scraping against the current EDCS API with append-only updates.
+- One-row-per-inscription data model.
+- Structured exports in JSONL and TSV.
+- Two cleaning outputs for analysis workflows:
+  - Conservative Cleaned Inscriptions
+  - Interpretive Cleaned Inscriptions
+- Interactive map with Roman provinces, roads, cities, and inscription points.
+- Search across raw and cleaned text.
+- TSV download and publication-style PNG map export.
 
-## Repository Structure
+## Repository Layout
 
 ```text
 EDCS-Analytics/
@@ -50,6 +56,7 @@ EDCS-Analytics/
 │   ├── edcs_cleaner.py
 │   └── edcs_streamlit_map.py
 ├── main.py
+├── epigcorpus.sh
 ├── pyproject.toml
 └── README.md
 ```
@@ -57,125 +64,149 @@ EDCS-Analytics/
 ## Requirements
 
 - Python 3.13+
-- Dependencies (from pyproject.toml):
-	- geopandas
-	- matplotlib
-	- pandas
-	- folium
-	- requests
-	- streamlit
+- Dependencies managed in pyproject.toml
+
+Core packages:
+- geopandas
+- matplotlib
+- pandas
+- folium
+- requests
+- streamlit
 
 ## Installation
 
-Recommended (uv):
+Using uv (recommended):
 
 ```bash
 uv sync
 ```
 
-Alternative (pip):
+Using pip:
 
 ```bash
 pip install geopandas matplotlib pandas folium requests streamlit
 ```
 
-## Running EpigCorpus
+## Quick Start
 
-Primary entry point (full pipeline):
+One-command launcher:
+
+```bash
+./epigcorpus.sh
+```
+
+Recommended for first-time and daily use.
+
+The launcher:
+1. Uses local .venv if available.
+2. Installs or uses uv when needed.
+3. Ensures a compatible Python runtime.
+4. Runs the full pipeline.
+
+## Run Modes
+
+Full pipeline:
 
 ```bash
 python main.py
 ```
 
-This runs:
-1. Scraping (incremental/resumable)
-2. Cleaning
-3. Streamlit map launch (typically http://localhost:8501)
-
-Optional flags:
+Skip scrape (use latest local JSONL):
 
 ```bash
 python main.py --skip-scrape
+```
+
+Skip map launch:
+
+```bash
 python main.py --skip-map
 ```
 
-You can also run modules directly if needed:
+Run components directly:
 
 ```bash
 python src/edcs_scraper.py
 streamlit run src/edcs_streamlit_map.py
 ```
 
-## Data Outputs
+## Data Products
 
-### Scraper outputs
+Generated in data/:
 
-- data/edcs_inscriptions.jsonl
-	- one JSON object per line
-	- append-safe for incremental scraping
-- data/edcs_inscriptions.tsv
-	- tab-separated export of inscription rows
-- data/edcs_lookup.json
-	- lookup dictionaries used for code-to-label translation
-- data/edcs_checkpoint.json
-	- temporary resume state during scraping
+- edcs_inscriptions.jsonl
+  - canonical machine-readable inscription export
+  - one JSON record per line
+- edcs_inscriptions.tsv
+  - tabular export for spreadsheets and SQL-style workflows
+- edcs_lookup.json
+  - lookup dictionary used to decode controlled vocabulary fields
+- edcs_checkpoint.json
+  - temporary resume checkpoint used during scraping
+- edcs_inscriptions_cleaned.jsonl
+  - cleaned dataset used by the Streamlit app and map search
 
-### Cleaner output
+For detailed data documentation and schema notes, see data/README.md.
 
-- data/edcs_inscriptions_cleaned.jsonl
-	- includes cleaned text variants used by the map and table search
+## Pipeline Details
 
-## Cleaning Model
+### 1) Scraping
 
-The cleaner is separated into src/edcs_cleaner.py and applies a staged text-normalization pipeline designed for epigraphic use.
+Implemented in src/edcs_scraper.py:
+- Uses EDCS API endpoint queries.
+- Supports resume via checkpoint.
+- Appends only unseen records in incremental mode.
 
-Generated text views include:
-- Raw inscriptions (original extracted text)
-- Conservative Cleaned Inscriptions
-- Interpretive Cleaned Inscriptions
+### 2) Cleaning
 
-These variants are exposed directly in the Streamlit search UI and in PNG export titles/metadata.
+Implemented in src/edcs_cleaner.py:
+- Applies a staged text cleaning pipeline.
+- Produces conservative and interpretive cleaned variants.
 
-## Interactive Map and Export
+### 3) Interactive Exploration
 
-The Streamlit app in src/edcs_streamlit_map.py provides:
+Implemented in src/edcs_streamlit_map.py:
+- Search modes: Raw inscriptions, Interpretive Cleaned Inscriptions, Conservative Cleaned Inscriptions.
+- Interactive map with layers and popups.
+- TSV export for result tables.
+- PNG export with attribution footer.
 
-- keyword search across raw and cleaned inscription text
-- map visualization with provinces, roads, cities, and inscription points
-- popup inspection for matching inscriptions
-- TSV download of matched records
-- PNG export of publication-style map with search metadata and project citation
-
-## Data and Software Citations
-
-This section provides citation-ready references for the datasets and software used in EpigCorpus.
+## Data and Software References
 
 ### Primary Data Sources
 
-1. Clauss, M., Kolb, A., Slaby, W. A., and Woitas, B. Epigraphik-Datenbank Clauss / Slaby (EDCS). Universitat Zurich and Katholische Universitat Eichstatt-Ingolstadt. Available at https://edcs.hist.uzh.ch/ (accessed 2026-06-02).
-2. EDCS API endpoint used by the scraper: https://edcs.hist.uzh.ch/api/query (accessed 2026-06-02).
+1. Clauss, M., Kolb, A., Slaby, W. A., and Woitas, B. Epigraphik-Datenbank Clauss / Slaby (EDCS). Universitat Zurich and Katholische Universitat Eichstatt-Ingolstadt. https://edcs.hist.uzh.ch/ (accessed 2026-06-03).
+2. EDCS API endpoint used by this scraper: https://edcs.hist.uzh.ch/api/query (accessed 2026-06-03).
 3. Hanson, J. W. (2016). Cities Database (OXREP Databases), Version 1.0. Oxford Roman Economy Project. DOI: https://doi.org/10.5287/bodleian:eqapevAn8. URL: http://oxrep.classics.ox.ac.uk/databases/cities/.
 
-### Historical GIS / Basemap Layers
+### Historical GIS Layers
 
-1. Ancient World Mapping Center (AWMC). Geodata repository. https://github.com/AWMC/geodata (accessed 2026-06-02).
-2. Province boundary layer used here: roman_empire_ad_117 (AWMC distribution).
-3. Road network layer used here: ba_roads (AWMC distribution).
-4. As documented in Lat-Epig and AWMC notes, these layers are part of the Barrington Atlas historical GIS ecosystem, with AWMC-distributed derivatives and OpenStreetMap-related licensing context where applicable.
+1. Ancient World Mapping Center (AWMC). Geodata repository. https://github.com/AWMC/geodata (accessed 2026-06-03).
+2. Province boundary layer used: roman_empire_ad_117.
+3. Road network layer used: ba_roads.
 
-### Upstream Method/Reference Project
+### Upstream Method Reference
 
 1. Ballsun-Stanton, B., Hermankova, P., and Laurence, R. (2024). LatEpig (Version 2.0) [Computer software]. GitHub. https://github.com/mqAncientHistory/Lat-Epig/. DOI: https://doi.org/10.5281/zenodo.12036539.
+
+### Software Stack
+
+1. Python. https://www.python.org/
+2. pandas. https://pandas.pydata.org/
+3. GeoPandas. https://geopandas.org/
+4. Matplotlib. https://matplotlib.org/
+5. Folium. https://python-visualization.github.io/folium/
+6. Requests. https://requests.readthedocs.io/
+7. Streamlit. https://streamlit.io/
 
 ## Reproducibility Notes
 
 - Scraping is incremental and resumable.
-- Cleaned output is regenerated from current local scraped data.
-- Map and PNG export are generated from the same cleaned dataset used in interactive search.
-- Search labels and output metadata are synchronized across UI and exported figures.
+- Cleaning is deterministic for a given input dataset.
+- Map search and PNG export use the same cleaned source data.
+- Search mode naming is synchronized across UI, match summaries, and exports.
 
 ## License
 
-MIT License.
-
-See LICENSE for details.
+MIT License. See LICENSE.
