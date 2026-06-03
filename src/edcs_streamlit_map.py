@@ -39,6 +39,86 @@ REQUIRED_COLS = [
 ROMAN_BOUNDS = (25, 50, -10, 45)  # (min_lat, max_lat, min_lon, max_lon)
 
 
+def inject_professional_styles() -> None:
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background: #000000;
+            color: #e5e7eb;
+        }
+        [data-testid="stSidebar"] {
+            display: none !important;
+        }
+        .block-container {
+            padding-top: 1.15rem;
+            padding-bottom: 1.3rem;
+        }
+        [data-testid="stAppViewContainer"] {
+            background: #000000;
+        }
+        [data-testid="stHeader"] {
+            background: rgba(0, 0, 0, 0);
+        }
+        h1, h2, h3 {
+            color: #e5e7eb;
+            letter-spacing: 0.2px;
+        }
+        .main-title {
+            text-align: center;
+            margin: 0 0 0.2rem 0;
+            color: #e5e7eb;
+            font-size: 2rem;
+            font-weight: 700;
+            text-decoration: none !important;
+        }
+        .results-title {
+            text-align: center;
+            margin: 0.7rem 0 0.55rem 0;
+            color: #e5e7eb;
+            font-size: 1.45rem;
+            font-weight: 650;
+            text-decoration: none !important;
+        }
+        [data-testid="stCaptionContainer"] {
+            color: #9ca3af;
+        }
+        [data-testid="stMarkdownContainer"] p {
+            color: #d1d5db;
+        }
+        .matches-summary {
+            text-align: center;
+            margin: 0.5rem 0 0.35rem 0;
+            color: #d1d5db;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        [data-testid="stDataFrame"] {
+            border: 1px solid #2b3648;
+            border-radius: 10px;
+            background: rgba(12, 16, 22, 0.88);
+        }
+        iframe {
+            border-radius: 10px;
+            border: 1px solid #2b3648;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+        }
+        /* Hide sidebar controls because all filters are on main page */
+        [data-testid="collapsedControl"] {
+            display: none !important;
+        }
+        button[kind="header"] {
+            display: none !important;
+        }
+        [data-testid="stSidebarCollapseButton"] {
+            display: none !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def download_if_missing(url: str, destination: Path) -> Path:
     if destination.exists():
         return destination
@@ -132,6 +212,14 @@ def load_all_inscriptions() -> pd.DataFrame:
     return data.reset_index(drop=True)
 
 
+@st.cache_data(show_spinner=False, ttl=3600)
+def load_full_cleaned_data() -> pd.DataFrame:
+    """Load full cleaned dataset with all columns for detailed result table."""
+    if not CLEANED_JSONL_FILE.exists():
+        raise FileNotFoundError(f"Missing: {CLEANED_JSONL_FILE}. Run main.py first.")
+    return pd.read_json(CLEANED_JSONL_FILE, lines=True)
+
+
 def filter_inscriptions(data: pd.DataFrame, search_column: str, term: str) -> pd.DataFrame:
     """Fast string filtering without GeoDataFrame overhead."""
     if not term.strip():
@@ -203,9 +291,6 @@ def _add_fixed_legend(map_obj: folium.Map) -> None:
 
 def build_map_fast(
     inscriptions: pd.DataFrame,
-    show_provinces: bool,
-    show_roads: bool,
-    show_cities: bool,
 ) -> folium.Map:
     """Build map with ultra-lightweight rendering."""
     m = folium.Map(
@@ -226,54 +311,51 @@ def build_map_fast(
         interactive=False,
     ).add_to(m)
 
-    if show_provinces:
-        provinces = load_provinces()
-        province_colors = [
-            "#f8dfd0",
-            "#d9ebf6",
-            "#e7f3dc",
-            "#f3e4f8",
-            "#f9edc9",
-            "#dcefe9",
-            "#fde2ea",
-            "#e5e9fb",
-        ]
-        provinces_colored = provinces.reset_index(drop=True).copy()
-        provinces_colored["_color"] = [
-            province_colors[i % len(province_colors)]
-            for i in range(len(provinces_colored))
-        ]
-        folium.GeoJson(
-            provinces_colored.to_json(),
-            name="Roman Provinces",
-            style_function=lambda f: {
-                "fillColor": f["properties"].get("_color", "#f0f0f0"),
-                "color": "#8c8c8c",
-                "weight": 0.35,
-                "fillOpacity": 0.58,
-            },
-        ).add_to(m)
+    provinces = load_provinces()
+    province_colors = [
+        "#f8dfd0",
+        "#d9ebf6",
+        "#e7f3dc",
+        "#f3e4f8",
+        "#f9edc9",
+        "#dcefe9",
+        "#fde2ea",
+        "#e5e9fb",
+    ]
+    provinces_colored = provinces.reset_index(drop=True).copy()
+    provinces_colored["_color"] = [
+        province_colors[i % len(province_colors)]
+        for i in range(len(provinces_colored))
+    ]
+    folium.GeoJson(
+        provinces_colored.to_json(),
+        name="Roman Provinces",
+        style_function=lambda f: {
+            "fillColor": f["properties"].get("_color", "#f0f0f0"),
+            "color": "#8c8c8c",
+            "weight": 0.35,
+            "fillOpacity": 0.58,
+        },
+    ).add_to(m)
 
-    if show_roads:
-        roads = load_roads()
-        folium.GeoJson(
-            roads.to_json(),
-            name="Roads",
-            style_function=lambda _: {"color": "#8b9099", "weight": 0.8, "opacity": 0.9},
-        ).add_to(m)
+    roads = load_roads()
+    folium.GeoJson(
+        roads.to_json(),
+        name="Roads",
+        style_function=lambda _: {"color": "#8b9099", "weight": 0.8, "opacity": 0.9},
+    ).add_to(m)
 
-    if show_cities:
-        cities = load_cities()
-        for _, city in cities.iterrows():
-            folium.CircleMarker(
-                location=[city.geometry.y, city.geometry.x],
-                radius=2,
-                fill=True,
-                fillColor="#228B6B",
-                fillOpacity=0.3,
-                weight=0.5,
-                color="#228B6B",
-            ).add_to(m)
+    cities = load_cities()
+    for _, city in cities.iterrows():
+        folium.CircleMarker(
+            location=[city.geometry.y, city.geometry.x],
+            radius=2,
+            fill=True,
+            fillColor="#228B6B",
+            fillOpacity=0.3,
+            weight=0.5,
+            color="#228B6B",
+        ).add_to(m)
 
     # Ultra-fast marker rendering using simple CircleMarker
     if not inscriptions.empty:
@@ -308,14 +390,23 @@ def main() -> None:
     st.set_page_config(
         page_title="EpigCorpus - EDCS Interactive Map",
         layout="wide",
-        initial_sidebar_state="expanded",
+        initial_sidebar_state="collapsed",
     )
 
-    with st.sidebar:
-        st.title("EpigCorpus")
+    inject_professional_styles()
 
-        with st.form("search_form", clear_on_submit=False):
-            search_mode = st.radio(
+    st.markdown("<div class='main-title'>EpigCorpus</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<p style='text-align:center; color:#9ca3af; margin-top:0; margin-bottom:1rem;'>"
+        "EDCS inscription exploration across the Roman Empire"
+        "</p>",
+        unsafe_allow_html=True,
+    )
+
+    with st.form("search_form", clear_on_submit=False):
+        form_col_1, form_col_2, form_col_3 = st.columns([1.5, 2.4, 0.9])
+        with form_col_1:
+            search_mode = st.selectbox(
                 "Search in:",
                 options=[
                     "Raw inscription text",
@@ -324,14 +415,11 @@ def main() -> None:
                 ],
                 index=0,
             )
+        with form_col_2:
             term = st.text_input("Keyword", value="viator", placeholder="Enter search term")
+        with form_col_3:
+            st.markdown("<div style='height: 1.72rem;'></div>", unsafe_allow_html=True)
             search_submitted = st.form_submit_button("Search", use_container_width=True)
-        
-        st.divider()
-        st.subheader("Map Layers")
-        show_provinces = st.checkbox("Provinces", value=True)
-        show_roads = st.checkbox("Roads", value=True)
-        show_cities = st.checkbox("Cities", value=True)
 
     if "submitted_term" not in st.session_state:
         st.session_state["submitted_term"] = ""
@@ -350,7 +438,7 @@ def main() -> None:
         return
 
     # Load all data once (cached)
-    with st.spinner("⏳ Loading inscriptions..."):
+    with st.spinner("Loading inscriptions..."):
         all_inscriptions = load_all_inscriptions()
 
     # Map search mode to column
@@ -362,33 +450,52 @@ def main() -> None:
     search_col = search_map[active_mode]
 
     # Fast filtering
-    with st.spinner("🔍 Searching..."):
+    with st.spinner("Searching inscriptions..."):
         filtered = filter_inscriptions(all_inscriptions, search_col, active_term)
 
-    # Display stats
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Matches", f"{len(filtered):,}")
-    with col2:
-        st.metric("Search mode", active_mode)
-    with col3:
-        st.metric("Keyword", active_term)
+    st.markdown(
+        (
+            "<div class='matches-summary'>"
+            f"Matches for \"{active_term}\" in {active_mode}: {len(filtered):,}"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
 
     if filtered.empty:
         st.warning("No matches found. Try different keywords.")
         return
 
     # Build and render map
-    with st.spinner("🗺️ Building map..."):
-        map_obj = build_map_fast(filtered, show_provinces, show_roads, show_cities)
+    with st.spinner("Building map..."):
+        map_obj = build_map_fast(filtered)
 
     html(map_obj._repr_html_(), height=700, scrolling=False)
 
-    # Results table
-    if len(filtered) <= 500:
-        st.subheader("Results")
-        display_cols = [c for c in ["record_id", "place", "province", "not_before", "not_after"] if c in filtered.columns]
-        st.dataframe(filtered[display_cols], use_container_width=True, height=300)
+    # Results table with all columns from cleaned dataset for matched IDs
+    st.markdown("<div class='results-title'>Results</div>", unsafe_allow_html=True)
+    with st.spinner("Preparing detailed results table..."):
+        full_data = load_full_cleaned_data()
+
+        id_col = "edcs_id" if "edcs_id" in filtered.columns and "edcs_id" in full_data.columns else "record_id"
+        matched_ids = filtered[id_col].dropna().astype(str).unique().tolist()
+
+        full_data_keyed = full_data.copy()
+        full_data_keyed[id_col] = full_data_keyed[id_col].astype(str)
+        matched_table = full_data_keyed[full_data_keyed[id_col].isin(matched_ids)]
+
+    tsv_bytes = matched_table.to_csv(sep="\t", index=False).encode("utf-8")
+    dl_col_1, dl_col_2, dl_col_3 = st.columns([3, 1, 3])
+    with dl_col_2:
+        st.download_button(
+            label="Download TSV",
+            data=tsv_bytes,
+            file_name="edcs_search_results.tsv",
+            mime="text/tab-separated-values",
+            use_container_width=True,
+        )
+
+    st.dataframe(matched_table, use_container_width=True, height=360)
 
 
 if __name__ == "__main__":
