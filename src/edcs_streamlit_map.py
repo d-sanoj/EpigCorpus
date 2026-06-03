@@ -155,12 +155,50 @@ def _format_popup(row: pd.Series) -> str:
     
     return (
         f"<b>{row.get('edcs_id', row.get('record_id', 'Inscription'))}</b><br>"
-        f"<b>Raw:</b> {raw}<br>"
-        f"<b>Interp:</b> {interp}<br>"
-        f"<b>Cons:</b> {cons}<br>"
+        f"<b>Raw inscription text:</b> {raw}<br>"
+        f"<b>Interpretive cleaned text:</b> {interp}<br>"
+        f"<b>Conservative cleaned text:</b> {cons}<br>"
         f"<b>Place:</b> {safe_str(row.get('place'))}<br>"
         f"<b>Province:</b> {safe_str(row.get('province'))}"
     )
+
+
+def _add_fixed_legend(map_obj: folium.Map) -> None:
+    legend_html = """
+    <div style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid #cfcfcf;
+        border-radius: 8px;
+        padding: 10px 12px;
+        min-width: 165px;
+        font-size: 12px;
+        line-height: 1.3;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+        color: #2f2f2f;
+    ">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="display:inline-block;flex:0 0 14px;width:14px;height:10px;background:#f8dfd0;border:1px solid #8c8c8c;"></span>
+            Roman Provinces
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="display:inline-block;flex:0 0 14px;width:14px;height:0;border-top:2px solid #8b9099;"></span>
+            Roads
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="display:inline-block;flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:#228B6B;opacity:0.5;"></span>
+            Cities
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <span style="display:inline-block;flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:#e33d2e;border:1px solid #a01010;"></span>
+            Inscriptions
+        </div>
+    </div>
+    """
+    map_obj.get_root().html.add_child(folium.Element(legend_html))
 
 
 def build_map_fast(
@@ -221,7 +259,7 @@ def build_map_fast(
         folium.GeoJson(
             roads.to_json(),
             name="Roads",
-            style_function=lambda _: {"color": "#999999", "weight": 0.3, "opacity": 0.6},
+            style_function=lambda _: {"color": "#8b9099", "weight": 0.8, "opacity": 0.9},
         ).add_to(m)
 
     if show_cities:
@@ -254,7 +292,7 @@ def build_map_fast(
             marker.add_to(ins_fg)
         ins_fg.add_to(m)
 
-    folium.LayerControl(collapsed=False, position="topright").add_to(m)
+    _add_fixed_legend(m)
 
     if not inscriptions.empty:
         bounds = [
@@ -274,15 +312,20 @@ def main() -> None:
     )
 
     with st.sidebar:
-        st.title("📍 EpigCorpus")
-        st.subheader("EDCS Inscriptions Map")
-        
-        search_mode = st.radio(
-            "Search in:",
-            options=["Raw Text", "Interpretive", "Conservative"],
-            index=0,
-        )
-        term = st.text_input("Keyword", value="viator", placeholder="Enter search term")
+        st.title("EpigCorpus")
+
+        with st.form("search_form", clear_on_submit=False):
+            search_mode = st.radio(
+                "Search in:",
+                options=[
+                    "Raw inscription text",
+                    "Interpretive cleaned text",
+                    "Conservative cleaned text",
+                ],
+                index=0,
+            )
+            term = st.text_input("Keyword", value="viator", placeholder="Enter search term")
+            search_submitted = st.form_submit_button("Search", use_container_width=True)
         
         st.divider()
         st.subheader("Map Layers")
@@ -290,8 +333,20 @@ def main() -> None:
         show_roads = st.checkbox("Roads", value=True)
         show_cities = st.checkbox("Cities", value=True)
 
-    if not term.strip():
-        st.warning("⚠️ Enter a search term to display results")
+    if "submitted_term" not in st.session_state:
+        st.session_state["submitted_term"] = ""
+    if "submitted_mode" not in st.session_state:
+        st.session_state["submitted_mode"] = "Raw inscription text"
+
+    if search_submitted:
+        st.session_state["submitted_term"] = term.strip()
+        st.session_state["submitted_mode"] = search_mode
+
+    active_term = st.session_state["submitted_term"]
+    active_mode = st.session_state["submitted_mode"]
+
+    if not active_term:
+        st.warning("Enter a keyword and press Enter or click Search to display results.")
         return
 
     # Load all data once (cached)
@@ -300,24 +355,24 @@ def main() -> None:
 
     # Map search mode to column
     search_map = {
-        "Raw Text": "inscription_text",
-        "Interpretive": "inscription_text_interpretive",
-        "Conservative": "inscription_text_conservative",
+        "Raw inscription text": "inscription_text",
+        "Interpretive cleaned text": "inscription_text_interpretive",
+        "Conservative cleaned text": "inscription_text_conservative",
     }
-    search_col = search_map[search_mode]
+    search_col = search_map[active_mode]
 
     # Fast filtering
     with st.spinner("🔍 Searching..."):
-        filtered = filter_inscriptions(all_inscriptions, search_col, term)
+        filtered = filter_inscriptions(all_inscriptions, search_col, active_term)
 
     # Display stats
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Matches", f"{len(filtered):,}")
     with col2:
-        st.metric("Mode", search_mode)
+        st.metric("Search mode", active_mode)
     with col3:
-        st.metric("Term", term)
+        st.metric("Keyword", active_term)
 
     if filtered.empty:
         st.warning("No matches found. Try different keywords.")
