@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+from io import BytesIO
 from pathlib import Path
 
 import folium
 import geopandas as gpd
+import matplotlib.pyplot as plt
 import pandas as pd
 import requests
 import streamlit as st
+from matplotlib.lines import Line2D
 from streamlit.components.v1 import html
 
 
@@ -17,6 +20,12 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
 SUPPORT_DIR = DATA_DIR / "lat_epig_support"
 CLEANED_JSONL_FILE = DATA_DIR / "edcs_inscriptions_cleaned.jsonl"
+REPO_URL = "https://github.com/d-sanoj/EpigCorpus"
+REPO_NAME = "d-sanoj/EpigCorpus"
+PNG_CITATION = (
+    "Sanoj Doddapaneni. (2026). EpigCorpus (Version 1.0) "
+    "[Computer software]. GitHub. https://github.com/d-sanoj/EpigCorpus"
+)
 
 # Required columns - everything else is dropped to reduce memory load
 REQUIRED_COLS = [
@@ -289,6 +298,142 @@ def _add_fixed_legend(map_obj: folium.Map) -> None:
     map_obj.get_root().html.add_child(folium.Element(legend_html))
 
 
+def _province_palette() -> list[str]:
+    return [
+        "#f8dfd0",
+        "#d9ebf6",
+        "#e7f3dc",
+        "#f3e4f8",
+        "#f9edc9",
+        "#dcefe9",
+        "#fde2ea",
+        "#e5e9fb",
+    ]
+
+
+def _normalize_search_mode(label: str | None) -> str:
+    legacy_map = {
+        "Raw inscription text": "Raw inscriptions",
+        "Interpretive cleaned text": "Interpretive Cleaned Inscriptions",
+        "Conservative cleaned text": "Conservative Cleaned Inscriptions",
+    }
+    normalized = legacy_map.get(label or "", label or "")
+    valid_modes = {
+        "Raw inscriptions",
+        "Interpretive Cleaned Inscriptions",
+        "Conservative Cleaned Inscriptions",
+    }
+    return normalized if normalized in valid_modes else "Raw inscriptions"
+
+
+@st.cache_data(show_spinner=False, ttl=3600)
+def build_png_bytes(inscriptions: pd.DataFrame, search_term: str, search_mode: str) -> bytes:
+    provinces = load_provinces().reset_index(drop=True).copy()
+    roads = load_roads()
+    cities = load_cities()
+    inscriptions_geo = gpd.GeoDataFrame(
+        inscriptions.copy(),
+        geometry=gpd.points_from_xy(inscriptions["longitude"], inscriptions["latitude"]),
+        crs="EPSG:4326",
+    )
+
+    provinces_proj = provinces.to_crs(epsg=3857)
+    roads_proj = roads.to_crs(epsg=3857)
+    cities_proj = cities.to_crs(epsg=3857)
+    inscriptions_proj = inscriptions_geo.to_crs(epsg=3857)
+
+    province_colors = _province_palette()
+    provinces_proj["_color"] = [
+        province_colors[i % len(province_colors)] for i in range(len(provinces_proj))
+    ]
+
+    fig, ax = plt.subplots(figsize=(11.8, 8.6), dpi=180)
+    fig.patch.set_facecolor("white")
+    ax.set_facecolor("white")
+    fig.subplots_adjust(left=0.06, right=0.94, top=0.88, bottom=0.08)
+
+    provinces_proj.plot(
+        ax=ax,
+        color=provinces_proj["_color"],
+        edgecolor="#9a9a9a",
+        linewidth=0.25,
+        alpha=0.58,
+        zorder=1,
+    )
+    roads_proj.plot(ax=ax, color="#8b9099", linewidth=0.22, alpha=0.85, zorder=2)
+    cities_proj.plot(ax=ax, color="#228B6B", markersize=3, alpha=0.30, zorder=3)
+
+    if not inscriptions_proj.empty:
+        inscriptions_proj.plot(
+            ax=ax,
+            color="#e33d2e",
+            markersize=10,
+            alpha=0.9,
+            edgecolor="#7f1212",
+            linewidth=0.15,
+            zorder=4,
+        )
+
+    minx, miny, maxx, maxy = provinces_proj.total_bounds
+    x_pad = (maxx - minx) * 0.025
+    y_pad = (maxy - miny) * 0.04
+    ax.set_xlim(minx - x_pad, maxx + x_pad)
+    ax.set_ylim(miny - y_pad, maxy + y_pad)
+    ax.set_axis_off()
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_anchor("C")
+
+    title = f'Inscriptions matching "{search_term}" in {search_mode}'
+    fig.suptitle(title, fontsize=17, fontfamily="serif", y=0.94)
+
+    legend_handles = [
+        Line2D([0], [0], color="#8b9099", lw=1.2, label="Roads"),
+        Line2D([0], [0], marker="o", color="w", markerfacecolor="#228B6B", markersize=5, alpha=0.5, label="Cities"),
+        Line2D([0], [0], marker="o", color="w", markerfacecolor="#e33d2e", markeredgecolor="#7f1212", markersize=5, label="Inscriptions"),
+    ]
+    legend = ax.legend(
+        handles=legend_handles,
+        loc="upper right",
+        bbox_to_anchor=(0.965, 0.965),
+        frameon=True,
+        fontsize=10,
+        borderaxespad=0.0,
+    )
+    legend.get_frame().set_facecolor("white")
+    legend.get_frame().set_edgecolor("#c6c6c6")
+
+    fig.text(
+        0.5,
+        0.068,
+        "\n".join(
+            [
+                f"Search term: {search_term}",
+                f"Results: {len(inscriptions):,} | Search mode: {search_mode}",
+                "Data source: Epigraphik-Datenbank Clauss / Slaby",
+            ]
+        ),
+        ha="center",
+        va="bottom",
+        fontsize=8,
+        color="#3f3f3f",
+    )
+    fig.text(
+        0.5,
+        0.02,
+        PNG_CITATION,
+        ha="center",
+        va="bottom",
+        fontsize=8.5,
+        color="#2f2f2f",
+    )
+
+    buffer = BytesIO()
+    fig.savefig(buffer, format="png", facecolor=fig.get_facecolor())
+    plt.close(fig)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
 def build_map_fast(
     inscriptions: pd.DataFrame,
 ) -> folium.Map:
@@ -312,16 +457,7 @@ def build_map_fast(
     ).add_to(m)
 
     provinces = load_provinces()
-    province_colors = [
-        "#f8dfd0",
-        "#d9ebf6",
-        "#e7f3dc",
-        "#f3e4f8",
-        "#f9edc9",
-        "#dcefe9",
-        "#fde2ea",
-        "#e5e9fb",
-    ]
+    province_colors = _province_palette()
     provinces_colored = provinces.reset_index(drop=True).copy()
     provinces_colored["_color"] = [
         province_colors[i % len(province_colors)]
@@ -409,9 +545,9 @@ def main() -> None:
             search_mode = st.selectbox(
                 "Search in:",
                 options=[
-                    "Raw inscription text",
-                    "Interpretive cleaned text",
-                    "Conservative cleaned text",
+                    "Raw inscriptions",
+                    "Interpretive Cleaned Inscriptions",
+                    "Conservative Cleaned Inscriptions",
                 ],
                 index=0,
             )
@@ -424,14 +560,18 @@ def main() -> None:
     if "submitted_term" not in st.session_state:
         st.session_state["submitted_term"] = ""
     if "submitted_mode" not in st.session_state:
-        st.session_state["submitted_mode"] = "Raw inscription text"
+        st.session_state["submitted_mode"] = "Raw inscriptions"
+    else:
+        st.session_state["submitted_mode"] = _normalize_search_mode(
+            st.session_state["submitted_mode"]
+        )
 
     if search_submitted:
         st.session_state["submitted_term"] = term.strip()
-        st.session_state["submitted_mode"] = search_mode
+        st.session_state["submitted_mode"] = _normalize_search_mode(search_mode)
 
     active_term = st.session_state["submitted_term"]
-    active_mode = st.session_state["submitted_mode"]
+    active_mode = _normalize_search_mode(st.session_state["submitted_mode"])
 
     if not active_term:
         st.warning("Enter a keyword and press Enter or click Search to display results.")
@@ -443,9 +583,9 @@ def main() -> None:
 
     # Map search mode to column
     search_map = {
-        "Raw inscription text": "inscription_text",
-        "Interpretive cleaned text": "inscription_text_interpretive",
-        "Conservative cleaned text": "inscription_text_conservative",
+        "Raw inscriptions": "inscription_text",
+        "Interpretive Cleaned Inscriptions": "inscription_text_interpretive",
+        "Conservative Cleaned Inscriptions": "inscription_text_conservative",
     }
     search_col = search_map[active_mode]
 
@@ -469,6 +609,17 @@ def main() -> None:
     # Build and render map
     with st.spinner("Building map..."):
         map_obj = build_map_fast(filtered)
+        png_bytes = build_png_bytes(filtered, active_term, active_mode)
+
+    map_btn_col_1, map_btn_col_2, map_btn_col_3 = st.columns([3, 1, 3])
+    with map_btn_col_2:
+        st.download_button(
+            label="Download as PNG",
+            data=png_bytes,
+            file_name=f"edcs_map_{active_term.replace(' ', '_').lower()}.png",
+            mime="image/png",
+            use_container_width=True,
+        )
 
     html(map_obj._repr_html_(), height=700, scrolling=False)
 
