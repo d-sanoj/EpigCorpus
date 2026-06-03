@@ -37,13 +37,7 @@ Sanoj Doddapaneni. (2026). EpigCorpus (Version 1.0) [Computer software]. GitHub.
 - Search across raw and cleaned text.
 - TSV download and publication-style PNG map export.
 
-## Demo
-
-### Streamlit Frontend (GIF)
-
-![EpigCorpus Streamlit Frontend](img/App%20video.gif)
-
-### Example PNG Export (term: viator)
+## Example PNG Export (term: viator)
 
 ![Example PNG Export for viator](img/Example%20export%20png%20image%20for%20term%20viator.png)
 
