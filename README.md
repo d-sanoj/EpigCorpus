@@ -23,7 +23,7 @@ This launcher handles environment checks and starts the project end-to-end.
 
 ## Software Citation
 
-Sanoj Doddapaneni. (2026). EpigCorpus (Version 1.0) [Computer software]. GitHub. https://github.com/d-sanoj/EpigCorpus
+Doddapaneni, S. (n.d.). EpigCorpus: A reproducible Latin epigraphy pipeline for extracting, cleaning, and exploring EDCS inscriptions [Computer software]. GitHub.
 
 ## Highlights
 
