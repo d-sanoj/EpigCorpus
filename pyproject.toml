@@ -13,3 +13,39 @@ dependencies = [
     "requests>=2.33.0",
     "streamlit>=1.45.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+exclude = ["data", "img"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+# Lint debt baseline, recorded 2026-08-19 (Phase 0).
+#
+# Phase 0 is documentation and test infrastructure only and must not modify
+# pipeline code, so the 28 pre-existing findings in these four modules are
+# suppressed here rather than fixed. They are NOT waived:
+#   E501   long lines           -> cleared by T38 (logging) / T40 (docs)
+#   UP015  redundant open modes -> T38
+#   F541   f-strings w/o fields -> T38 (all are print() calls being replaced)
+#   SIM115 open() w/o context   -> T19 (scrape() leaks file handles on failure)
+#   SIM105 suppressible except  -> T19 / T30
+#   I001   unsorted imports      -> cleared whenever each module is next touched
+# Each entry must be deleted as its task lands. Do not add files to this list.
+[tool.ruff.lint.per-file-ignores]
+"src/edcs_scraper.py"       = ["E501", "UP015", "F541", "SIM115", "SIM105", "I001"]
+"src/edcs_streamlit_map.py" = ["E501", "SIM115", "SIM105", "I001"]
+"src/edcs_cleaner.py"       = ["E501", "I001"]
+"main.py"                   = ["E501", "F541", "I001"]
