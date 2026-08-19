@@ -1,77 +1,125 @@
 """
 EDCS Scraper — edcs.hist.uzh.ch
 ================================
-Scrapes all inscriptions from the Epigraphy Database Clauss/Slaby.
+Harvests all inscriptions from the Epigraphik-Datenbank Clauss / Slaby.
+
+Rewritten 2026-08-19 for the EDCS release of 2026-08-07, which withdrew the
+DataTables endpoint `/api/query` (now 403) and replaced it with a static-file
+architecture. See docs/EDCS_API.md for the full contract.
 
 FOLDER STRUCTURE:
-    EDCS-Analytics/
+    EpigCorpus/
     ├── data/
-    │   ├── edcs_inscriptions.jsonl   ← one record per line
+    │   ├── edcs_inscriptions.jsonl     ← one record per line
     │   ├── edcs_inscriptions.tsv
-    │   └── edcs_lookup.json
+    │   ├── edcs_lookup.json            ← materials / provinces / categories / languages
+    │   ├── edcs_checkpoint.json        ← resume cursor
+    │   └── edcs_failed_ids.json        ← monuments that could not be fetched
     └── src/
-        └── edcs_scraper.py           ← this file
+        └── edcs_scraper.py             ← this file
 
-KEY DESIGN DECISIONS:
+HOW THE CURRENT API WORKS:
+    1. /data/indexes/searchable.json  — the whole corpus index in one file
+       (542,854 entries, ~19 MB gzip, no pagination)
+    2. /data/indexes/{lookups,places,languages,sources}.json — code tables
+    3. /data/monument/{shard}/{id8}.json — one static file per monument,
+       where id8 = zero-padded 8-digit id and shard = its first 3 characters.
+       Inscription TEXT lives only here, so a full harvest needs one request
+       per monument.
+
+KEY DESIGN DECISIONS (unchanged from the original):
     - One row per inscription (not per monument)
-    - record_id = edcs_id + inscription index e.g. EDCS-00000001-0
+    - record_id = edcs_id + inscription index, e.g. EDCS-00000001-0
     - dating, language, category all come from inside each inscription
-    - all categories translated to English via lookup
-    - image_urls stored as last column
-    - JSONL: category and category_en as lists, belege as list
-    - TSV:   category and category_en pipe separated, belege pipe separated
+    - all categories/materials/languages translated to English via lookup
+    - JSONL: list-valued columns stay lists
+    - TSV:   list-valued columns are pipe separated
 
-LOGIC:
-    1. Check if data files exist
-    2. If not → fresh scrape
-    3. If yes → check recordsTotal against local count
-    4. If new records → scrape only new ones
-    5. If no new records → print info and exit
+FIELD COVERAGE:
+    This captures every descriptive field the current EDCS exposes for a
+    monument and its inscriptions: identity, place and coordinates, material,
+    citations, dating, text, language, category, comments and images.
+
+    Two categories of field are deliberately absent because the current API has
+    no equivalent. External database cross-links (partner records, Trismegistos
+    place ids) were rendered only on the retired PHP pages and appear nowhere in
+    the present application. Free-form HTML remnants are meaningless against a
+    structured JSON API.
 
 READING IN PYTHON:
     import pandas as pd
     df = pd.read_json("data/edcs_inscriptions.jsonl", lines=True)
 
-SETUP:
-    pip install requests
-
 RUN (from project root):
-    python src/edcs_scraper.py
+    python src/edcs_scraper.py                 # full harvest, resumes if interrupted
+    python src/edcs_scraper.py --limit 500     # first 500 monuments (smoke test)
+    python src/edcs_scraper.py --restart       # discard existing output and start over
+    python src/edcs_scraper.py --workers 8     # gentler on the server
 """
 
-import requests
-import json
+import argparse
 import csv
-import time
-import sys
+import gzip
+import json
 import os
-import re
+import signal
+import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+import requests
 
 # ─── PATHS ────────────────────────────────────────────────────────────────────
-SRC_DIR      = os.path.dirname(os.path.abspath(__file__))
-PROJECT_DIR  = os.path.dirname(SRC_DIR)
-DATA_DIR     = os.path.join(PROJECT_DIR, "data")
+SRC_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(SRC_DIR)
+DATA_DIR = os.path.join(PROJECT_DIR, "data")
 
 OUTPUT_JSONL = os.path.join(DATA_DIR, "edcs_inscriptions.jsonl")
-OUTPUT_TSV   = os.path.join(DATA_DIR, "edcs_inscriptions.tsv")
-LOOKUP_FILE  = os.path.join(DATA_DIR, "edcs_lookup.json")
-CHECKPOINT   = os.path.join(DATA_DIR, "edcs_checkpoint.json")
+OUTPUT_TSV = os.path.join(DATA_DIR, "edcs_inscriptions.tsv")
+LOOKUP_FILE = os.path.join(DATA_DIR, "edcs_lookup.json")
+CHECKPOINT = os.path.join(DATA_DIR, "edcs_checkpoint.json")
+FAILED_FILE = os.path.join(DATA_DIR, "edcs_failed_ids.json")
+INDEX_CACHE = os.path.join(DATA_DIR, "edcs_index_cache.json")
+MANIFEST = os.path.join(DATA_DIR, "edcs_harvest_manifest.json")
 
 # ─── API CONFIG ───────────────────────────────────────────────────────────────
-API_URL    = "https://edcs.hist.uzh.ch/api/query"
-DELAY      = 1.5
-PAGE_SIZES = [500, 100]
+BASE = "https://edcs.hist.uzh.ch"
+INDEX_URL = f"{BASE}/data/indexes/searchable.json"
+LOOKUPS_URL = f"{BASE}/data/indexes/lookups.json"
+PLACES_URL = f"{BASE}/data/indexes/places.json"
+LANGUAGES_URL = f"{BASE}/data/indexes/languages.json"
+SOURCES_URL = f"{BASE}/data/indexes/sources.json"
+MONUMENT_URL = f"{BASE}/data/monument/{{shard}}/{{id8}}.json"
+IMAGE_URL = f"{BASE}/bilder/{{prefix}}/{{filename}}"
 
+EPIGCORPUS_VERSION = "0.2.0"
+
+# An identifying User-Agent. Verified 2026-08-19: the static /data/ endpoints
+# serve this without complaint (300/300 and 600/600 in survey runs), so there is
+# no access reason to spoof a browser. The old scraper's forged Firefox UA,
+# Referer and X-Requested-With bought nothing — six header variants all got the
+# same 403 from the withdrawn /api/query.
 HEADERS = {
-    "User-Agent":       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Gecko/20100101 Firefox/120.0",
-    "Accept":           "application/json, text/javascript, */*; q=0.01",
-    "Accept-Language":  "en-US,en;q=0.5",
-    "X-Requested-With": "XMLHttpRequest",
-    "Referer":          "https://edcs.hist.uzh.ch/en/search",
+    "User-Agent": (
+        f"EpigCorpus/{EPIGCORPUS_VERSION} "
+        "(+https://github.com/d-sanoj/EpigCorpus; contact.sanoj.d@gmail.com)"
+    ),
+    "Accept": "application/json",
+    "Accept-Encoding": "gzip, deflate",
 }
 
-# ─── 17 COLUMNS ───────────────────────────────────────────────────────────────
+DEFAULT_WORKERS = 16
+CHUNK_SIZE = 2000
+MAX_RETRIES = 4
+BACKOFF_BASE = 2.0
+
+# ─── OUTPUT COLUMNS ───────────────────────────────────────────────────────────
+# The first block is the original EpigCorpus schema, unchanged, so main.py,
+# edcs_cleaner.py and edcs_streamlit_map.py keep working untouched.
+# The second block adds the remaining descriptive fields plus record-level provenance.
 TSV_FIELDS = [
+    # — original EpigCorpus columns —
     "record_id",
     "edcs_id",
     "inscription_index",
@@ -87,509 +135,702 @@ TSV_FIELDS = [
     "language",
     "category",
     "category_en",
-    "belege",         # ← NEW
+    "belege",
     "image_urls",
+    # — additional descriptive fields —
+    "publication",      # citations as a single display string
+    "raw_dating",       # human-readable dating range
+    "dating_from",      # earliest year (negative = BC)
+    "dating_to",        # latest year (negative = BC)
+    "status",           # inscription genus / personal status
+    "comment",          # editorial comments on the monument
+    "photo",            # resolved image URLs
+    "language_codes",
+    "photo_credits",
+    # — provenance —
+    "retrieved_at",
+    "source_url",
 ]
 
-# ─── BUILD REQUEST PARAMS ─────────────────────────────────────────────────────
+LIST_COLUMNS = {"category", "category_en", "belege", "status", "language_codes"}
 
-def build_params(draw, start, length):
-    return {
-        "draw":   draw,
-        "start":  start,
-        "length": length,
+_print_lock = threading.Lock()
 
-        "columns[0][data]":          "obj.edcs-id",
-        "columns[0][name]":          "",
-        "columns[0][searchable]":    "true",
-        "columns[0][orderable]":     "true",
-        "columns[0][search][value]": "",
-        "columns[0][search][regex]": "false",
 
-        "columns[1][data]":          "",
-        "columns[1][name]":          "",
-        "columns[1][searchable]":    "true",
-        "columns[1][orderable]":     "true",
-        "columns[1][search][value]": "",
-        "columns[1][search][regex]": "false",
+def log(message):
+    with _print_lock:
+        print(message, flush=True)
 
-        "columns[2][data]":          "obj.inschriften",
-        "columns[2][name]":          "",
-        "columns[2][searchable]":    "true",
-        "columns[2][orderable]":     "true",
-        "columns[2][search][value]": "",
-        "columns[2][search][regex]": "false",
 
-        "columns[3][data]":          "obj.material",
-        "columns[3][name]":          "",
-        "columns[3][searchable]":    "true",
-        "columns[3][orderable]":     "true",
-        "columns[3][search][value]": "",
-        "columns[3][search][regex]": "false",
+def install_signal_handlers():
+    """Make SIGTERM stop the harvest as cleanly as Ctrl+C does.
 
-        "columns[4][data]":          "obj.datierung",
-        "columns[4][name]":          "",
-        "columns[4][searchable]":    "true",
-        "columns[4][orderable]":     "true",
-        "columns[4][search][value]": "",
-        "columns[4][search][regex]": "false",
+    Background jobs started from a non-interactive shell inherit SIGINT set to
+    ignore, so `kill -INT` does nothing and the only way to stop a detached run
+    is SIGTERM. Without this, SIGTERM kills the process mid-chunk and leaves the
+    output files ahead of the checkpoint, which produces duplicate rows on the
+    next resume. Raising KeyboardInterrupt routes SIGTERM into the same handler
+    that already flushes and checkpoints.
+    """
 
-        "columns[5][data]":          "obj.anzahl_bilder",
-        "columns[5][name]":          "",
-        "columns[5][searchable]":    "false",
-        "columns[5][orderable]":     "false",
-        "columns[5][search][value]": "",
-        "columns[5][search][regex]": "false",
+    def handler(signum, _frame):
+        raise KeyboardInterrupt(f"signal {signum}")
 
-        "order[0][column]": "0",
-        "order[0][dir]":    "asc",
-        "order[0][name]":   "",
+    signal.signal(signal.SIGTERM, handler)
 
-        "search[value]": "",
-        "search[regex]": "false",
-        "_":             int(time.time() * 1000),
+
+# ─── HTTP ─────────────────────────────────────────────────────────────────────
+
+
+def make_session():
+    session = requests.Session()
+    session.headers.update(HEADERS)
+    adapter = requests.adapters.HTTPAdapter(pool_connections=32, pool_maxsize=32)
+    session.mount("https://", adapter)
+    return session
+
+
+def get_json(session, url, timeout=300):
+    """GET with exponential backoff. Honours Retry-After when the server sends it."""
+    last_error = None
+    for attempt in range(MAX_RETRIES):
+        try:
+            response = session.get(url, timeout=timeout)
+            if response.status_code == 429 or response.status_code >= 500:
+                wait = float(response.headers.get("Retry-After", BACKOFF_BASE**attempt))
+                time.sleep(wait)
+                last_error = f"HTTP {response.status_code}"
+                continue
+            response.raise_for_status()
+            return response.json()
+        except (requests.RequestException, json.JSONDecodeError) as exc:
+            last_error = f"{type(exc).__name__}: {exc}"
+            if attempt < MAX_RETRIES - 1:
+                time.sleep(BACKOFF_BASE**attempt)
+    raise RuntimeError(f"{url} failed after {MAX_RETRIES} attempts — {last_error}")
+
+
+# ─── LOOKUPS ──────────────────────────────────────────────────────────────────
+
+
+def build_lookup(session):
+    """Fetch and flatten every code table into a single lookup dict."""
+    log("[+] Fetching lookup tables...")
+    lookups = get_json(session, LOOKUPS_URL)["d"]
+    languages = get_json(session, LANGUAGES_URL)["d"]
+    places_raw = get_json(session, PLACES_URL)
+    sources_raw = get_json(session, SOURCES_URL)["d"]
+
+    # materials: index = id, entry = [token, {de,en,...}]; slot 0 is null
+    materials = {}
+    for idx, entry in enumerate(lookups.get("materials", [])):
+        if entry:
+            materials[idx] = {"token": entry[0], "en": entry[1].get("en", entry[0])}
+
+    # categories: [bit, token, {de,en,...}], keyed by bit
+    categories = {}
+    for entry in lookups.get("categories", []):
+        if isinstance(entry, list) and len(entry) >= 3:
+            categories[entry[0]] = {"token": entry[1], "en": entry[2].get("en", entry[1])}
+
+    provinces = lookups.get("provinces", [])
+
+    langs = {}
+    for entry in languages:
+        if isinstance(entry, dict):
+            langs[entry.get("sprache_id")] = {
+                "en": entry.get("names", {}).get("en", ""),
+                "code": (entry.get("kuerzel") or "").strip(),
+            }
+
+    # places: [geo_id, ort, province_index, [lat, lon]]
+    # NOTE: coord is [latitude, longitude] here. The OLD API returned
+    # [longitude, latitude]. Getting this backwards transposes the whole corpus.
+    places = {}
+    for row in places_raw.get("d", []):
+        coord = row[3] if len(row) > 3 else None
+        province_idx = row[2] if len(row) > 2 else None
+        places[row[0]] = {
+            "ort": row[1] or "",
+            "province": (
+                provinces[province_idx]
+                if isinstance(province_idx, int) and 0 <= province_idx < len(provinces)
+                else ""
+            ),
+            "lat": coord[0] if coord and len(coord) == 2 else "",
+            "lon": coord[1] if coord and len(coord) == 2 else "",
+        }
+
+    # sources: index = id, entry = [token, description, count]
+    sources = {}
+    for idx, entry in enumerate(sources_raw):
+        if entry:
+            sources[idx] = entry[0]
+
+    lookup = {
+        "materials": materials,
+        "categories": categories,
+        "provinces": provinces,
+        "languages": langs,
+        "places": places,
+        "sources": sources,
+        "_meta": {
+            "retrieved_at": now_iso(),
+            "epigcorpus_version": EPIGCORPUS_VERSION,
+        },
+    }
+    log(
+        f"    materials={len(materials)} categories={len(categories)} "
+        f"provinces={len(provinces)} languages={len(langs)} "
+        f"places={len(places)} sources={len(sources)}"
+    )
+    return lookup
+
+
+def save_lookup(lookup):
+    with open(LOOKUP_FILE, "w", encoding="utf-8") as handle:
+        json.dump(lookup, handle, ensure_ascii=False, indent=2)
+
+
+# ─── PARSING ──────────────────────────────────────────────────────────────────
+
+
+def now_iso():
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def format_citation(entry, sources):
+    """[source_id, volume, number] -> 'CIL-06, *00226'.
+
+    Mirrors the site's own `citationLabel()` (app.js) exactly: source name,
+    then '-volume' if a volume is present, then ', number'. Matching EDCS's
+    rendering keeps our `publication` column joinable against theirs.
+
+    The '*' prefix EDCS uses to mark falsae is preserved verbatim -- it is the
+    only forgery marker the API exposes (see docs/AUDIT.md F1).
+    """
+    if not isinstance(entry, list) or not entry:
+        return ""
+    name = sources.get(entry[0], str(entry[0]))
+    value = str(name)
+    volume = str(entry[1]).strip() if len(entry) > 1 and entry[1] else ""
+    detail = str(entry[2]).strip() if len(entry) > 2 and entry[2] else ""
+    if volume:
+        value += f"-{volume}"
+    if detail:
+        value += f", {detail}"
+    return value.strip()
+
+
+def image_url(filename):
+    clean = str(filename or "").strip()
+    if not clean or len(clean) < 2:
+        return ""
+    return IMAGE_URL.format(prefix=clean[:2], filename=clean)
+
+
+def format_dating(not_before, not_after):
+    """Human-readable dating, matching the site's own `formatDatingRange()`.
+
+    '-' when undated, a bare year when both bounds agree, otherwise
+    'from .. to' with '?' for an open bound. Negative years are BC.
+    """
+    has_before = not_before not in ("", None)
+    has_after = not_after not in ("", None)
+    if not has_before and not has_after:
+        return "-"
+    start = str(not_before) if has_before else "?"
+    end = str(not_after) if has_after else "?"
+    if start == end:
+        return start
+    return f"{start} .. {end}"
+
+
+def parse_monument(payload, monument_id, lookup):
+    """One monument payload -> a list of rows, one per inscription."""
+    obj = payload.get("d", payload) if isinstance(payload, dict) else {}
+    if not isinstance(obj, dict):
+        return []
+
+    edcs_id = f"EDCS-{int(monument_id):08d}"
+    source_url = MONUMENT_URL.format(
+        shard=f"{int(monument_id):08d}"[:3], id8=f"{int(monument_id):08d}"
+    )
+    retrieved_at = now_iso()
+
+    # ── Place / province / coordinates ──
+    geo_id = obj.get("g")
+    place_info = lookup["places"].get(geo_id, {}) if geo_id is not None else {}
+    province = place_info.get("province", "")
+    place = place_info.get("ort", "")
+    latitude = place_info.get("lat", "")
+    longitude = place_info.get("lon", "")
+
+    # ── Material ──
+    material_id = obj.get("m")
+    material_info = lookup["materials"].get(material_id, {})
+    material = material_info.get("token", "")
+    material_en = material_info.get("en", "")
+
+    # ── Citations (`belege` as a list, `publication` as a string) ──
+    sources = lookup["sources"]
+    belege = [format_citation(entry, sources) for entry in (obj.get("q") or [])]
+    belege = [b for b in belege if b]
+    publication = " | ".join(belege)
+
+    # ── Photos ──
+    photos, credits = [], []
+    for photo in obj.get("p") or []:
+        if isinstance(photo, dict):
+            url = image_url(photo.get("b"))
+            if url:
+                photos.append(url)
+            if photo.get("u"):
+                credits.append(str(photo["u"]))
+    image_urls = " | ".join(photos)
+    photo_credits = " | ".join(dict.fromkeys(credits))
+
+    # ── Comments (absent from the old API) ──
+    comments = []
+    for comment in obj.get("c") or []:
+        if isinstance(comment, dict):
+            text = comment.get("k") or ""
+            note = comment.get("n")
+            comments.append(f"{text} ({note})" if note else str(text))
+        elif comment:
+            comments.append(str(comment))
+    comment_text = " | ".join(c for c in comments if c)
+
+    shared = {
+        "edcs_id": edcs_id,
+        "province": province,
+        "place": place,
+        "latitude": latitude,
+        "longitude": longitude,
+        "material": material,
+        "material_en": material_en,
+        "belege": belege,
+        "publication": publication,
+        "image_urls": image_urls,
+        "photo": image_urls,
+        "photo_credits": photo_credits,
+        "comment": comment_text,
+        "retrieved_at": retrieved_at,
+        "source_url": source_url,
     }
 
-# ─── LOOKUP ───────────────────────────────────────────────────────────────────
-
-def fetch_lookup(session):
-    """Fetch one page just to extract the lookup dictionary."""
-    params = build_params(draw=1, start=0, length=1)
-    r = session.get(API_URL, params=params, timeout=30)
-    r.raise_for_status()
-    return r.json().get("lookup", {})
-
-def load_or_update_lookup(session):
-    """
-    Load lookup from file if exists.
-    Fetch fresh from API and compare.
-    Save only if changed.
-    """
-    fresh = fetch_lookup(session)
-
-    if os.path.exists(LOOKUP_FILE):
-        with open(LOOKUP_FILE, "r", encoding="utf-8") as f:
-            existing = json.load(f)
-        if existing == fresh:
-            print("[lookup] No changes — using existing lookup file.")
-            return existing
-        else:
-            print("[lookup] Changes detected — updating lookup file.")
-    else:
-        print("[lookup] No lookup file found — creating new one.")
-
-    with open(LOOKUP_FILE, "w", encoding="utf-8") as f:
-        json.dump(fresh, f, ensure_ascii=False, indent=2)
-    return fresh
-
-def get_material_en(lookup, code):
-    """Translate material code to English."""
-    if not code:
-        return ""
-    return lookup.get("material", {}).get(code, {}).get("en", code)
-
-def translate_categories(lookup, cats):
-    """
-    Translate ALL category codes to English.
-    Returns a list of English translations.
-    Falls back to original term if not found in lookup.
-    """
-    if not cats or not isinstance(cats, list):
-        return []
-    gattung = lookup.get("gattung", {})
-    return [
-        gattung.get(cat, {}).get("en", cat)   # fallback to original if not found
-        for cat in cats
-    ]
-
-# ─── PARSE BELEGE ─────────────────────────────────────────────────────────────
-
-def parse_belege(obj):
-    """
-    Parse obj.belege into a list of strings like ["CIL 16 00041", "AE 1913 00179"].
-    Each belege entry is a 3-element array: [journal, volume, number].
-    """
-    raw = obj.get("belege") or []
-    result = []
-    for entry in raw:
-        if isinstance(entry, list) and len(entry) >= 3:
-            parts = [str(p).strip() for p in entry[:3] if p]
-            if parts:
-                result.append(" ".join(parts))
-    return result
-
-# ─── PARSE ONE MONUMENT → MULTIPLE INSCRIPTION ROWS ──────────────────────────
-
-def parse_monument(item, lookup):
-    """
-    One monument can have multiple inscriptions.
-    Returns a LIST of rows — one per inscription.
-    Each row has a unique record_id = edcs_id-inscription_index.
-    """
-    obj = item.get("obj", {})
-
-    # ── Monument level fields (shared across all inscriptions) ──
-    edcs_id  = obj.get("edcs-id", "")
-    province = obj.get("provinz", "")
-    place    = obj.get("ort", "")
-
-    coord     = obj.get("coord") or []
-    longitude = coord[0] if len(coord) > 0 else ""
-    latitude  = coord[1] if len(coord) > 1 else ""
-
-    material    = obj.get("material", "") or ""
-    material_en = get_material_en(lookup, material)
-
-    # ── Belege — shared across all inscriptions ──
-    belege = parse_belege(obj)
-
-    # ── Image URLs — shared across all inscriptions ──
-    bilder     = obj.get("bilder") or []
-    image_list = []
-    for b in bilder:
-        if isinstance(b, list) and b[0]:
-            image_list.append(str(b[0]))
-        elif isinstance(b, str) and b:
-            image_list.append(b)
-    image_urls = " | ".join(image_list)
-
-    # ── Inscriptions — one row per inscription ──
-    inschriften = obj.get("inschriften") or []
-    rows        = []
-
-    for i, insc in enumerate(inschriften):
-        if not isinstance(insc, list):
+    rows = []
+    for index, inscription in enumerate(obj.get("i") or []):
+        if not isinstance(inscription, dict):
             continue
 
-        # index[0] → inscription text
-        inscription_text = insc[0] if len(insc) > 0 else ""
+        text = inscription.get("t") or ""
 
-        # index[1] → [not_before, not_after] — confirmed from JSON
-        dating     = insc[1] if len(insc) > 1 else []
-        not_before = ""
-        not_after  = ""
-        if isinstance(dating, list):
-            not_before = dating[0] if len(dating) > 0 else ""
-            not_after  = dating[1] if len(dating) > 1 else ""
+        dating = inscription.get("d") or []
+        not_before = dating[0] if len(dating) > 0 and dating[0] is not None else ""
+        not_after = dating[1] if len(dating) > 1 and dating[1] is not None else ""
 
-        # index[2] → language list
-        langs    = insc[2] if len(insc) > 2 else []
-        language = ", ".join(langs) if isinstance(langs, list) else str(langs or "")
+        language_ids = inscription.get("s") or []
+        language_names, language_codes = [], []
+        for language_id in language_ids:
+            info = lookup["languages"].get(language_id, {})
+            if info.get("en"):
+                language_names.append(info["en"])
+            if info.get("code"):
+                language_codes.append(info["code"])
 
-        # index[3] → category list — ALL values
-        cats        = insc[3] if len(insc) > 3 else []
-        category    = cats if isinstance(cats, list) else []
-        category_en = translate_categories(lookup, category)
+        category_ids = inscription.get("g") or []
+        category, category_en = [], []
+        for category_id in category_ids:
+            info = lookup["categories"].get(category_id, {})
+            category.append(info.get("token", str(category_id)))
+            category_en.append(info.get("en", str(category_id)))
 
-        rows.append({
-            "record_id":         f"{edcs_id}-{i}",
-            "edcs_id":           edcs_id,
-            "inscription_index": i,
-            "province":          province,
-            "place":             place,
-            "latitude":          latitude,
-            "longitude":         longitude,
-            "material":          material,
-            "material_en":       material_en,
-            "not_before":        not_before,
-            "not_after":         not_after,
-            "inscription_text":  inscription_text,
-            "language":          language,
-            "category":          category,       # list in JSONL
-            "category_en":       category_en,    # list in JSONL
-            "belege":            belege,          # list in JSONL ← NEW
-            "image_urls":        image_urls,
-        })
+        rows.append(
+            {
+                **shared,
+                "record_id": f"{edcs_id}-{index}",
+                "inscription_index": index,
+                "not_before": not_before,
+                "not_after": not_after,
+                "dating_from": not_before,
+                "dating_to": not_after,
+                "raw_dating": format_dating(not_before, not_after),
+                "inscription_text": text,
+                "language": ", ".join(language_names),
+                "language_codes": language_codes,
+                "category": category,
+                "category_en": category_en,
+                "status": category_en,
+            }
+        )
 
-    # If monument has no inschriften at all — still save one row
+    # Monument with no inscriptions — still record it, as the original did.
     if not rows:
-        rows.append({
-            "record_id":         f"{edcs_id}-0",
-            "edcs_id":           edcs_id,
-            "inscription_index": 0,
-            "province":          province,
-            "place":             place,
-            "latitude":          latitude,
-            "longitude":         longitude,
-            "material":          material,
-            "material_en":       material_en,
-            "not_before":        "",
-            "not_after":         "",
-            "inscription_text":  "",
-            "language":          "",
-            "category":          [],
-            "category_en":       [],
-            "belege":            belege,          # ← NEW
-            "image_urls":        image_urls,
-        })
+        rows.append(
+            {
+                **shared,
+                "record_id": f"{edcs_id}-0",
+                "inscription_index": 0,
+                "not_before": "",
+                "not_after": "",
+                "dating_from": "",
+                "dating_to": "",
+                "raw_dating": "",
+                "inscription_text": "",
+                "language": "",
+                "language_codes": [],
+                "category": [],
+                "category_en": [],
+                "status": [],
+            }
+        )
 
     return rows
 
-# ─── LOCAL FILE HELPERS ───────────────────────────────────────────────────────
 
-def count_local_records():
-    """Count monuments (not inscription rows) in JSONL by unique edcs_id."""
-    if not os.path.exists(OUTPUT_JSONL):
-        return 0
-    seen = set()
-    with open(OUTPUT_JSONL, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                rec = json.loads(line)
-                seen.add(rec.get("edcs_id", ""))
-            except json.JSONDecodeError:
-                continue
-    return len(seen)
+# ─── CHECKPOINT / FAILURES ────────────────────────────────────────────────────
 
-def get_last_edcs_int():
-    """Get highest EDCS ID integer from existing JSONL."""
-    if not os.path.exists(OUTPUT_JSONL):
-        return 0
-    last_int = 0
-    with open(OUTPUT_JSONL, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                rec = json.loads(line)
-                eid = edcs_id_to_int(rec.get("edcs_id", "0"))
-                if eid > last_int:
-                    last_int = eid
-            except json.JSONDecodeError:
-                continue
-    return last_int
 
-def edcs_id_to_int(edcs_id):
-    m = re.search(r'\d+', str(edcs_id))
-    return int(m.group()) if m else 0
+def save_checkpoint(cursor, monuments_done, rows_written):
+    with open(CHECKPOINT, "w", encoding="utf-8") as handle:
+        json.dump(
+            {
+                "cursor": cursor,
+                "monuments_done": monuments_done,
+                "rows_written": rows_written,
+                "updated_at": now_iso(),
+            },
+            handle,
+            indent=2,
+        )
 
-# ─── CHECKPOINT ───────────────────────────────────────────────────────────────
-
-def save_checkpoint(start, last_edcs_id):
-    with open(CHECKPOINT, "w") as f:
-        json.dump({
-            "start":         start,
-            "last_edcs_id":  last_edcs_id,
-            "last_edcs_int": edcs_id_to_int(last_edcs_id),
-        }, f, indent=2)
 
 def load_checkpoint():
-    if os.path.exists(CHECKPOINT):
-        with open(CHECKPOINT, "r") as f:
-            cp = json.load(f)
-        print(f"[resume] Checkpoint found — last EDCS ID: {cp['last_edcs_id']} | start: {cp['start']}")
-        return cp["start"], cp["last_edcs_int"]
-    return None, None
+    if not os.path.exists(CHECKPOINT):
+        return None
+    with open(CHECKPOINT, encoding="utf-8") as handle:
+        return json.load(handle)
 
-# ─── CORE SCRAPE LOOP ─────────────────────────────────────────────────────────
 
-def scrape(session, lookup, start, last_edcs_int, total, page_size, is_resume):
-    jsonl_file = open(OUTPUT_JSONL, "a", encoding="utf-8")
-    tsv_file   = open(OUTPUT_TSV, "a" if is_resume else "w", encoding="utf-8", newline="")
-    tsv_writer = csv.DictWriter(tsv_file, fieldnames=TSV_FIELDS, delimiter="\t", extrasaction="ignore")
+def save_manifest(monuments_done, rows_written, index_fetched_at, duration_s, failed):
+    """Record that a harvest finished.
 
+    The checkpoint is deleted on completion, so it cannot double as the
+    completion marker -- its absence would otherwise be indistinguishable from
+    "never run", which is what makes a blind re-run destructive.
+    """
+    with open(MANIFEST, "w", encoding="utf-8") as handle:
+        json.dump(
+            {
+                "completed_at": now_iso(),
+                "monuments": monuments_done,
+                "rows": rows_written,
+                "failed": len(failed),
+                "index_fetched_at": index_fetched_at,
+                "duration_seconds": round(duration_s, 1),
+                "epigcorpus_version": EPIGCORPUS_VERSION,
+            },
+            handle,
+            indent=2,
+        )
+
+
+def load_manifest():
+    if not os.path.exists(MANIFEST):
+        return None
+    try:
+        with open(MANIFEST, encoding="utf-8") as handle:
+            return json.load(handle)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def compress_outputs():
+    """Write .gz copies of the corpus for distribution.
+
+    The harvest itself writes plain text because appending to a gzip stream
+    across a checkpointed resume is not safe. Compression therefore runs once,
+    at the end, on the finished files. Only the .gz copies are committed --
+    the corpus is ~11x smaller compressed, which keeps it under GitHub's
+    100 MB per-file limit without Git LFS. Loaders read either form, so no
+    manual decompression step is ever required.
+    """
+    for source in (OUTPUT_JSONL, OUTPUT_TSV):
+        if not os.path.exists(source):
+            continue
+        target = source + ".gz"
+        raw = os.path.getsize(source)
+        log(f"[+] Compressing {os.path.basename(source)} ({raw / 1048576:.1f} MB)...")
+        with open(source, "rb") as src, gzip.open(target, "wb", compresslevel=9) as dst:
+            while chunk := src.read(1024 * 1024):
+                dst.write(chunk)
+        packed = os.path.getsize(target)
+        log(f"    -> {os.path.basename(target)} "
+            f"({packed / 1048576:.1f} MB, {raw / packed:.1f}x smaller)")
+
+
+def save_failed(failed):
+    with open(FAILED_FILE, "w", encoding="utf-8") as handle:
+        json.dump({"count": len(failed), "ids": sorted(failed)}, handle, indent=2)
+
+
+def load_failed():
+    if not os.path.exists(FAILED_FILE):
+        return set()
+    with open(FAILED_FILE, encoding="utf-8") as handle:
+        return set(json.load(handle).get("ids", []))
+
+
+# ─── INDEX ────────────────────────────────────────────────────────────────────
+
+
+def fetch_index(session, use_cache=True):
+    """Fetch the full corpus index. One request, ~19 MB, no pagination."""
+    if use_cache and os.path.exists(INDEX_CACHE):
+        with open(INDEX_CACHE, encoding="utf-8") as handle:
+            cached = json.load(handle)
+        log(f"[+] Using cached index: {len(cached['ids']):,} monuments "
+            f"(fetched {cached['fetched_at']})")
+        return cached["ids"], cached["fetched_at"]
+
+    log("[+] Fetching corpus index (~19 MB)...")
+    started = time.time()
+    payload = get_json(session, INDEX_URL, timeout=600)
+    ids = [row[0] for row in payload.get("d", [])]
+    fetched_at = now_iso()
+    log(f"[+] Index: {len(ids):,} monuments in {time.time() - started:.1f}s")
+
+    with open(INDEX_CACHE, "w", encoding="utf-8") as handle:
+        json.dump({"fetched_at": fetched_at, "count": len(ids), "ids": ids}, handle)
+    return ids, fetched_at
+
+
+# ─── HARVEST ──────────────────────────────────────────────────────────────────
+
+
+def harvest(session_factory, ids, lookup, workers, start_cursor, monuments_done, rows_written):
+    is_resume = start_cursor > 0
+
+    # Guard: opening in "w" truncates. Only ever do that when there is nothing
+    # to lose, or when the caller explicitly asked via --restart (which deletes
+    # the files up front, so they will not exist here).
+    if not is_resume:
+        for path in (OUTPUT_JSONL, OUTPUT_TSV):
+            if os.path.exists(path) and os.path.getsize(path) > 0:
+                raise RuntimeError(
+                    f"Refusing to overwrite existing output: {path} "
+                    f"({os.path.getsize(path):,} bytes).\n"
+                    "  To add to it,      run without --restart (needs a checkpoint).\n"
+                    "  To re-harvest,     run with --restart (DELETES existing output).\n"
+                    "  To keep it,        move the file aside first."
+                )
+
+    jsonl_file = open(OUTPUT_JSONL, "a" if is_resume else "w", encoding="utf-8")
+    tsv_file = open(OUTPUT_TSV, "a" if is_resume else "w", encoding="utf-8", newline="")
+    tsv_writer = csv.DictWriter(
+        tsv_file, fieldnames=TSV_FIELDS, delimiter="\t", extrasaction="ignore"
+    )
     if not is_resume:
         tsv_writer.writeheader()
 
-    monuments_saved  = 0
-    rows_saved       = 0
-    draw             = 1
-    last_edcs_id     = f"EDCS-{last_edcs_int:08d}" if last_edcs_int else ""
+    failed = load_failed() if is_resume else set()
+    sessions = [session_factory() for _ in range(workers)]
+    total = len(ids)
+    cursor = start_cursor
+    started = time.time()
 
-    print(f"\n[+] Starting from offset  : {start:,}")
-    print(f"[+] Total records in EDCS : {total:,}")
-    print(f"[+] Page size             : {page_size}")
-    print(f"[+] Press Ctrl+C anytime  — progress saved every page\n")
+    def fetch_one(task):
+        slot, monument_id = task
+        id8 = f"{int(monument_id):08d}"
+        url = MONUMENT_URL.format(shard=id8[:3], id8=id8)
+        try:
+            return monument_id, get_json(sessions[slot % workers], url, timeout=60)
+        except Exception:
+            return monument_id, None
+
+    def write_payload(monument_id, payload):
+        """Write one monument's rows. Returns the number of rows written."""
+        written = 0
+        for row in parse_monument(payload, monument_id, lookup):
+            jsonl_file.write(json.dumps(row, ensure_ascii=False) + "\n")
+            tsv_row = dict(row)
+            for column in LIST_COLUMNS:
+                if isinstance(tsv_row.get(column), list):
+                    tsv_row[column] = " | ".join(str(v) for v in tsv_row[column])
+            tsv_writer.writerow(tsv_row)
+            written += 1
+        return written
+
+    log(f"\n[+] Harvesting {total - cursor:,} of {total:,} monuments")
+    log(f"[+] Workers: {workers} | chunk: {CHUNK_SIZE}")
+    log("[+] Ctrl+C is safe — progress is checkpointed after every chunk\n")
 
     try:
-        while start < total:
-            params = build_params(draw=draw, start=start, length=page_size)
-            try:
-                r = session.get(API_URL, params=params, timeout=30)
-                r.raise_for_status()
-                data = r.json()
-            except requests.exceptions.RequestException as e:
-                print(f"\n[!] Network error at start={start}: {e}. Retrying in 15s...")
-                time.sleep(15)
-                continue
-            except json.JSONDecodeError as e:
-                print(f"\n[!] Bad JSON at start={start}: {e}. Skipping page.")
-                start += page_size
-                draw  += 1
-                continue
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            # Retry anything that failed on an earlier run BEFORE moving on.
+            # The cursor has already advanced past these ids, so without this
+            # pass they would never be revisited and the harvest would quietly
+            # be short by however many failed. This is the path that matters
+            # after a laptop sleep, which kills every in-flight connection.
+            if failed:
+                retry_ids = sorted(failed)
+                log(f"[+] Retrying {len(retry_ids):,} monuments that failed earlier...")
+                for offset in range(0, len(retry_ids), CHUNK_SIZE):
+                    batch = retry_ids[offset : offset + CHUNK_SIZE]
+                    for monument_id, payload in pool.map(fetch_one, enumerate(batch)):
+                        if payload is None:
+                            continue
+                        rows_written += write_payload(monument_id, payload)
+                        monuments_done += 1
+                        failed.discard(monument_id)
+                    jsonl_file.flush()
+                    tsv_file.flush()
+                    save_checkpoint(cursor, monuments_done, rows_written)
+                    save_failed(failed)
+                recovered = len(retry_ids) - len(failed)
+                log(f"[+] Recovered {recovered:,}; {len(failed):,} still failing\n")
 
-            records = data.get("data", [])
-            if not records:
-                print(f"\n[=] Empty page at start={start}. Done.")
-                break
+            while cursor < total:
+                chunk = ids[cursor : cursor + CHUNK_SIZE]
+                tasks = list(enumerate(chunk))
 
-            for item in records:
-                edcs_id = item.get("obj", {}).get("edcs-id", "")
-                eid_int = edcs_id_to_int(edcs_id)
+                for monument_id, payload in pool.map(fetch_one, tasks):
+                    if payload is None:
+                        failed.add(monument_id)
+                        continue
+                    rows_written += write_payload(monument_id, payload)
+                    monuments_done += 1
 
-                # Skip already saved monuments on resume
-                if is_resume and eid_int <= last_edcs_int:
-                    continue
+                cursor += len(chunk)
+                jsonl_file.flush()
+                tsv_file.flush()
+                save_checkpoint(cursor, monuments_done, rows_written)
+                save_failed(failed)
 
-                # Parse monument into one or more inscription rows
-                rows = parse_monument(item, lookup)
-
-                for row in rows:
-                    # JSONL — category, category_en, belege as lists
-                    jsonl_file.write(json.dumps(row, ensure_ascii=False) + "\n")
-
-                    # TSV — lists joined with pipe
-                    tsv_row = row.copy()
-                    if isinstance(tsv_row["category"], list):
-                        tsv_row["category"] = " | ".join(tsv_row["category"])
-                    if isinstance(tsv_row["category_en"], list):
-                        tsv_row["category_en"] = " | ".join(tsv_row["category_en"])
-                    if isinstance(tsv_row["belege"], list):          # ← NEW
-                        tsv_row["belege"] = " | ".join(tsv_row["belege"])
-                    tsv_writer.writerow(tsv_row)
-
-                    rows_saved += 1
-
-                monuments_saved += 1
-                last_edcs_id     = edcs_id
-                last_edcs_int    = eid_int
-
-            # Save checkpoint after every page
-            save_checkpoint(start + page_size, last_edcs_id)
-
-            # Progress
-            pct     = min(100.0, (start + page_size) / total * 100)
-            est_min = int(((total - start - page_size) / page_size) * DELAY / 60)
-            print(
-                f"  offset={start + page_size:>7,}/{total:,} | "
-                f"monuments={monuments_saved:>7,} | "
-                f"rows={rows_saved:>7,} | "
-                f"{pct:5.1f}% | "
-                f"~{est_min}min left      ",
-                end="\r"
-            )
-
-            start += page_size
-            draw  += 1
-            time.sleep(DELAY)
+                elapsed = time.time() - started
+                done_now = cursor - start_cursor
+                rate = done_now / elapsed if elapsed > 0 else 0
+                remaining = (total - cursor) / rate / 60 if rate > 0 else 0
+                log(
+                    f"  {cursor:>7,}/{total:,} ({cursor / total * 100:5.1f}%) | "
+                    f"rows={rows_written:>8,} | failed={len(failed):>4,} | "
+                    f"{rate:5.1f} mon/s | ~{remaining:.0f} min left"
+                )
 
     except KeyboardInterrupt:
-        print(f"\n\n[!] Stopped. Run again to resume from {last_edcs_id}.")
+        log(f"\n[!] Interrupted at {cursor:,}. Run again to resume.")
 
     finally:
         jsonl_file.close()
         tsv_file.close()
+        save_checkpoint(cursor, monuments_done, rows_written)
+        save_failed(failed)
 
-    print(f"\n[✓] Monuments saved : {monuments_saved:,}")
-    print(f"[✓] Total rows      : {rows_saved:,}  (more than monuments due to multi-inscription records)")
-    print(f"[✓] Last EDCS ID    : {last_edcs_id}")
+    return cursor, monuments_done, rows_written, failed
 
-    if start >= total and os.path.exists(CHECKPOINT):
-        os.remove(CHECKPOINT)
-        print(f"[✓] Checkpoint deleted — full scrape complete!")
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 
+
+def build_parser():
+    parser = argparse.ArgumentParser(description="Harvest EDCS inscriptions.")
+    parser.add_argument("--limit", type=int, default=None,
+                        help="Only harvest the first N monuments (smoke test).")
+    parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS,
+                        help=f"Concurrent requests (default {DEFAULT_WORKERS}).")
+    parser.add_argument("--restart", action="store_true",
+                        help="Discard existing output and checkpoint, then start over.")
+    parser.add_argument("--refresh-index", action="store_true",
+                        help="Re-fetch the corpus index instead of using the cache.")
+    return parser
+
+
 def main():
+    args = build_parser().parse_args()
     os.makedirs(DATA_DIR, exist_ok=True)
+    install_signal_handlers()
 
-    session = requests.Session()
-    session.headers.update(HEADERS)
+    if args.restart:
+        for path in (OUTPUT_JSONL, OUTPUT_TSV, CHECKPOINT, FAILED_FILE):
+            if os.path.exists(path):
+                os.remove(path)
+        log("[+] Restart: previous output removed.")
 
-    # ── Step 1: Connect and detect page size ──
-    page_size = None
-    total     = None
-    print("[+] Connecting to EDCS API...")
+    session = make_session()
 
-    for size in PAGE_SIZES:
-        try:
-            params = build_params(draw=1, start=0, length=size)
-            r      = session.get(API_URL, params=params, timeout=30)
-            r.raise_for_status()
-            data = r.json()
-            if "data" in data and len(data["data"]) > 0:
-                page_size = size
-                total     = data["recordsTotal"]
-                print(f"[+] Connected. Page size {size} works. Total in EDCS: {total:,}")
-                break
-            else:
-                print(f"[!] Page size {size} returned no data, trying smaller...")
-        except Exception as e:
-            print(f"[!] Page size {size} failed: {e}")
-        time.sleep(DELAY)
-
-    if not page_size or not total:
-        print("[!] Could not connect to EDCS API. Check your internet connection.")
+    try:
+        ids, index_fetched_at = fetch_index(session, use_cache=not args.refresh_index)
+    except RuntimeError as exc:
+        log(f"[!] Could not fetch the EDCS index: {exc}")
+        log("[!] The endpoint or its schema may have changed again — see docs/EDCS_API.md")
         sys.exit(1)
 
-    # ── Step 2: Load or update lookup ──
-    print()
-    lookup = load_or_update_lookup(session)
+    if args.limit:
+        ids = ids[: args.limit]
+        log(f"[+] --limit {args.limit}: harvesting a subset")
 
-    # ── Step 3: Check local data files ──
-    print()
-    files_exist = os.path.exists(OUTPUT_JSONL) and os.path.exists(OUTPUT_TSV)
+    try:
+        lookup = build_lookup(session)
+    except RuntimeError as exc:
+        log(f"[!] Could not fetch lookup tables: {exc}")
+        sys.exit(1)
+    save_lookup(lookup)
 
-    if not files_exist:
-        print("[+] No existing data files found — starting fresh scrape.")
-        scrape(
-            session       = session,
-            lookup        = lookup,
-            start         = 0,
-            last_edcs_int = 0,
-            total         = total,
-            page_size     = page_size,
-            is_resume     = False,
-        )
+    checkpoint = load_checkpoint()
+    manifest = load_manifest()
+    cursor = monuments_done = rows_written = 0
 
-    else:
-        # Check for interrupted scrape first
-        cp_start, cp_last_int = load_checkpoint()
+    # A completed harvest deletes its checkpoint, so the manifest is what tells
+    # us the corpus on disk is already whole. Without this check a plain re-run
+    # would fall through with cursor=0 and truncate the output.
+    if manifest and not checkpoint and not args.restart:
+        log(f"[✓] Harvest already complete — {manifest['monuments']:,} monuments, "
+            f"{manifest['rows']:,} rows, finished {manifest['completed_at']}.")
+        log(f"[✓] Index snapshot      : {manifest.get('index_fetched_at', '?')}")
+        if manifest.get("failed"):
+            log(f"[!] {manifest['failed']:,} monuments failed — see {FAILED_FILE}")
+        log("\n    Nothing to do. Use --restart to re-harvest from scratch "
+            "(this DELETES the existing corpus),")
+        log("    or --refresh-index to check whether EDCS has grown since.")
+        return
 
-        if cp_start is not None:
-            print(f"[+] Resuming interrupted scrape from offset {cp_start:,}...")
-            scrape(
-                session       = session,
-                lookup        = lookup,
-                start         = cp_start,
-                last_edcs_int = cp_last_int,
-                total         = total,
-                page_size     = page_size,
-                is_resume     = True,
-            )
+    if checkpoint and not args.restart:
+        cursor = checkpoint.get("cursor", 0)
+        monuments_done = checkpoint.get("monuments_done", 0)
+        rows_written = checkpoint.get("rows_written", 0)
+        if cursor >= len(ids):
+            log(f"[✓] Already complete — {monuments_done:,} monuments, "
+                f"{rows_written:,} rows. Use --restart to re-harvest.")
+            return
+        log(f"[resume] Checkpoint at monument {cursor:,} "
+            f"({rows_written:,} rows already written)")
 
-        else:
-            # Compare local monument count vs API total
-            print("[+] Data files found. Checking for updates...")
-            local_count = count_local_records()
-            print(f"    Local monuments : {local_count:,}")
-            print(f"    EDCS total      : {total:,}")
+    started = time.time()
+    cursor, monuments_done, rows_written, failed = harvest(
+        make_session, ids, lookup, args.workers, cursor, monuments_done, rows_written
+    )
+    duration = time.time() - started
 
-            if total > local_count:
-                new_count     = total - local_count
-                last_edcs_int = get_last_edcs_int()
-                print(f"[+] {new_count:,} new records found — scraping updates...")
-                scrape(
-                    session       = session,
-                    lookup        = lookup,
-                    start         = local_count,
-                    last_edcs_int = last_edcs_int,
-                    total         = total,
-                    page_size     = page_size,
-                    is_resume     = True,
-                )
-            else:
-                print(f"\n[✓] No new records found — local data is up to date.")
-                print(f"[✓] Local monuments : {local_count:,}")
-                print(f"[✓] EDCS total      : {total:,}")
+    log(f"\n[✓] Monuments harvested : {monuments_done:,}")
+    log(f"[✓] Inscription rows    : {rows_written:,}")
+    log(f"[✓] Failed monuments    : {len(failed):,}")
+    log(f"[✓] Duration            : {duration / 60:.1f} min")
+    log(f"[✓] Index fetched at    : {index_fetched_at}")
 
-    print(f"\n[✓] JSONL  : {OUTPUT_JSONL}")
-    print(f"[✓] TSV    : {OUTPUT_TSV}")
-    print(f"[✓] Lookup : {LOOKUP_FILE}")
+    if failed:
+        log(f"[!] {len(failed):,} monuments could not be fetched — ids in {FAILED_FILE}")
+        log("[!] Harvest is INCOMPLETE. Re-run to retry them.")
+    elif cursor >= len(ids):
+        compress_outputs()
+        save_manifest(monuments_done, rows_written, index_fetched_at, duration, failed)
+        if os.path.exists(CHECKPOINT):
+            os.remove(CHECKPOINT)
+        log(f"[✓] Checkpoint cleared — full harvest complete. Manifest: {MANIFEST}")
+
+    log(f"\n[✓] JSONL  : {OUTPUT_JSONL}")
+    log(f"[✓] TSV    : {OUTPUT_TSV}")
+    log(f"[✓] Lookup : {LOOKUP_FILE}")
 
 
 if __name__ == "__main__":
