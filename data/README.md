@@ -1,143 +1,226 @@
-# Data Directory Documentation
+# Data directory
 
-This directory contains raw and cleaned inscription exports, lookup dictionaries, and map-support reference datasets used by EpigCorpus.
+Corpus exports, lookup tables, harvest metadata and base-map layers used by
+EpigCorpus.
+
+**Current snapshot:** harvested 2026-08-19 against EDCS release
+`20260807-142626` — 542,854 monuments, 588,509 inscription rows, 0 failed
+fetches. See `edcs_harvest_manifest.json`.
+
+---
 
 ## Contents
 
-### Core inscription exports
+### Committed to the repository
 
-- edcs_inscriptions.jsonl
-  - canonical scraper output (JSON Lines)
-  - one inscription record per line
-  - append-safe for incremental updates
+| File | Size | What it is |
+|---|---|---|
+| `edcs_inscriptions.jsonl.gz` | ~39 MB | The corpus. One inscription per line. |
+| `edcs_inscriptions.tsv.gz` | ~12 MB | Same records, tab-delimited. |
+| `edcs_lookup.json` | 3.2 MB | Flattened EDCS code tables used for the harvest: materials, categories, provinces, languages, places, citation sources. |
+| `edcs_harvest_manifest.json` | <1 KB | Completion record: counts, timestamps, index snapshot, version. |
+| `edcs_failed_ids.json` | <1 KB | Monuments that could not be fetched. Empty for a clean harvest. |
+| `map_layers/` | 6.2 MB | Base-map layers. See `map_layers/README.md`. |
 
-- edcs_inscriptions.tsv
-  - tabular export of the same records
-  - suitable for spreadsheets and relational imports
+### Generated locally, not committed
 
-- edcs_inscriptions_cleaned.jsonl
-  - cleaned dataset generated from raw exports
-  - includes conservative and interpretive cleaned text columns
-  - used by the Streamlit search UI and map exports
+| File | What it is |
+|---|---|
+| `edcs_inscriptions.jsonl` / `.tsv` | Uncompressed working copies (~540 MB / ~102 MB), written during a harvest. |
+| `edcs_inscriptions_cleaned.jsonl` | Cleaned corpus with conservative and interpretive text columns. |
+| `edcs_inscriptions_cleaned.jsonl.gz` | Compressed cleaned corpus. |
+| `edcs_checkpoint.json` | Resume cursor. Present only mid-harvest; deleted on completion. |
+| `edcs_index_cache.json` | Cached corpus index (~5 MB). Regenerable with `--refresh-index`. |
 
-### Operational and lookup files
+---
 
-- edcs_lookup.json
-  - controlled-vocabulary lookup data returned by EDCS
-  - includes mappings for material and inscription categories
+## Compression
 
-- edcs_checkpoint.json
-  - temporary scrape resume marker
-  - created during in-progress runs
-  - removed after successful completion
+The corpus is committed gzipped because the uncompressed JSONL is ~540 MB,
+well over GitHub's 100 MB per-file limit. Compression is ~13.7x.
 
-### Corpus snapshots and compression
+Git LFS is deliberately **not** used: the free tier allows 1 GB of bandwidth per
+month, so roughly one and a half clones of a 651 MB corpus would exhaust it for
+everyone, reviewers included.
 
-The corpus is committed **gzipped** (`edcs_inscriptions.jsonl.gz`, ~39 MB;
-`edcs_inscriptions.tsv.gz`, ~12 MB). The uncompressed forms are ~540 MB and
-~102 MB, which exceeds GitHub's 100 MB per-file limit. Git LFS is deliberately
-not used: its free tier allows 1 GB of bandwidth per month, so a couple of
-clones of a 651 MB corpus would exhaust it for everyone.
-
-**No manual compression or decompression is ever required.**
+**No manual compression or decompression is ever needed.**
 
 - The scraper writes plain `.jsonl`/`.tsv` during a harvest — appending to a
   gzip stream across a checkpointed resume is not safe — then compresses them
-  automatically once the harvest completes.
-- `main.py` and the Streamlit map read either form. `pandas` infers gzip from
-  the file extension, and the loaders prefer a plain file when one exists,
-  falling back to the `.gz` snapshot otherwise.
-- `.gitignore` ignores the plain working copies and ships only the `.gz`.
+  automatically on completion.
+- `main.py` and the Streamlit map read either form. pandas infers gzip from the
+  file extension; the loaders prefer a plain file when one exists and fall back
+  to the `.gz` snapshot.
+- `.gitignore` ships only the `.gz` and ignores the plain working copies.
 
-So a fresh clone contains only the compressed snapshot and runs immediately;
-after you re-harvest, the plain files take precedence locally and fresh `.gz`
-copies are regenerated for committing.
+A fresh clone therefore contains only the compressed snapshot and runs
+immediately. After you re-harvest, the plain files take precedence locally and
+fresh `.gz` copies are regenerated for committing.
 
-### Map support datasets
+---
 
-- map_layers/Hanson2016_Cities_OxREP.csv
-  - Roman city reference dataset used for map plotting
-
-- map_layers/ba_roads/
-  - Roman roads shapefile components
-
-- map_layers/roman_empire_ad_117/
-  - Roman empire/province boundary shapefile components
-
-## Data Generation Workflow
-
-From project root:
+## Workflow
 
 ```bash
-python main.py
+python main.py                    # harvest, clean, launch the map
+python src/edcs_scraper.py        # harvest only
+python main.py --skip-scrape      # clean and launch from existing data
 ```
 
-Or run individual stages:
+Scraper options:
 
 ```bash
-python src/edcs_scraper.py
-python main.py --skip-scrape
+python src/edcs_scraper.py --limit 500      # smoke test on 500 monuments
+python src/edcs_scraper.py --workers 8      # gentler on the server (default 16)
+python src/edcs_scraper.py --refresh-index  # re-fetch the index; check if EDCS grew
+python src/edcs_scraper.py --restart        # DELETES existing output, re-harvests
 ```
 
-Workflow summary:
-1. Scraper pulls records from EDCS API.
-2. New records are appended to JSONL/TSV exports.
-3. Cleaning stage produces edcs_inscriptions_cleaned.jsonl.
-4. Streamlit app reads the cleaned file for map/search/export.
+Running the scraper against a completed harvest is safe: it reads the manifest,
+reports the corpus is already complete, and exits without touching anything. It
+also refuses to overwrite any non-empty output file unless `--restart` is given.
 
-## Format Notes
+An interrupted harvest resumes from its checkpoint automatically — just run it
+again with no flags. Monuments that failed on an earlier run are retried before
+the harvest continues, and a harvest is never reported complete while
+`edcs_failed_ids.json` is non-empty.
 
-### JSONL files
+---
 
-- UTF-8 encoded text
-- one JSON object per line
-- read with pandas:
+## Schema
+
+28 columns. The first block is the original EpigCorpus schema; the rest were
+added with the 2026 API port.
+
+### Identity and provenance
+
+| Column | Notes |
+|---|---|
+| `record_id` | `EDCS-00000001-0` — monument id plus inscription index |
+| `edcs_id` | `EDCS-00000001` |
+| `inscription_index` | 0-based; a monument may carry several inscriptions |
+| `retrieved_at` | ISO 8601 UTC fetch time |
+| `source_url` | Exact URL this record came from |
+
+### Place
+
+| Column | Notes |
+|---|---|
+| `province` | Resolved from the place index |
+| `place` | Findspot / settlement |
+| `latitude`, `longitude` | Decimal degrees, WGS 84 |
+
+Coordinates are findspot- or settlement-level, so many inscriptions share
+identical points. The source `coord` field is `[latitude, longitude]` — the
+reverse of the pre-2026 API, which returned `[longitude, latitude]`.
+
+### Text and description
+
+| Column | Notes |
+|---|---|
+| `inscription_text` | Raw EDCS text with editorial markup intact |
+| `language`, `language_codes` | e.g. `Latin` / `la` |
+| `material`, `material_en` | Latin token and English label |
+| `category`, `category_en` | Inscription genus / personal status, as lists |
+| `status` | Same values as `category_en`, under the conventional name |
+| `comment` | Editorial comments. Not available before the 2026 API. |
+
+### Dating
+
+| Column | Notes |
+|---|---|
+| `not_before`, `not_after` | Integer years; **negative means BC** |
+| `dating_from`, `dating_to` | Same values under the conventional names |
+| `raw_dating` | Display form: `101 .. 299`, a bare year, or `-` if undated |
+
+Only 37.3% of rows carry any dating.
+
+### Bibliography and images
+
+| Column | Notes |
+|---|---|
+| `belege` | Citations as a list |
+| `publication` | Same citations as one string, e.g. `CIL-06, 00001` |
+| `image_urls`, `photo` | Resolved image URLs, pipe-separated |
+| `photo_credits` | Attribution where EDCS supplies it |
+
+Citation and dating strings follow EDCS's own `citationLabel()` and
+`formatDatingRange()` output, so these columns join against EDCS's rendering.
+
+**A `*` prefix on a citation number marks a forgery** (*falsa*) — e.g.
+`CIL-06, *00226`. This is the only forgery marker the API exposes.
+
+### Added by the cleaning stage
+
+`inscription_text_conservative`, `inscription_text_interpretive`,
+`is_unreadable`, `is_forged`.
+
+> The cleaning pipeline has known defects that alter corpus semantics — see
+> `docs/AUDIT.md` §3. Treat cleaned text as provisional until those are fixed.
+
+---
+
+## Coverage
+
+Measured on the 2026-08-19 snapshot, over 588,509 rows.
+
+| Field | Coverage |
+|---|---|
+| Inscription text | 100% |
+| Language | 100% |
+| Province / place | 99.4% |
+| Citations | 99.2% |
+| Coordinates | 96.6% |
+| Material | 86.1% |
+| Category | 82.0% |
+| Dated | 37.3% |
+| Images | 20.3% |
+| Comments | 3.1% |
+
+30,503 monuments carry more than one inscription.
+
+Largest provinces: Roma 132,109 · Latium et Campania 50,159 · Africa
+proconsularis 37,377 · Hispania citerior 24,874 · Gallia Narbonensis 24,174.
+
+Languages: Latin 540,410 · Greek 26,968 · indistinct 12,416 · Greek and Latin
+7,021, plus Iberian, Etruscan, Oscan, Palmyrene and others.
+
+---
+
+## Reading the data
 
 ```python
 import pandas as pd
-df = pd.read_json("data/edcs_inscriptions.jsonl", lines=True)
+
+# Works on either form — pandas infers gzip from the extension
+df = pd.read_json("data/edcs_inscriptions.jsonl.gz", lines=True)
 ```
 
-### TSV file
+In the TSV, list-valued columns (`category`, `category_en`, `belege`, `status`,
+`language_codes`) are pipe-separated. In the JSONL they stay as lists. Prefer
+the JSONL for analysis — inscription text contains newlines, which the TSV
+quotes but which make naive line-counting of that file wrong.
 
-- tab-delimited text
-- consistent fixed schema exported by scraper
-- flattened list-style fields for tabular compatibility
+---
 
-## Common Fields
+## Provenance and licensing
 
-The exports typically include fields such as:
-- record_id
-- edcs_id
-- inscription_index
-- province
-- place
-- latitude
-- longitude
-- material
-- material_en
-- not_before
-- not_after
-- inscription_text
-- language
-- category
-- category_en
-- image_urls
+Inscriptions come from the **Epigraphik-Datenbank Clauss / Slaby**,
+<https://edcs.hist.uzh.ch/>. The project's MIT licence covers **code only**.
+EDCS-derived text carries EDCS's own terms, and redistribution terms for this
+corpus are still to be settled (T29).
 
-The cleaned dataset additionally includes cleaned inscription variants used by search and export.
+Base-map layer sources and licences: `map_layers/README.md`.
 
-## Data Provenance and Attribution
+## Caveats
 
-- Inscriptions: Epigraphik-Datenbank Clauss / Slaby (EDCS)
-  - https://edcs.hist.uzh.ch/
-- Cities: Hanson (2016) OXREP Cities Database
-  - http://oxrep.classics.ox.ac.uk/databases/cities/
-  - DOI: https://doi.org/10.5287/bodleian:eqapevAn8
-- Provinces and roads: Ancient World Mapping Center (AWMC) geodata distributions
-  - https://github.com/AWMC/geodata
-
-## Practical Notes
-
-- Treat edcs_checkpoint.json as ephemeral state.
-- Prefer edcs_inscriptions_cleaned.jsonl for analysis and app search.
-- Keep heavy geospatial support files in map_layers for consistent local map rendering.
+- **This snapshot is not a citable deposit.** A Zenodo release with a DOI (T21)
+  is what a paper should cite.
+- **EDCS is actively revised and periodically rebuilt.** This snapshot reflects
+  one moment. The harvester has been broken by a rebuild before — see
+  `docs/LATEPIG_BREAKAGE.md`.
+- **No forgery filtering is applied.** Rows whose citations carry `*` are
+  *falsae* and are included.
+- **The map's bounding box discards ~9.3% of the corpus**, including all of
+  Britannia. That filter lives in the map, not the data — the corpus here is
+  complete. See `docs/AUDIT.md` §2.
