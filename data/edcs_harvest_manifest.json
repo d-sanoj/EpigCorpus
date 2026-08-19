@@ -1,0 +1,10 @@
+{
+  "completed_at": "2026-08-19T18:21:00Z",
+  "monuments": 542854,
+  "rows": 588509,
+  "failed": 0,
+  "index_fetched_at": "2026-08-19T16:30:17Z",
+  "duration_seconds": 6180.0,
+  "epigcorpus_version": "0.2.0",
+  "note": "Backfilled from verified corpus counts. The harvest ran in two parts (interrupted at monument 406,000, resumed to completion) before the manifest mechanism existed; duration is the combined approximate total."
+}
