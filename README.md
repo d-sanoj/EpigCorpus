@@ -50,7 +50,7 @@ EDCS-Analytics/
 │   ├── edcs_inscriptions.tsv
 │   ├── edcs_lookup.json
 │   ├── edcs_inscriptions_cleaned.jsonl
-│   ├── lat_epig_support/
+│   ├── map_layers/
 │   │   ├── Hanson2016_Cities_OxREP.csv
 │   │   ├── ba_roads/
 │   │   └── roman_empire_ad_117/

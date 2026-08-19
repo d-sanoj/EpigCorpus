@@ -9,17 +9,20 @@ import folium
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
-import requests
 import streamlit as st
 from matplotlib.lines import Line2D
 from streamlit.components.v1 import html
 
 
-BASE_RAW = "https://raw.githubusercontent.com/mqAncientHistory/Lat-Epig/main"
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
-SUPPORT_DIR = DATA_DIR / "lat_epig_support"
+
+# Base-map layers are vendored in the repository rather than fetched at runtime,
+# so the map is reproducible offline and does not depend on any third-party
+# repository staying online. Provenance and licence terms: data/map_layers/README.md
+MAP_LAYERS_DIR = DATA_DIR / "map_layers"
 CLEANED_JSONL_FILE = DATA_DIR / "edcs_inscriptions_cleaned.jsonl"
+CLEANED_JSONL_GZ = DATA_DIR / "edcs_inscriptions_cleaned.jsonl.gz"
 REPO_URL = "https://github.com/d-sanoj/EpigCorpus"
 REPO_NAME = "d-sanoj/EpigCorpus"
 PNG_CITATION = (
@@ -128,61 +131,38 @@ def inject_professional_styles() -> None:
     )
 
 
-def download_if_missing(url: str, destination: Path) -> Path:
-    if destination.exists():
-        return destination
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    response = requests.get(url, timeout=60)
-    response.raise_for_status()
-    destination.write_bytes(response.content)
-    return destination
-
-
-def download_shapefile_components(base_url: str, stem: str, local_dir: Path) -> Path:
-    required = [".shp", ".shx", ".dbf", ".prj"]
-    optional = [".sbn", ".sbx", ".cpg"]
-
-    for ext in required:
-        download_if_missing(f"{base_url}/{stem}{ext}", local_dir / f"{stem}{ext}")
-    for ext in optional:
-        try:
-            download_if_missing(f"{base_url}/{stem}{ext}", local_dir / f"{stem}{ext}")
-        except requests.HTTPError:
-            pass
-    return local_dir / f"{stem}.shp"
+def map_layer_path(*parts: str) -> Path:
+    """Resolve a vendored base-map file, failing with an actionable message."""
+    path = MAP_LAYERS_DIR.joinpath(*parts)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Missing base-map layer: {path}\n"
+            "These files are vendored in the repository under data/map_layers/. "
+            "Restore them with: git checkout -- data/map_layers"
+        )
+    return path
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_provinces() -> gpd.GeoDataFrame:
-    """Load and cache Roman provinces shapefile."""
-    provinces_shp = download_shapefile_components(
-        f"{BASE_RAW}/awmc.unc.edu/awmc/map_data/shapefiles/cultural_data/political_shading/roman_empire_ad_117/shape",
-        "roman_empire_ad_117",
-        SUPPORT_DIR / "roman_empire_ad_117",
-    )
+    """Load and cache the Roman provinces shapefile (AWMC, AD 117)."""
+    provinces_shp = map_layer_path("roman_empire_ad_117", "roman_empire_ad_117.shp")
     provinces = gpd.read_file(provinces_shp).to_crs(epsg=4326)
     return provinces
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_roads() -> gpd.GeoDataFrame:
-    """Load and cache Roman roads shapefile."""
-    roads_shp = download_shapefile_components(
-        f"{BASE_RAW}/awmc.unc.edu/awmc/map_data/shapefiles/ba_roads",
-        "ba_roads",
-        SUPPORT_DIR / "ba_roads",
-    )
+    """Load and cache the Roman roads shapefile (AWMC, Barrington Atlas)."""
+    roads_shp = map_layer_path("ba_roads", "ba_roads.shp")
     roads = gpd.read_file(roads_shp).to_crs(epsg=4326)
     return roads
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_cities() -> gpd.GeoDataFrame:
-    """Load and cache cities dataset."""
-    cities_csv = download_if_missing(
-        f"{BASE_RAW}/cities/Hanson2016_Cities_OxREP.csv",
-        SUPPORT_DIR / "Hanson2016_Cities_OxREP.csv",
-    )
+    """Load and cache the cities dataset (Hanson 2016, OXREP)."""
+    cities_csv = map_layer_path("Hanson2016_Cities_OxREP.csv")
     cities_df = pd.read_csv(cities_csv, encoding="iso-8859-1")
     cities = gpd.GeoDataFrame(
         cities_df,
@@ -191,14 +171,26 @@ def load_cities() -> gpd.GeoDataFrame:
     return cities
 
 
+def cleaned_corpus_path() -> Path:
+    """Return the cleaned corpus, preferring the plain file over the .gz snapshot.
+
+    pandas infers compression from the extension, so callers need no special
+    handling and users never have to decompress anything by hand.
+    """
+    if CLEANED_JSONL_FILE.exists():
+        return CLEANED_JSONL_FILE
+    if CLEANED_JSONL_GZ.exists():
+        return CLEANED_JSONL_GZ
+    raise FileNotFoundError(
+        f"Missing: {CLEANED_JSONL_FILE} (or {CLEANED_JSONL_GZ.name}). Run main.py first."
+    )
+
+
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_all_inscriptions() -> pd.DataFrame:
     """Load JSONL with only needed columns - minimal memory footprint."""
-    if not CLEANED_JSONL_FILE.exists():
-        raise FileNotFoundError(f"Missing: {CLEANED_JSONL_FILE}. Run main.py first.")
-
     # Load JSONL and keep only required columns
-    data = pd.read_json(CLEANED_JSONL_FILE, lines=True)
+    data = pd.read_json(cleaned_corpus_path(), lines=True)
     
     # Select only columns we need
     cols_to_keep = [c for c in REQUIRED_COLS if c in data.columns]
@@ -224,9 +216,7 @@ def load_all_inscriptions() -> pd.DataFrame:
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_full_cleaned_data() -> pd.DataFrame:
     """Load full cleaned dataset with all columns for detailed result table."""
-    if not CLEANED_JSONL_FILE.exists():
-        raise FileNotFoundError(f"Missing: {CLEANED_JSONL_FILE}. Run main.py first.")
-    return pd.read_json(CLEANED_JSONL_FILE, lines=True)
+    return pd.read_json(cleaned_corpus_path(), lines=True)
 
 
 def filter_inscriptions(data: pd.DataFrame, search_column: str, term: str) -> pd.DataFrame:

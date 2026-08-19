@@ -31,15 +31,37 @@ This directory contains raw and cleaned inscription exports, lookup dictionaries
   - created during in-progress runs
   - removed after successful completion
 
+### Corpus snapshots and compression
+
+The corpus is committed **gzipped** (`edcs_inscriptions.jsonl.gz`, ~39 MB;
+`edcs_inscriptions.tsv.gz`, ~12 MB). The uncompressed forms are ~540 MB and
+~102 MB, which exceeds GitHub's 100 MB per-file limit. Git LFS is deliberately
+not used: its free tier allows 1 GB of bandwidth per month, so a couple of
+clones of a 651 MB corpus would exhaust it for everyone.
+
+**No manual compression or decompression is ever required.**
+
+- The scraper writes plain `.jsonl`/`.tsv` during a harvest — appending to a
+  gzip stream across a checkpointed resume is not safe — then compresses them
+  automatically once the harvest completes.
+- `main.py` and the Streamlit map read either form. `pandas` infers gzip from
+  the file extension, and the loaders prefer a plain file when one exists,
+  falling back to the `.gz` snapshot otherwise.
+- `.gitignore` ignores the plain working copies and ships only the `.gz`.
+
+So a fresh clone contains only the compressed snapshot and runs immediately;
+after you re-harvest, the plain files take precedence locally and fresh `.gz`
+copies are regenerated for committing.
+
 ### Map support datasets
 
-- lat_epig_support/Hanson2016_Cities_OxREP.csv
+- map_layers/Hanson2016_Cities_OxREP.csv
   - Roman city reference dataset used for map plotting
 
-- lat_epig_support/ba_roads/
+- map_layers/ba_roads/
   - Roman roads shapefile components
 
-- lat_epig_support/roman_empire_ad_117/
+- map_layers/roman_empire_ad_117/
   - Roman empire/province boundary shapefile components
 
 ## Data Generation Workflow
@@ -118,4 +140,4 @@ The cleaned dataset additionally includes cleaned inscription variants used by s
 
 - Treat edcs_checkpoint.json as ephemeral state.
 - Prefer edcs_inscriptions_cleaned.jsonl for analysis and app search.
-- Keep heavy geospatial support files in lat_epig_support for consistent local map rendering.
+- Keep heavy geospatial support files in map_layers for consistent local map rendering.
