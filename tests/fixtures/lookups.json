@@ -1,0 +1,693 @@
+{
+ "d": {
+  "materials": [
+   null,
+   [
+    "aes",
+    {
+     "de": "Bronze",
+     "en": "bronze",
+     "es": "bronce",
+     "fr": "bronze",
+     "it": "bronzo"
+    }
+   ],
+   [
+    "argentum",
+    {
+     "de": "Silber",
+     "en": "silver",
+     "es": "plata",
+     "fr": "argent",
+     "it": "argento"
+    }
+   ],
+   [
+    "aurum",
+    {
+     "de": "Gold",
+     "en": "gold",
+     "es": "oro",
+     "fr": "or",
+     "it": "oro"
+    }
+   ],
+   [
+    "corium",
+    {
+     "de": "Leder",
+     "en": "leather",
+     "es": "cuero",
+     "fr": "cuir",
+     "it": "pelle"
+    }
+   ],
+   [
+    "cyprum",
+    {
+     "de": "Kupfer",
+     "en": "copper",
+     "es": "cobre",
+     "fr": "cuivre",
+     "it": "rame"
+    }
+   ],
+   [
+    "ferrum",
+    {
+     "de": "Eisen",
+     "en": "iron",
+     "es": "hierro",
+     "fr": "fer",
+     "it": "ferro"
+    }
+   ],
+   [
+    "gemma",
+    {
+     "de": "Edelstein",
+     "en": "gem",
+     "es": "piedra preciosa",
+     "fr": "pierre précieuse",
+     "it": "pietra preziosa"
+    }
+   ],
+   [
+    "lapis",
+    {
+     "de": "Stein",
+     "en": "stone",
+     "es": "piedra",
+     "fr": "pierre",
+     "it": "pietra"
+    }
+   ],
+   [
+    "lignum",
+    {
+     "de": "Holz",
+     "en": "wood",
+     "es": "madera",
+     "fr": "bois",
+     "it": "legno"
+    }
+   ],
+   [
+    "musivum",
+    {
+     "de": "Mosaik",
+     "en": "mosaic",
+     "es": "mosaico",
+     "fr": "mosaïque",
+     "it": "mosaico"
+    }
+   ],
+   [
+    "opus figlinae",
+    {
+     "de": "Keramik",
+     "en": "ceramics",
+     "es": "cerámica",
+     "fr": "céramique",
+     "it": "ceramica"
+    }
+   ],
+   [
+    "orichalcum",
+    {
+     "de": "Messing",
+     "en": "brass",
+     "es": "latón",
+     "fr": "laiton",
+     "it": "ottone"
+    }
+   ],
+   [
+    "os",
+    {
+     "de": "Bein",
+     "en": "bone",
+     "es": "hueso",
+     "fr": "os",
+     "it": "osso"
+    }
+   ],
+   [
+    "plumbum",
+    {
+     "de": "Blei",
+     "en": "lead",
+     "es": "plomo",
+     "fr": "plomb",
+     "it": "piombo"
+    }
+   ],
+   [
+    "rupes",
+    {
+     "de": "Fels",
+     "en": "rock",
+     "es": "roca",
+     "fr": "rocher",
+     "it": "roccia"
+    }
+   ],
+   [
+    "steatitis",
+    {
+     "de": "Speckstein",
+     "en": "soapstone",
+     "es": "esteatita",
+     "fr": "stéatite",
+     "it": "steatite"
+    }
+   ],
+   [
+    "sucinus",
+    {
+     "de": "Bernstein",
+     "en": "amber",
+     "es": "ámbar",
+     "fr": "ambre jaune",
+     "it": "ambra"
+    }
+   ],
+   [
+    "tectorium",
+    {
+     "de": "Wandverputz",
+     "en": "plaster",
+     "es": "revoque",
+     "fr": "crépi",
+     "it": "intonaco"
+    }
+   ],
+   [
+    "textum",
+    {
+     "de": "Stoff",
+     "en": "cloth",
+     "es": "tejido",
+     "fr": "tissu",
+     "it": "tessuto"
+    }
+   ],
+   [
+    "vitrum",
+    {
+     "de": "Glas",
+     "en": "glass",
+     "es": "vidrio",
+     "fr": "verre",
+     "it": "vetro"
+    }
+   ],
+   [
+    "stannum",
+    {
+     "de": "Zinn",
+     "en": "tin",
+     "es": "estaño",
+     "fr": "étain",
+     "it": "stagno"
+    }
+   ]
+  ],
+  "provinces": [
+   "Achaia",
+   "Aegyptus",
+   "Aemilia / Regio VIII",
+   "Africa proconsularis",
+   "Alpes Cottiae",
+   "Alpes Graiae",
+   "Alpes Maritimae",
+   "Alpes Poeninae",
+   "Apulia et Calabria / Regio II",
+   "Aquitania / Aquitanica",
+   "Arabia",
+   "Armenia",
+   "Asia",
+   "Baetica",
+   "Barbaricum",
+   "Belgica",
+   "Britannia",
+   "Bruttium et Lucania / Regio III",
+   "Cappadocia",
+   "Cilicia",
+   "Corsica",
+   "Creta et Cyrenaica",
+   "Cyprus",
+   "Dacia",
+   "Dalmatia",
+   "Etruria / Regio VII",
+   "Galatia",
+   "Gallia Narbonensis",
+   "Germania inferior",
+   "Germania superior",
+   "Hispania citerior",
+   "Italia",
+   "Latium et Campania / Regio I",
+   "Liguria / Regio IX",
+   "Lugudunensis",
+   "Lusitania",
+   "Lycia et Pamphylia",
+   "Macedonia",
+   "Mauretania Caesariensis",
+   "Mauretania Tingitana",
+   "Mesopotamia",
+   "Moesia inferior",
+   "Moesia superior",
+   "Noricum",
+   "Numidia",
+   "Palaestina",
+   "Pannonia inferior",
+   "Pannonia superior",
+   "Picenum / Regio V",
+   "Pontus et Bithynia",
+   "Provincia incerta",
+   "Raetia",
+   "Regnum Bospori",
+   "Roma",
+   "Samnium / Regio IV",
+   "Sardinia",
+   "Sicilia",
+   "Syria",
+   "Thracia",
+   "Transpadana / Regio XI",
+   "Umbria / Regio VI",
+   "Venetia et Histria / Regio X",
+   "Belgica / Germania superior",
+   "Belgica / Germania inferior"
+  ],
+  "categories": [
+   [
+    21,
+    "Augusti/Augustae",
+    {
+     "de": "Kaiser/Kaiserin",
+     "en": "emperor/emperess",
+     "es": "emperador/emperatriz",
+     "fr": "empereur/impératrice",
+     "it": "imperatore/imperatrice"
+    }
+   ],
+   [
+    5,
+    "carmina",
+    {
+     "de": "Epigramme",
+     "en": "epigrammes",
+     "es": "epigramas",
+     "fr": "épigrammes",
+     "it": "epigrammi"
+    }
+   ],
+   [
+    6,
+    "defixiones",
+    {
+     "de": "Fluch-Tafeln",
+     "en": "curse tablets",
+     "es": "tablas de maldiciones",
+     "fr": "tables de malédiction",
+     "it": "tavole delle maledizioni"
+    }
+   ],
+   [
+    7,
+    "diplomata militaria",
+    {
+     "de": "Militärdiplome",
+     "en": "military diplomas",
+     "es": "diplomas militares",
+     "fr": "diplômes militaires",
+     "it": "diplomi militari"
+    }
+   ],
+   [
+    9,
+    "inscriptiones christianae",
+    {
+     "de": "christliche Inschriften",
+     "en": "christian inscriptions",
+     "es": "inscripciones cristianas",
+     "fr": "inscriptions chrétiennes",
+     "it": "iscrizioni cristiane"
+    }
+   ],
+   [
+    10,
+    "leges",
+    {
+     "de": "Inschriften rechtlichen Inhalts",
+     "en": "legal incriptions",
+     "es": "inscripciones jurídicas",
+     "fr": "inscriptions juridiques",
+     "it": "iscrizioni giuridiche"
+    }
+   ],
+   [
+    22,
+    "liberti/libertae",
+    {
+     "de": "Freigelassene",
+     "en": "freed men and women",
+     "es": "liberados",
+     "fr": "hommes et femmes libérés",
+     "it": "liberati"
+    }
+   ],
+   [
+    15,
+    "litterae erasae",
+    {
+     "de": "eradierte Inschriften",
+     "en": "erased inscriptions",
+     "es": "inscripciones borradas",
+     "fr": "iInscriptions effacées",
+     "it": "iscrizioni cancellate"
+    }
+   ],
+   [
+    16,
+    "litterae in litura",
+    {
+     "de": "Überschriebene Eradierungen",
+     "en": "overwritten erasures",
+     "es": "borrados sobrescritos ",
+     "fr": "effacements réécrits",
+     "it": "cancellature sovrascritte"
+    }
+   ],
+   [
+    8,
+    "miliaria",
+    {
+     "de": "Meilensteine",
+     "en": "milestones",
+     "es": "miliarios",
+     "fr": "miliaires",
+     "it": "miliari"
+    }
+   ],
+   [
+    23,
+    "milites",
+    {
+     "de": "Soldaten",
+     "en": "soldiers",
+     "es": "soldados",
+     "fr": "soldats",
+     "it": "soldati"
+    }
+   ],
+   [
+    24,
+    "mulieres",
+    {
+     "de": "Frauen",
+     "en": "women",
+     "es": "mujeres",
+     "fr": "femmes",
+     "it": "donne"
+    }
+   ],
+   [
+    25,
+    "nomen singulare",
+    {
+     "de": "Einzelname",
+     "en": "single name",
+     "es": "nombre único",
+     "fr": "nom unique",
+     "it": "nome singulo"
+    }
+   ],
+   [
+    27,
+    "officium/professio",
+    {
+     "de": "Beruf",
+     "en": "occupation",
+     "es": "profesión",
+     "fr": "profession",
+     "it": "professione"
+    }
+   ],
+   [
+    28,
+    "ordo decurionum",
+    {
+     "de": "städtische Magistrate, Priester und Ratsangehörige",
+     "en": "municipal magistrates, priests and councillors",
+     "es": "magistrados y sacerdotes municipales, miembros del consejo municipal",
+     "fr": "magistrats et prêtres municipaux, membres du conseil municipa",
+     "it": "magistrati e sacerdoti cittadini, membri del consiglio comunale"
+    }
+   ],
+   [
+    29,
+    "ordo equester",
+    {
+     "de": "römische Ritter",
+     "en": "Roman knights",
+     "es": "caballeros romanos",
+     "fr": "chevaliers romains",
+     "it": "cavalieri romani"
+    }
+   ],
+   [
+    30,
+    "ordo senatorius",
+    {
+     "de": "Angehörige des Senatorenstandes",
+     "en": "members of the senatorial order",
+     "es": "miembros de la clase senatorial",
+     "fr": "membres de la classe sénatoriale ",
+     "it": "membri dell'ordine dei senatori"
+    }
+   ],
+   [
+    26,
+    "praenomen et nomen",
+    {
+     "de": "Vorname und Gentilname",
+     "en": "first name and gentile name",
+     "es": "nombre y gentilicio",
+     "fr": "prénom et nom de famille",
+     "it": "nome e nome gentilizio"
+    }
+   ],
+   [
+    31,
+    "reges",
+    {
+     "de": "Könige",
+     "en": "kings",
+     "es": "reyes",
+     "fr": "rois",
+     "it": "re"
+    }
+   ],
+   [
+    32,
+    "sacerdotes christiani",
+    {
+     "de": "christliche Priester",
+     "en": "christian priests",
+     "es": "sacerdotes cristianos",
+     "fr": "prêtres chrétiens",
+     "it": "sacerdoti cristiani"
+    }
+   ],
+   [
+    33,
+    "sacerdotes pagani",
+    {
+     "de": "heidnische Priester",
+     "en": "pagan priests",
+     "es": "sacerdotes paganos",
+     "fr": "prêtres païens",
+     "it": "sacerdoti pagani"
+    }
+   ],
+   [
+    11,
+    "senatus consulta",
+    {
+     "de": "Senatsbeschlüsse",
+     "en": "senatorial decrees",
+     "es": "decisiones del senado",
+     "fr": "décisions du sénat",
+     "it": "decisioni del senato"
+    }
+   ],
+   [
+    34,
+    "servi/servae",
+    {
+     "de": "Sklaven und Sklavinnen",
+     "en": "slaves",
+     "es": "esclavas y esclavos",
+     "fr": "esclaves",
+     "it": "schiave e schiavi"
+    }
+   ],
+   [
+    35,
+    "seviri Augustales",
+    {
+     "de": "seviri Augustales",
+     "en": "seviri Augustales",
+     "es": "seviri Augustales",
+     "fr": "seviri Augustales",
+     "it": "seviri Augustales"
+    }
+   ],
+   [
+    12,
+    "sigilla impressa",
+    {
+     "de": "gestempelte Inschriften",
+     "en": "stamped inscriptions",
+     "es": "inscripciones estampadas",
+     "fr": "inscriptions estampillées",
+     "it": "iscrizioni impresse"
+    }
+   ],
+   [
+    36,
+    "signacula",
+    {
+     "de": "Stempel",
+     "en": "stamps",
+     "es": "sellos",
+     "fr": "cachets",
+     "it": "timbri"
+    }
+   ],
+   [
+    14,
+    "signacula medicorum",
+    {
+     "de": "Augensalben-Stempel",
+     "en": "oculist’s stamps",
+     "es": "sellos de los oculistas",
+     "fr": "cachets à collyre",
+     "it": "timbri per pomate oftalmiche"
+    }
+   ],
+   [
+    13,
+    "termini",
+    {
+     "de": "Grenzsteine",
+     "en": "boundary stones",
+     "es": "hitos fronterizos",
+     "fr": "bornes frontalières",
+     "it": "cippi di confine"
+    }
+   ],
+   [
+    37,
+    "tesserae nummulariae",
+    {
+     "de": "Marken",
+     "en": "tokens",
+     "es": "fichas",
+     "fr": "jetons",
+     "it": "gettoni"
+    }
+   ],
+   [
+    17,
+    "tituli fabricationis",
+    {
+     "de": "Herstellerinschriften",
+     "en": "manufacturer's inscriptions",
+     "es": "inscripciones del fabricante",
+     "fr": "inscriptions du fabricant ",
+     "it": "iscrizioni del produttore "
+    }
+   ],
+   [
+    1,
+    "tituli honorarii",
+    {
+     "de": "Ehreninschriften",
+     "en": "honorary inscriptions",
+     "es": "inscripciones honoríficas",
+     "fr": "inscriptions honorifiques",
+     "it": "iscrizioni onorarie"
+    }
+   ],
+   [
+    2,
+    "tituli operum",
+    {
+     "de": "Bauinschriften",
+     "en": "building inscriptions",
+     "es": "inscripciones arquitectónicas",
+     "fr": "inscriptions architecturales",
+     "it": "iscrizioni architettoniche"
+    }
+   ],
+   [
+    18,
+    "tituli possessionis",
+    {
+     "de": "Besitzerinschriften",
+     "en": "owner inscriptions",
+     "es": "inscripciones del propietario ",
+     "fr": "inscriptions du propriétaire",
+     "it": "iscrizioni del proprietario"
+    }
+   ],
+   [
+    3,
+    "tituli sacri",
+    {
+     "de": "Weihinschriften",
+     "en": "dedicatory inscriptions",
+     "es": "inscripciones dedicatorias",
+     "fr": "inscriptions commémoratives",
+     "it": "iscrizioni commemorative"
+    }
+   ],
+   [
+    4,
+    "tituli sepulcrales",
+    {
+     "de": "Grabinschriften",
+     "en": "tomb inscriptions",
+     "es": "inscripciones funerarias",
+     "fr": "inscriptions funéraires",
+     "it": "iscrizioni tombali"
+    }
+   ],
+   [
+    19,
+    "tria nomina",
+    {
+     "de": "tria nomina",
+     "en": "tria nomina",
+     "es": "tria nomina",
+     "fr": "tria nomina",
+     "it": "miliari"
+    }
+   ],
+   [
+    20,
+    "viri",
+    {
+     "de": "Männer",
+     "en": "men",
+     "es": "hombres",
+     "fr": "hommes",
+     "it": "uomini"
+    }
+   ]
+  ]
+ },
+ "v": 2
+}

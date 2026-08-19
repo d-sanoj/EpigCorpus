@@ -1,0 +1,159 @@
+{
+ "d": [
+  {
+   "names": {
+    "de": "unklar",
+    "en": "indistinct",
+    "es": "indistinto",
+    "fr": "indistinct",
+    "it": "indistinto"
+   },
+   "kuerzel": "? ",
+   "sprache_id": 0
+  },
+  {
+   "names": {
+    "de": "Etruskisch",
+    "en": "Etruscan",
+    "es": "Etrusco",
+    "fr": "Étrusque",
+    "it": "Etrusco"
+   },
+   "kuerzel": "et",
+   "sprache_id": 1
+  },
+  {
+   "names": {
+    "de": "Griechisch",
+    "en": "Greek",
+    "es": "Griego",
+    "fr": "Grec",
+    "it": "Greco"
+   },
+   "kuerzel": "gr",
+   "sprache_id": 2
+  },
+  {
+   "names": {
+    "de": "Hebräisch",
+    "en": "Hebrew",
+    "es": "Hebreo",
+    "fr": "Hébreu",
+    "it": "Ebraico"
+   },
+   "kuerzel": "he",
+   "sprache_id": 3
+  },
+  {
+   "names": {
+    "de": "Iberisch",
+    "en": "Iberian",
+    "es": "Íbero",
+    "fr": "Ibère",
+    "it": "Iberico"
+   },
+   "kuerzel": "ib",
+   "sprache_id": 4
+  },
+  {
+   "names": {
+    "de": "Latein",
+    "en": "Latin",
+    "es": "Latín",
+    "fr": "Latin",
+    "it": "Latino"
+   },
+   "kuerzel": "la",
+   "sprache_id": 5
+  },
+  {
+   "names": {
+    "de": "Lepontisch",
+    "en": "Lepontic",
+    "es": "Lepóntico",
+    "fr": "Lépontique",
+    "it": "Leponzio"
+   },
+   "kuerzel": "le",
+   "sprache_id": 6
+  },
+  {
+   "names": {
+    "de": "Libyisch",
+    "en": "Libyan",
+    "es": "Líbico",
+    "fr": "Libyque",
+    "it": "Libico"
+   },
+   "kuerzel": "li",
+   "sprache_id": 7
+  },
+  {
+   "names": {
+    "de": "Oskisch",
+    "en": "Oscan",
+    "es": "Osco",
+    "fr": "Osque",
+    "it": "Osco"
+   },
+   "kuerzel": "os",
+   "sprache_id": 8
+  },
+  {
+   "names": {
+    "de": "Palmyrenisch",
+    "en": "Palmyrene",
+    "es": "Palmireno",
+    "fr": "Palmyrénien",
+    "it": "Palmireno"
+   },
+   "kuerzel": "pa",
+   "sprache_id": 9
+  },
+  {
+   "names": {
+    "de": "Punisch",
+    "en": "Phoenician",
+    "es": "Fenicio",
+    "fr": "Phénicien",
+    "it": "Fenicio"
+   },
+   "kuerzel": "pu",
+   "sprache_id": 10
+  },
+  {
+   "names": {
+    "de": "Raetisch",
+    "en": "Rhaetic",
+    "es": "Rético",
+    "fr": "Rhétique",
+    "it": "Retico"
+   },
+   "kuerzel": "ra",
+   "sprache_id": 11
+  },
+  {
+   "names": {
+    "de": "Safaitisch",
+    "en": "Safaitic",
+    "es": "Safaítico",
+    "fr": "Safaïtique",
+    "it": "Safaito"
+   },
+   "kuerzel": "sa",
+   "sprache_id": 12
+  },
+  {
+   "names": {
+    "de": "Venetisch",
+    "en": "Venetic",
+    "es": "Venético",
+    "fr": "Vénète",
+    "it": "Venetico"
+   },
+   "kuerzel": "ve",
+   "sprache_id": 13
+  }
+ ],
+ "v": 1
+}
