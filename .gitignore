@@ -29,8 +29,19 @@ venv/
 # Scraper runtime artifacts
 data/edcs_checkpoint.json
 
-# Generated export data (uncomment if you don't want to commit snapshots)
-data/*.json
-data/*.tsv
+# Corpus snapshots: commit the COMPRESSED form, ignore the working copies.
+# The scraper writes plain .jsonl/.tsv and compresses them on completion; the
+# loaders read either, so a fresh clone works from the .gz with no manual step.
 data/*.jsonl
+data/*.tsv
 data/edcs_inscriptions_cleaned.csv
+!data/*.jsonl.gz
+!data/*.tsv.gz
+
+# Derived caches — regenerated on demand, not worth versioning
+data/edcs_index_cache.json
+
+# Small metadata files below are committed deliberately:
+#   data/edcs_lookup.json           code tables for the harvest
+#   data/edcs_harvest_manifest.json completion record
+#   data/edcs_failed_ids.json       failure manifest

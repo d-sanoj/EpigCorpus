@@ -1,2 +1,7 @@
-data/*.json filter=lfs diff=lfs merge=lfs -text
-data/*.tsv filter=lfs diff=lfs merge=lfs -text
+# Corpus snapshots are committed gzipped (see data/README.md), which keeps every
+# file well under GitHub's 100 MB limit. Git LFS is deliberately NOT used: the
+# free tier allows 1 GB/month of bandwidth and the raw corpus is ~651 MB, so a
+# couple of clones would exhaust it for everyone.
+*.gz binary
+data/*.jsonl text eol=lf
+data/*.tsv   text eol=lf

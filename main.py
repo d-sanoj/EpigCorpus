@@ -67,8 +67,19 @@ def build_terminal_preview(df: pd.DataFrame, max_rows: int = 10) -> pd.DataFrame
 
 
 def get_jsonl_files() -> list[Path]:
-    """Get JSONL files in data directory, sorted by modification time (newest first)."""
-    return sorted(DATA_DIR.glob("*.jsonl"), key=lambda p: p.stat().st_mtime, reverse=True)
+    """Get corpus files in data directory, newest first.
+
+    Matches both plain .jsonl and gzipped .jsonl.gz. A fresh clone contains only
+    the gzipped snapshot; running the scraper produces the plain file. Plain
+    files sort ahead of their own .gz at equal mtime so a freshly harvested
+    corpus wins over a committed snapshot.
+    """
+    files = list(DATA_DIR.glob("*.jsonl")) + list(DATA_DIR.glob("*.jsonl.gz"))
+    return sorted(
+        files,
+        key=lambda p: (p.stat().st_mtime, p.suffix != ".gz"),
+        reverse=True,
+    )
 
 
 def run_scraper() -> None:
@@ -104,6 +115,7 @@ def load_latest_data() -> pd.DataFrame:
         raise FileNotFoundError("No JSONL file found in 'data/' after running scraper.")
 
     jsonl_path = jsonl_files[0]
+    # pandas infers gzip from the .gz extension, so both forms load identically.
     data = pd.read_json(jsonl_path, lines=True)
     print(f"\nLoaded: {jsonl_path}")
 
@@ -114,12 +126,25 @@ def load_latest_data() -> pd.DataFrame:
 
 
 def save_cleaned_data(cleaned: pd.DataFrame) -> Path:
-    """Save cleaned data to JSONL format only."""
+    """Save cleaned data as JSONL, plus a .gz copy for distribution.
+
+    The plain file is what the app reads locally; the .gz is what gets committed
+    (it is roughly 11x smaller, keeping it under GitHub's 100 MB per-file limit
+    without Git LFS). Loaders accept either, so nobody has to decompress by hand.
+    """
     output_jsonl = DATA_DIR / "edcs_inscriptions_cleaned.jsonl"
+    output_gz = DATA_DIR / "edcs_inscriptions_cleaned.jsonl.gz"
 
     cleaned.to_json(output_jsonl, orient="records", lines=True, force_ascii=False)
     print(f"\nSaved cleaned JSONL: {output_jsonl}")
-    
+
+    cleaned.to_json(output_gz, orient="records", lines=True, force_ascii=False,
+                    compression="gzip")
+    raw_mb = output_jsonl.stat().st_size / 1048576
+    gz_mb = output_gz.stat().st_size / 1048576
+    print(f"Saved compressed   : {output_gz} "
+          f"({gz_mb:.1f} MB, {raw_mb / gz_mb:.1f}x smaller)")
+
     return output_jsonl
 
 
