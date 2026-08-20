@@ -8,6 +8,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — queries described in words rather than key/value pairs (2026-08-19)
+
+- `describe_query` phrases a query as a title and a single subtitle line, used
+  by both the PNG export and the on-screen match summary:
+  `Inscriptions matching "viator"` /
+  `In Latin, on stone or marble, classified as tomb inscriptions, from Noricum
+  and Dalmatia — searched in raw inscription text`.
+- Only the filters actually in use are named. Locations read with "and" because
+  the map really does show all of them; attributes read with "or" because an
+  inscription matches just one of them.
+- The subtitle is guaranteed to be one line. If the sentence runs long, the
+  wordiest selections collapse into counts one at a time (`from 7 provinces`),
+  so short selections stay spelled out for as long as they fit; the search-mode
+  clause shortens next, and only then is the line trimmed on a word boundary.
+
 ### Changed — search controls laid out in three equal rows (2026-08-19)
 
 - The controls sit in three equal-width rows: *Search in / Keyword / Language*,

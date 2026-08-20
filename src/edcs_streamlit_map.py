@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import json
 import math
-import textwrap
 from io import BytesIO
 from pathlib import Path
 
@@ -1096,7 +1095,7 @@ def build_png_bytes(
     query can now be a keyword, a set of filters, or both. The subtitle names
     every active filter directly under the title.
     """
-    subtitle_lines = textwrap.wrap(subtitle, width=110) if subtitle.strip() else []
+    subtitle_lines = [subtitle] if subtitle.strip() else []
     provinces = load_provinces().reset_index(drop=True).copy()
     roads = load_roads()
     cities = load_cities()
@@ -1255,14 +1254,107 @@ SEARCH_COLUMNS = {
 }
 
 
-def _selection_summary(selections: dict[str, list[str]]) -> list[str]:
-    """One human-readable line per filter that is actually set."""
-    lines = []
-    for column, label in FILTER_LABELS.items():
-        chosen = selections.get(column) or []
-        if chosen:
-            lines.append(f"{label}: {', '.join(chosen)}")
-    return lines
+# How each filter reads in a sentence: the preposition that introduces it, the
+# conjunction between values, and the noun used once the list grows too long to
+# spell out. Locations take "and" because the map really does show all of them;
+# attributes take "or" because a single inscription matches just one of them.
+FILTER_PHRASING = {
+    "language": ("in", "or", "languages"),
+    "material_en": ("on", "or", "materials"),
+    "category_en": ("classified as", "or", "categories"),
+    "province": ("from", "and", "provinces"),
+    "place": ("at", "and", "places"),
+}
+
+# Beyond this many values a filter is summarised as a count rather than listed.
+PHRASE_LIST_LIMIT = 3
+# A subtitle longer than this is condensed so it always fits on one line.
+# At 10pt across the 11.8in figure this is about three quarters of the width.
+SUBTITLE_WIDTH = 132
+
+SEARCH_MODE_PHRASING = {
+    "Raw inscriptions": "raw inscription text",
+    "Interpretive Cleaned Inscriptions": "interpretive cleaned text",
+    "Conservative Cleaned Inscriptions": "conservative cleaned text",
+}
+# Used once a query has enough filters that the full wording will not fit.
+SEARCH_MODE_PHRASING_SHORT = {
+    "Raw inscriptions": "raw text",
+    "Interpretive Cleaned Inscriptions": "interpretive text",
+    "Conservative Cleaned Inscriptions": "conservative text",
+}
+
+
+def _join_values(values: list[str], conjunction: str) -> str:
+    """`a`, `a or b`, `a, b or c`."""
+    if len(values) == 1:
+        return values[0]
+    return f"{', '.join(values[:-1])} {conjunction} {values[-1]}"
+
+
+def _clause(column: str, chosen: list[str], condensed: bool) -> str:
+    """One filter as a phrase, either spelled out or summarised as a count."""
+    preposition, conjunction, plural = FILTER_PHRASING[column]
+    if condensed or len(chosen) > PHRASE_LIST_LIMIT:
+        return f"{preposition} {len(chosen)} {plural}"
+    return f"{preposition} {_join_values(chosen, conjunction)}"
+
+
+def describe_query(
+    term: str, search_mode: str, selections: dict[str, list[str]]
+) -> tuple[str, str]:
+    """Phrase a query as a title and a one-line subtitle.
+
+    Only the filters actually in use are named. If the sentence runs past the
+    single line it is given, the longest selections collapse into counts one at
+    a time ("from 7 provinces"), so short selections stay spelled out for as
+    long as they fit.
+    """
+    active = [column for column in FILTER_PHRASING if selections.get(column)]
+
+    if term:
+        title = f'Inscriptions matching "{term}"'
+    elif active:
+        title = "Inscriptions across the Roman Empire"
+    else:
+        return (
+            "All known places in the EDCS corpus",
+            "Every place EDCS records, sized by inscription count",
+        )
+
+    condensed: set[str] = set()
+
+    def compose(short_mode: bool) -> str:
+        parts = [_clause(column, selections[column], column in condensed) for column in active]
+        sentence = ", ".join(parts)
+        if term:
+            phrasing = SEARCH_MODE_PHRASING_SHORT if short_mode else SEARCH_MODE_PHRASING
+            searched = f"searched in {phrasing.get(search_mode, 'raw inscription text')}"
+            sentence = f"{sentence} \u2014 {searched}" if sentence else searched
+        return sentence[:1].upper() + sentence[1:] if sentence else ""
+
+    subtitle = compose(short_mode=False)
+
+    # Collapse the wordiest selections first; a single-value filter has nothing
+    # to gain from collapsing, so it is never touched.
+    savings = {
+        column: len(_clause(column, selections[column], False))
+        - len(_clause(column, selections[column], True))
+        for column in active
+        if len(selections[column]) > 1
+    }
+    for column in sorted(savings, key=savings.get, reverse=True):
+        if len(subtitle) <= SUBTITLE_WIDTH:
+            break
+        condensed.add(column)
+        subtitle = compose(short_mode=False)
+
+    if len(subtitle) > SUBTITLE_WIDTH:
+        subtitle = compose(short_mode=True)
+    if len(subtitle) > SUBTITLE_WIDTH:
+        # Trim on a word boundary rather than mid-word.
+        subtitle = subtitle[: SUBTITLE_WIDTH - 1].rsplit(" ", 1)[0].rstrip(" ,\u2014") + "\u2026"
+    return title, subtitle
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
@@ -1377,7 +1469,6 @@ def main() -> None:
     # Any keyword or any selected filter counts as a query. With one running the
     # corpus-wide teal layer comes off, so only the results are on the map.
     query_active = bool(active_term) or any(active_filters.get(c) for c in FILTER_LABELS)
-    summary_lines = _selection_summary(active_filters)
 
     filtered = all_inscriptions.iloc[:0]
     result_places = pd.DataFrame(columns=["place", "latitude", "longitude", "count", "items"])
@@ -1403,12 +1494,7 @@ def main() -> None:
     # whether or not a query is running.
     if query_active:
         png_places = result_places
-        heading = (
-            f'Inscriptions matching "{active_term}" in {active_mode}'
-            if active_term
-            else "Inscriptions matching the selected filters"
-        )
-        subtitle = " \u00b7 ".join(summary_lines)
+        heading, subtitle = describe_query(active_term, active_mode, active_filters)
         footer_lines = (
             f"Search term: {active_term}" if active_term else "Search term: (none)",
             f"Results: {len(filtered):,} across {len(png_places):,} places"
@@ -1419,8 +1505,7 @@ def main() -> None:
         file_stem = active_term.replace(" ", "_").lower() or "filtered"
     else:
         png_places = known_places
-        heading = "All known places in the EDCS corpus"
-        subtitle = "No keyword or filters applied"
+        heading, subtitle = describe_query("", active_mode, active_filters)
         footer_lines = (
             f"All known places: {len(known_places):,}",
             f"Inscriptions plotted: {int(known_places['count'].sum()):,}",
@@ -1452,14 +1537,11 @@ def main() -> None:
         )
 
     if query_active:
-        criteria = []
-        if active_term:
-            criteria.append(f'"{active_term}" in {active_mode}')
-        criteria.extend(summary_lines)
+        _, described = describe_query(active_term, active_mode, active_filters)
         st.markdown(
             (
                 "<div class='matches-summary'>"
-                f"{len(filtered):,} inscriptions match &mdash; {' &middot; '.join(criteria)}"
+                f"{len(filtered):,} inscriptions match. {described}."
                 "</div>"
             ),
             unsafe_allow_html=True,
