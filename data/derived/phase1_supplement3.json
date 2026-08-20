@@ -1,0 +1,387 @@
+{
+ "seed": 20260820,
+ "kept_pairs": 1424314,
+ "dropped_tokens": 342714,
+ "province": {
+  "tvd": 0.1314604197184526,
+  "null": [
+   0.00958816925200483,
+   0.01179153662745714
+  ]
+ },
+ "century": {
+  "tvd": 0.09695721136045138,
+  "null": [
+   0.003664842907096146,
+   0.005940233851993367
+  ],
+  "kept_n": 512860,
+  "drop_n": 135243
+ },
+ "length": {
+  "kept_median": 119.0,
+  "drop_median": 140.0,
+  "kept_mean": 279.82798245330736,
+  "drop_mean": 504.48703583746214
+ },
+ "century_table": {
+  "8AD": {
+   "drop": 22,
+   "kept": 158
+  },
+  "15AD": {
+   "drop": 1,
+   "kept": 5
+  },
+  "18AD": {
+   "drop": 1,
+   "kept": 3
+  },
+  "6BC": {
+   "drop": 40,
+   "kept": 2
+  },
+  "9AD": {
+   "drop": 17,
+   "kept": 66
+  },
+  "2BC": {
+   "drop": 976,
+   "kept": 2786
+  },
+  "20AD": {
+   "drop": 1,
+   "kept": 20
+  },
+  "11AD": {
+   "drop": 8,
+   "kept": 38
+  },
+  "3BC": {
+   "drop": 222,
+   "kept": 975
+  },
+  "7AD": {
+   "drop": 343,
+   "kept": 1019
+  },
+  "16AD": {
+   "drop": 0,
+   "kept": 1
+  },
+  "5AD": {
+   "drop": 3566,
+   "kept": 8936
+  },
+  "3AD": {
+   "drop": 32967,
+   "kept": 98518
+  },
+  "2AD": {
+   "drop": 51249,
+   "kept": 188209
+  },
+  "4AD": {
+   "drop": 13720,
+   "kept": 41866
+  },
+  "1AD": {
+   "drop": 25773,
+   "kept": 137851
+  },
+  "4BC": {
+   "drop": 51,
+   "kept": 17
+  },
+  "7BC": {
+   "drop": 2,
+   "kept": 1
+  },
+  "10AD": {
+   "drop": 15,
+   "kept": 62
+  },
+  "1BC": {
+   "drop": 4371,
+   "kept": 25944
+  },
+  "5BC": {
+   "drop": 185,
+   "kept": 0
+  },
+  "6AD": {
+   "drop": 1708,
+   "kept": 6374
+  },
+  "12AD": {
+   "drop": 1,
+   "kept": 4
+  },
+  "17AD": {
+   "drop": 4,
+   "kept": 5
+  }
+ },
+ "province_table": {
+  "Asia": {
+   "drop": 6967,
+   "kept": 7469
+  },
+  "Alpes Poeninae": {
+   "drop": 217,
+   "kept": 729
+  },
+  "Transpadana / Regio XI": {
+   "drop": 3329,
+   "kept": 15736
+  },
+  "Numidia": {
+   "drop": 14026,
+   "kept": 109905
+  },
+  "Noricum": {
+   "drop": 4074,
+   "kept": 14580
+  },
+  "Sardinia": {
+   "drop": 2074,
+   "kept": 8562
+  },
+  "Syria": {
+   "drop": 2066,
+   "kept": 7018
+  },
+  "Picenum / Regio V": {
+   "drop": 1892,
+   "kept": 6985
+  },
+  "Macedonia": {
+   "drop": 1946,
+   "kept": 5897
+  },
+  "Moesia superior": {
+   "drop": 2289,
+   "kept": 11336
+  },
+  "Africa proconsularis": {
+   "drop": 23943,
+   "kept": 122048
+  },
+  "Regnum Bospori": {
+   "drop": 264,
+   "kept": 474
+  },
+  "Germania superior": {
+   "drop": 10245,
+   "kept": 38238
+  },
+  "Liguria / Regio IX": {
+   "drop": 1484,
+   "kept": 5350
+  },
+  "UNKNOWN": {
+   "drop": 751,
+   "kept": 4337
+  },
+  "Baetica": {
+   "drop": 6420,
+   "kept": 32117
+  },
+  "Gallia Narbonensis": {
+   "drop": 8959,
+   "kept": 35431
+  },
+  "Pontus et Bithynia": {
+   "drop": 1156,
+   "kept": 3094
+  },
+  "Alpes Cottiae": {
+   "drop": 305,
+   "kept": 958
+  },
+  "Belgica / Germania inferior": {
+   "drop": 105,
+   "kept": 508
+  },
+  "Mesopotamia": {
+   "drop": 34,
+   "kept": 190
+  },
+  "Palaestina": {
+   "drop": 1092,
+   "kept": 1762
+  },
+  "Dacia": {
+   "drop": 7822,
+   "kept": 23317
+  },
+  "Germania inferior": {
+   "drop": 4620,
+   "kept": 17002
+  },
+  "Mauretania Caesariensis": {
+   "drop": 4036,
+   "kept": 25541
+  },
+  "Aegyptus": {
+   "drop": 1602,
+   "kept": 4238
+  },
+  "Arabia": {
+   "drop": 2413,
+   "kept": 4669
+  },
+  "Galatia": {
+   "drop": 1733,
+   "kept": 5485
+  },
+  "Apulia et Calabria / Regio II": {
+   "drop": 3906,
+   "kept": 23634
+  },
+  "Sicilia": {
+   "drop": 3669,
+   "kept": 4349
+  },
+  "Aemilia / Regio VIII": {
+   "drop": 2805,
+   "kept": 19046
+  },
+  "Alpes Maritimae": {
+   "drop": 420,
+   "kept": 1536
+  },
+  "Moesia inferior": {
+   "drop": 6318,
+   "kept": 14616
+  },
+  "Mauretania Tingitana": {
+   "drop": 2017,
+   "kept": 4364
+  },
+  "Samnium / Regio IV": {
+   "drop": 5011,
+   "kept": 26315
+  },
+  "Hispania citerior": {
+   "drop": 11546,
+   "kept": 45302
+  },
+  "Raetia": {
+   "drop": 4136,
+   "kept": 6221
+  },
+  "Venetia et Histria / Regio X": {
+   "drop": 9826,
+   "kept": 48757
+  },
+  "Lycia et Pamphylia": {
+   "drop": 708,
+   "kept": 955
+  },
+  "Bruttium et Lucania / Regio III": {
+   "drop": 2108,
+   "kept": 6944
+  },
+  "Pannonia inferior": {
+   "drop": 5152,
+   "kept": 20375
+  },
+  "Thracia": {
+   "drop": 1762,
+   "kept": 3009
+  },
+  "Corsica": {
+   "drop": 256,
+   "kept": 432
+  },
+  "Lugudunensis": {
+   "drop": 4561,
+   "kept": 16179
+  },
+  "Pannonia superior": {
+   "drop": 7381,
+   "kept": 28492
+  },
+  "Roma": {
+   "drop": 69154,
+   "kept": 322195
+  },
+  "Cappadocia": {
+   "drop": 1336,
+   "kept": 2758
+  },
+  "Achaia": {
+   "drop": 2218,
+   "kept": 3200
+  },
+  "Italia": {
+   "drop": 62,
+   "kept": 281
+  },
+  "Alpes Graiae": {
+   "drop": 102,
+   "kept": 289
+  },
+  "Armenia": {
+   "drop": 14,
+   "kept": 73
+  },
+  "Cilicia": {
+   "drop": 256,
+   "kept": 625
+  },
+  "Latium et Campania / Regio I": {
+   "drop": 27165,
+   "kept": 125225
+  },
+  "Provincia incerta": {
+   "drop": 18301,
+   "kept": 26356
+  },
+  "Etruria / Regio VII": {
+   "drop": 5845,
+   "kept": 25629
+  },
+  "Umbria / Regio VI": {
+   "drop": 3183,
+   "kept": 17794
+  },
+  "Belgica": {
+   "drop": 3478,
+   "kept": 14400
+  },
+  "Aquitania / Aquitanica": {
+   "drop": 3718,
+   "kept": 13017
+  },
+  "Cyprus": {
+   "drop": 263,
+   "kept": 270
+  },
+  "Barbaricum": {
+   "drop": 908,
+   "kept": 1121
+  },
+  "Lusitania": {
+   "drop": 4893,
+   "kept": 31014
+  },
+  "Dalmatia": {
+   "drop": 6470,
+   "kept": 28771
+  },
+  "Britannia": {
+   "drop": 7151,
+   "kept": 27013
+  },
+  "Creta et Cyrenaica": {
+   "drop": 748,
+   "kept": 765
+  },
+  "Belgica / Germania superior": {
+   "drop": 3,
+   "kept": 16
+  }
+ }
+}
