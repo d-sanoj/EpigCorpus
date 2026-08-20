@@ -505,3 +505,128 @@ un-skewed afterwards.
 
 **Status.** UNRESOLVED. Owned by Phase 3f. The most important open question
 in the project.
+
+---
+
+## D-0016 — The vinculum is not preserved in EDCS plain-text transcription
+
+**Decided.** Recorded as a citable negative observation about the database.
+The multiplicative vinculum (`X̄` = 10,000) has **zero** attestations; the
+abbreviation overline survives in **two** Latin records out of 588,509.
+
+**Evidence.** Full character census of all 588,509 records — 39,470,885
+characters, 414 distinct code points — not a targeted search
+(`scripts/phase2_vinculum.py`). Complete combining-mark inventory: **222
+marks total**, of which U+0305 = 2, U+0332 = 1, U+0304 = **0**. Number Forms
+U+2150–U+218F (including U+2183 Ↄ, the reversed C) = **0**. Ancient Symbols
+U+10190–U+101CF (ROMAN DENARIUS/SEXTANS/UNCIA SIGN) = **0**. Supplemental
+Punctuation = 8, all raised omission brackets. The 28 precomposed
+macron letters are all Greek vowel-length marks.
+
+All three sightings read out in full (`reports/vinculum_check.md` §2.2), and
+**none is a multiplicative vinculum**: `q̅(uaestori)` is the abbreviation
+overline on a letter; `III̅viro` is the Type 3 numeral-prefix compound; `τ̲` is
+Greek.
+
+**Not an encoding limitation.** 208 U+0323 Leiden underdots pass through the
+pipeline, so combining marks are transmitted. Overlines are absent by
+transcription convention. Qualifier: at 208 instances in 75 records, no
+Leiden diacritic is *systematically* preserved either.
+
+**Alternatives rejected.** Grepping for the three named code points.
+Rejected: absence in a targeted search is not evidence of absence, and it is
+the first thing a reviewer would say. The census enumerates every code point
+present, so the negative is read out of a complete inventory.
+
+**Overturned by.** A re-harvest that changes the character inventory, or
+EDCS documentation stating overlines are encoded in a field this project
+does not read.
+
+**Status.** SETTLED.
+
+---
+
+## D-0017 — EDCS renders the vinculum as a supplied word, which grounds the Phase 3b Type 2 class in evidence rather than stipulation
+
+**Decided.** `N(milia)` is EDCS's plain-text rendering of the overline. The
+brief's Type 2 class — *numeral + supplied unit, not an abbreviation, the
+word is nowhere on the stone* — is adopted, and its justification is
+upgraded from a definitional choice to a documented convention.
+
+**Evidence.** `scripts/phase2_crossref.py`, `phase2_numeral_fusion.py`.
+Device A, `N(milia/mille/milli-)`: **1,875 raw occurrences, 65.4% (1,226)
+immediately preceded by `HS`**, with small multiplier numerals (II 187,
+III 158, X 151, V 107, L 100). `HS X(milia)` is ten thousand sesterces — the
+vinculum's exact job. The device generalises to the measures system
+(*librae* 361, *sextarii* 76, *modii* 24, *iugera* 9) and to ordinals
+(*quarta* 12, *tertia* 11, as in `p(ro) p(arte) IIII(quarta)`).
+
+Device B, `|(miliaria)` (1,381), cross-references to the milliary family of
+D-0013 and is predominantly military unit-strength — `Coh(ors) I F(lavia)
+Dam(ascenorum) |(miliaria)` — but 136 cases are `HS`-preceded, so the two
+uses are not cleanly separated in EDCS. `|(mille)|(mille)|(mille)DC` = 3,600
+shows repetition-as-multiplication, the same principle as `||(mulierum)`
+in D-0013.
+
+**Limitation, stated.** The plain text establishes that the letters are
+**supplied**, not **what glyph they replace**. That `X(milia)` renders an
+overline is an inference from the parenthesis convention plus standard Roman
+practice. Status: ASSUMPTION. **[VERIFY — LATINIST]**, **[NEEDS CITATION]**
+— EDCS's published transcription conventions would settle it directly.
+
+**Status.** SETTLED as a measurement of the device. The vinculum reading is
+ASSUMPTION.
+
+---
+
+## D-0018 — 2,338 fused numeral pairs are in the released dataset; 1,607 are clean, the rest are a candidate set for Phase 3b
+
+**Decided.** Reported as a defect in the current release. The thousands
+family (1,607) is treated as established; the wider 2,338 is a **candidate
+set**, not a classification.
+
+**Evidence.** Stated rule over the kept 1,424,314: abbreviation entirely
+Roman-numeral characters, expansion = that string plus a complete word
+occurring ≥20 times in its own right as an expansion. Yields **2,338 pairs,
+446 types**, of which **1,607** append *milia* / *milibus* / *mille*.
+Top: `II → IImilia` 124, `III → IIImilia` 122, `X → Xmilia` 107,
+`L → Lmilia` 84, `III → IIIlibrae` 57, `II → IIduorum` 40, `VI → VIvir` 31.
+`X → Xmilia` is not a Latin word and was never on a stone.
+
+**False positives, reported rather than filtered.** `V → Vixit` (13) is the
+genuine `V(ixit)` = *vixit*; `D → Diae` (6) is the goddess Dea Dia. The
+*Vixit* misfire traces to `ixit` occurring 48 times as a standalone
+expansion, itself caused by **EDCS breaking lines mid-word** — `v/` ends a
+line, `ix(it)` begins the next, yielding the spurious pair `ix → ixit`.
+
+**New artifact class, not in any prior report: line-break fragmentation.**
+Handed to Phase 3.
+
+**Alternatives rejected.** Publishing the 2,338 as the Phase 3b Type 2
+count. Rejected: the brief requires Type 2 to be decided against an explicit,
+printed unit word list with reported coverage, and a rule with known false
+positives must not pre-empt that.
+
+**Status.** 1,607 SETTLED. The remaining 731 UNRESOLVED, owned by Phase 3b.
+Line-break fragmentation UNRESOLVED, owned by Phase 3.
+
+---
+
+## D-0019 — A Phase 0 prediction is withdrawn
+
+**Decided.** D-0008 item 2 recorded a single U+0305 sighting and stated it
+"raises the prior that Phase 2's vinculum scan will not be a pure negative."
+**That prediction was wrong and is withdrawn.**
+
+**Evidence.** D-0016. One sighting in 39.5 million characters is n = 2.
+Phase 2 is a pure negative on the multiplicative vinculum and a near-pure
+negative on the abbreviation overline.
+
+**What the caution got right, for the wrong reason.** Running Phase 2 was
+correct — not because overlines would be found, but because the census
+surfaced the replacement device (D-0017), which expecting a null would never
+have produced. The methodological lesson stands even though the prediction
+failed: run the census, not the grep.
+
+**Status.** SETTLED. Logged because R7 requires reporting outcomes that
+damage my own earlier claims.
