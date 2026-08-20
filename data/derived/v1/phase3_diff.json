@@ -1,0 +1,722 @@
+{
+ "rows": 1424314,
+ "rows_flagged_excluded": 2571,
+ "V0": {
+  "pairs": 1424314,
+  "unique_abbrev_keys": 37526,
+  "unique_pair_types": 73105,
+  "ambiguous_keys": 7836,
+  "ambiguous_keys_n>=20": 1937,
+  "lexically_ambiguous_keys_n>=20": 1056,
+  "lexical_share_of_ambiguous": 0.5452,
+  "mean_expansions_per_key": 1.948,
+  "pairs_on_ambiguous_keys": 1356329
+ },
+ "V1": {
+  "pairs": 1424314,
+  "unique_abbrev_keys": 37526,
+  "unique_pair_types": 73101,
+  "ambiguous_keys": 7836,
+  "ambiguous_keys_n>=20": 1937,
+  "lexically_ambiguous_keys_n>=20": 1058,
+  "lexical_share_of_ambiguous": 0.5462,
+  "mean_expansions_per_key": 1.948,
+  "pairs_on_ambiguous_keys": 1356329
+ },
+ "V1c": {
+  "pairs": 1424314,
+  "unique_abbrev_keys": 36920,
+  "unique_pair_types": 71977,
+  "ambiguous_keys": 7592,
+  "ambiguous_keys_n>=20": 1865,
+  "lexically_ambiguous_keys_n>=20": 1017,
+  "lexical_share_of_ambiguous": 0.5453,
+  "mean_expansions_per_key": 1.95,
+  "pairs_on_ambiguous_keys": 1356889
+ },
+ "top50": [
+  {
+   "abbrev": "m",
+   "pairs": 137216,
+   "V0_expansions": 501,
+   "V1_expansions": 499,
+   "V1c_pairs": 137377,
+   "V1c_expansions": 505,
+   "V0_top": "manibus",
+   "V1c_top": "manibus"
+  },
+  {
+   "abbrev": "l",
+   "pairs": 90901,
+   "V0_expansions": 348,
+   "V1_expansions": 346,
+   "V1c_pairs": 91047,
+   "V1c_expansions": 352,
+   "V0_top": "luci",
+   "V1c_top": "luci"
+  },
+  {
+   "abbrev": "d",
+   "pairs": 87666,
+   "V0_expansions": 399,
+   "V1_expansions": 399,
+   "V1c_pairs": 89045,
+   "V1c_expansions": 407,
+   "V0_top": "dis",
+   "V1c_top": "dis"
+  },
+  {
+   "abbrev": "f",
+   "pairs": 72949,
+   "V0_expansions": 353,
+   "V1_expansions": 353,
+   "V1c_pairs": 73067,
+   "V1c_expansions": 358,
+   "V0_top": "filius",
+   "V1c_top": "filius"
+  },
+  {
+   "abbrev": "p",
+   "pairs": 70184,
+   "V0_expansions": 637,
+   "V1_expansions": 637,
+   "V1c_pairs": 70422,
+   "V1c_expansions": 652,
+   "V0_top": "pedes",
+   "V1c_top": "pedes"
+  },
+  {
+   "abbrev": "s",
+   "pairs": 66140,
+   "V0_expansions": 609,
+   "V1_expansions": 609,
+   "V1c_pairs": 66188,
+   "V1c_expansions": 616,
+   "V0_top": "sacrum",
+   "V1c_top": "sacrum"
+  },
+  {
+   "abbrev": "c",
+   "pairs": 64081,
+   "V0_expansions": 629,
+   "V1_expansions": 629,
+   "V1c_pairs": 64622,
+   "V1c_expansions": 645,
+   "V0_top": "cai",
+   "V1c_top": "cai"
+  },
+  {
+   "abbrev": "v",
+   "pairs": 38757,
+   "V0_expansions": 317,
+   "V1_expansions": 317,
+   "V1c_pairs": 39062,
+   "V1c_expansions": 323,
+   "V0_top": "vixit",
+   "V1c_top": "vixit"
+  },
+  {
+   "abbrev": "a",
+   "pairs": 30461,
+   "V0_expansions": 419,
+   "V1_expansions": 419,
+   "V1c_pairs": 30536,
+   "V1c_expansions": 420,
+   "V0_top": "annos",
+   "V1c_top": "annos"
+  },
+  {
+   "abbrev": "aug",
+   "pairs": 28162,
+   "V0_expansions": 58,
+   "V1_expansions": 58,
+   "V1c_pairs": 30155,
+   "V1c_expansions": 65,
+   "V0_top": "augusti",
+   "V1c_top": "augusti"
+  },
+  {
+   "abbrev": "t",
+   "pairs": 26435,
+   "V0_expansions": 240,
+   "V1_expansions": 240,
+   "V1c_pairs": 26470,
+   "V1c_expansions": 241,
+   "V0_top": "titus",
+   "V1c_top": "titus"
+  },
+  {
+   "abbrev": "q",
+   "pairs": 26169,
+   "V0_expansions": 167,
+   "V1_expansions": 167,
+   "V1c_pairs": 26273,
+   "V1c_expansions": 172,
+   "V0_top": "quinti",
+   "V1c_top": "quinti"
+  },
+  {
+   "abbrev": "h",
+   "pairs": 25112,
+   "V0_expansions": 158,
+   "V1_expansions": 158,
+   "V1c_pairs": 25136,
+   "V1c_expansions": 159,
+   "V0_top": "hic",
+   "V1c_top": "hic"
+  },
+  {
+   "abbrev": "e",
+   "pairs": 19095,
+   "V0_expansions": 153,
+   "V1_expansions": 153,
+   "V1c_pairs": 19102,
+   "V1c_expansions": 155,
+   "V0_top": "est",
+   "V1c_top": "est"
+  },
+  {
+   "abbrev": "an",
+   "pairs": 18599,
+   "V0_expansions": 70,
+   "V1_expansions": 70,
+   "V1c_pairs": 33974,
+   "V1c_expansions": 78,
+   "V0_top": "annos",
+   "V1c_top": "annos"
+  },
+  {
+   "abbrev": "leg",
+   "pairs": 18115,
+   "V0_expansions": 35,
+   "V1_expansions": 35,
+   "V1c_pairs": 18127,
+   "V1c_expansions": 35,
+   "V0_top": "legio",
+   "V1c_top": "legio"
+  },
+  {
+   "abbrev": "ann",
+   "pairs": 15379,
+   "V0_expansions": 26,
+   "V1_expansions": 24,
+   "V1c_pairs": 4,
+   "V1c_expansions": 2,
+   "V0_top": "annos",
+   "V1c_top": "aniensi"
+  },
+  {
+   "abbrev": "n",
+   "pairs": 14299,
+   "V0_expansions": 295,
+   "V1_expansions": 295,
+   "V1c_pairs": 16343,
+   "V1c_expansions": 303,
+   "V0_top": "nostri",
+   "V1c_top": "nostri"
+  },
+  {
+   "abbrev": "cos",
+   "pairs": 14056,
+   "V0_expansions": 48,
+   "V1_expansions": 48,
+   "V1c_pairs": 14062,
+   "V1c_expansions": 52,
+   "V0_top": "consulibus",
+   "V1c_top": "consulibus"
+  },
+  {
+   "abbrev": "vix",
+   "pairs": 12731,
+   "V0_expansions": 6,
+   "V1_expansions": 6,
+   "V1c_pairs": 12731,
+   "V1c_expansions": 6,
+   "V0_top": "vixit",
+   "V1c_top": "vixit"
+  },
+  {
+   "abbrev": "imp",
+   "pairs": 12641,
+   "V0_expansions": 27,
+   "V1_expansions": 27,
+   "V1c_pairs": 13045,
+   "V1c_expansions": 27,
+   "V0_top": "imperator",
+   "V1c_top": "imperator"
+  },
+  {
+   "abbrev": "b",
+   "pairs": 12022,
+   "V0_expansions": 181,
+   "V1_expansions": 181,
+   "V1c_pairs": 12040,
+   "V1c_expansions": 182,
+   "V0_top": "bene",
+   "V1c_top": "bene"
+  },
+  {
+   "abbrev": "pr",
+   "pairs": 9769,
+   "V0_expansions": 169,
+   "V1_expansions": 169,
+   "V1c_pairs": 9769,
+   "V1c_expansions": 169,
+   "V0_top": "praediis",
+   "V1c_top": "praediis"
+  },
+  {
+   "abbrev": "of",
+   "pairs": 9002,
+   "V0_expansions": 23,
+   "V1_expansions": 23,
+   "V1c_pairs": 9679,
+   "V1c_expansions": 29,
+   "V0_top": "officina",
+   "V1c_top": "officina"
+  },
+  {
+   "abbrev": "o",
+   "pairs": 8420,
+   "V0_expansions": 160,
+   "V1_expansions": 160,
+   "V1c_pairs": 8420,
+   "V1c_expansions": 160,
+   "V0_top": "optimo",
+   "V1c_top": "optimo"
+  },
+  {
+   "abbrev": "fil",
+   "pairs": 7317,
+   "V0_expansions": 17,
+   "V1_expansions": 17,
+   "V1c_pairs": 7320,
+   "V1c_expansions": 17,
+   "V0_top": "filio",
+   "V1c_top": "filio"
+  },
+  {
+   "abbrev": "i",
+   "pairs": 7206,
+   "V0_expansions": 225,
+   "V1_expansions": 226,
+   "V1c_pairs": 8521,
+   "V1c_expansions": 294,
+   "V0_top": "iovi",
+   "V1c_top": "iovi"
+  },
+  {
+   "abbrev": "lib",
+   "pairs": 7032,
+   "V0_expansions": 61,
+   "V1_expansions": 61,
+   "V1c_pairs": 7049,
+   "V1c_expansions": 62,
+   "V0_top": "libertus",
+   "V1c_top": "libertus"
+  },
+  {
+   "abbrev": "caes",
+   "pairs": 6339,
+   "V0_expansions": 32,
+   "V1_expansions": 32,
+   "V1c_pairs": 6762,
+   "V1c_expansions": 32,
+   "V0_top": "caesari",
+   "V1c_top": "caesari"
+  },
+  {
+   "abbrev": "ti",
+   "pairs": 5786,
+   "V0_expansions": 35,
+   "V1_expansions": 35,
+   "V1c_pairs": 5786,
+   "V1c_expansions": 35,
+   "V0_top": "tiberi",
+   "V1c_top": "tiberi"
+  },
+  {
+   "abbrev": "r",
+   "pairs": 5764,
+   "V0_expansions": 309,
+   "V1_expansions": 309,
+   "V1c_pairs": 5771,
+   "V1c_expansions": 309,
+   "V0_top": "rei",
+   "V1c_top": "rei"
+  },
+  {
+   "abbrev": "fl",
+   "pairs": 5409,
+   "V0_expansions": 58,
+   "V1_expansions": 58,
+   "V1c_pairs": 5411,
+   "V1c_expansions": 58,
+   "V0_top": "flavio",
+   "V1c_top": "flavio"
+  },
+  {
+   "abbrev": "sex",
+   "pairs": 5268,
+   "V0_expansions": 27,
+   "V1_expansions": 27,
+   "V1c_pairs": 5268,
+   "V1c_expansions": 27,
+   "V0_top": "sexti",
+   "V1c_top": "sexti"
+  },
+  {
+   "abbrev": "cl",
+   "pairs": 5230,
+   "V0_expansions": 58,
+   "V1_expansions": 58,
+   "V1c_pairs": 5230,
+   "V1c_expansions": 58,
+   "V0_top": "classis",
+   "V1c_top": "classis"
+  },
+  {
+   "abbrev": "iul",
+   "pairs": 4972,
+   "V0_expansions": 21,
+   "V1_expansions": 21,
+   "V1c_pairs": 4982,
+   "V1c_expansions": 22,
+   "V0_top": "iulius",
+   "V1c_top": "iulius"
+  },
+  {
+   "abbrev": "aur",
+   "pairs": 4878,
+   "V0_expansions": 40,
+   "V1_expansions": 40,
+   "V1c_pairs": 4883,
+   "V1c_expansions": 40,
+   "V0_top": "aurelius",
+   "V1c_top": "aurelius"
+  },
+  {
+   "abbrev": "cn",
+   "pairs": 4801,
+   "V0_expansions": 25,
+   "V1_expansions": 25,
+   "V1c_pairs": 4801,
+   "V1c_expansions": 25,
+   "V0_top": "cnaei",
+   "V1c_top": "cnaei"
+  },
+  {
+   "abbrev": "max",
+   "pairs": 4733,
+   "V0_expansions": 26,
+   "V1_expansions": 26,
+   "V1c_pairs": 4733,
+   "V1c_expansions": 26,
+   "V0_top": "maximus",
+   "V1c_top": "maximus"
+  },
+  {
+   "abbrev": "mil",
+   "pairs": 4712,
+   "V0_expansions": 49,
+   "V1_expansions": 49,
+   "V1c_pairs": 4712,
+   "V1c_expansions": 49,
+   "V0_top": "miles",
+   "V1c_top": "miles"
+  },
+  {
+   "abbrev": "fec",
+   "pairs": 4691,
+   "V0_expansions": 9,
+   "V1_expansions": 9,
+   "V1c_pairs": 4697,
+   "V1c_expansions": 9,
+   "V0_top": "fecit",
+   "V1c_top": "fecit"
+  },
+  {
+   "abbrev": "coh",
+   "pairs": 4659,
+   "V0_expansions": 11,
+   "V1_expansions": 11,
+   "V1c_pairs": 4666,
+   "V1c_expansions": 11,
+   "V0_top": "cohortis",
+   "V1c_top": "cohortis"
+  },
+  {
+   "abbrev": "trib",
+   "pairs": 4642,
+   "V0_expansions": 29,
+   "V1_expansions": 29,
+   "V1c_pairs": 4646,
+   "V1c_expansions": 30,
+   "V0_top": "tribunicia",
+   "V1c_top": "tribunicia"
+  },
+  {
+   "abbrev": "g",
+   "pairs": 4426,
+   "V0_expansions": 149,
+   "V1_expansions": 149,
+   "V1c_pairs": 4443,
+   "V1c_expansions": 149,
+   "V0_top": "gemina",
+   "V1c_top": "gemina"
+  },
+  {
+   "abbrev": "kal",
+   "pairs": 4198,
+   "V0_expansions": 20,
+   "V1_expansions": 20,
+   "V1c_pairs": 4198,
+   "V1c_expansions": 20,
+   "V0_top": "kalendas",
+   "V1c_top": "kalendas"
+  },
+  {
+   "abbrev": "k",
+   "pairs": 3492,
+   "V0_expansions": 89,
+   "V1_expansions": 89,
+   "V1c_pairs": 3494,
+   "V1c_expansions": 90,
+   "V0_top": "kalendas",
+   "V1c_top": "kalendas"
+  },
+  {
+   "abbrev": "val",
+   "pairs": 3201,
+   "V0_expansions": 43,
+   "V1_expansions": 43,
+   "V1c_pairs": 3207,
+   "V1c_expansions": 45,
+   "V0_top": "valerius",
+   "V1c_top": "valerius"
+  },
+  {
+   "abbrev": "ser",
+   "pairs": 2887,
+   "V0_expansions": 47,
+   "V1_expansions": 47,
+   "V1c_pairs": 2889,
+   "V1c_expansions": 49,
+   "V0_top": "servus",
+   "V1c_top": "servus"
+  },
+  {
+   "abbrev": "pot",
+   "pairs": 2821,
+   "V0_expansions": 18,
+   "V1_expansions": 18,
+   "V1c_pairs": 2821,
+   "V1c_expansions": 18,
+   "V0_top": "potestate",
+   "V1c_top": "potestate"
+  },
+  {
+   "abbrev": "que",
+   "pairs": 2679,
+   "V0_expansions": 15,
+   "V1_expansions": 15,
+   "V1c_pairs": 2679,
+   "V1c_expansions": 15,
+   "V0_top": "quae",
+   "V1c_top": "quae"
+  },
+  {
+   "abbrev": "fr",
+   "pairs": 2613,
+   "V0_expansions": 28,
+   "V1_expansions": 28,
+   "V1c_pairs": 2613,
+   "V1c_expansions": 28,
+   "V0_top": "fronte",
+   "V1c_top": "fronte"
+  }
+ ],
+ "keys_gaining_expansions_from_collapse": [
+  {
+   "key": "i",
+   "before": 226,
+   "after": 294,
+   "pairs": 8521
+  },
+  {
+   "key": "x",
+   "before": 46,
+   "after": 63,
+   "pairs": 732
+  },
+  {
+   "key": "c",
+   "before": 629,
+   "after": 645,
+   "pairs": 64622
+  },
+  {
+   "key": "p",
+   "before": 637,
+   "after": 652,
+   "pairs": 70422
+  },
+  {
+   "key": "vi",
+   "before": 68,
+   "after": 78,
+   "pairs": 935
+  },
+  {
+   "key": "com",
+   "before": 45,
+   "after": 55,
+   "pairs": 386
+  },
+  {
+   "key": "d",
+   "before": 399,
+   "after": 407,
+   "pairs": 89045
+  },
+  {
+   "key": "an",
+   "before": 70,
+   "after": 78,
+   "pairs": 33974
+  },
+  {
+   "key": "n",
+   "before": 295,
+   "after": 303,
+   "pairs": 16343
+  },
+  {
+   "key": "ffl",
+   "before": 2,
+   "after": 10,
+   "pairs": 31
+  },
+  {
+   "key": "ac",
+   "before": 32,
+   "after": 40,
+   "pairs": 116
+  },
+  {
+   "key": "aug",
+   "before": 58,
+   "after": 65,
+   "pairs": 30155
+  },
+  {
+   "key": "s",
+   "before": 609,
+   "after": 616,
+   "pairs": 66188
+  },
+  {
+   "key": "col",
+   "before": 58,
+   "after": 65,
+   "pairs": 2345
+  },
+  {
+   "key": "m",
+   "before": 499,
+   "after": 505,
+   "pairs": 137377
+  },
+  {
+   "key": "l",
+   "before": 346,
+   "after": 352,
+   "pairs": 91047
+  },
+  {
+   "key": "v",
+   "before": 317,
+   "after": 323,
+   "pairs": 39062
+  },
+  {
+   "key": "suc",
+   "before": 18,
+   "after": 24,
+   "pairs": 447
+  },
+  {
+   "key": "tur",
+   "before": 21,
+   "after": 27,
+   "pairs": 252
+  },
+  {
+   "key": "of",
+   "before": 23,
+   "after": 29,
+   "pairs": 9679
+  },
+  {
+   "key": "im",
+   "before": 28,
+   "after": 34,
+   "pairs": 184
+  },
+  {
+   "key": "in",
+   "before": 36,
+   "after": 42,
+   "pairs": 116
+  },
+  {
+   "key": "il",
+   "before": 23,
+   "after": 29,
+   "pairs": 54
+  },
+  {
+   "key": "f",
+   "before": 353,
+   "after": 358,
+   "pairs": 73067
+  },
+  {
+   "key": "mar",
+   "before": 77,
+   "after": 82,
+   "pairs": 800
+  },
+  {
+   "key": "q",
+   "before": 167,
+   "after": 172,
+   "pairs": 26273
+  },
+  {
+   "key": "gal",
+   "before": 28,
+   "after": 33,
+   "pairs": 1371
+  },
+  {
+   "key": "pol",
+   "before": 20,
+   "after": 25,
+   "pairs": 533
+  },
+  {
+   "key": "ter",
+   "before": 38,
+   "after": 43,
+   "pairs": 522
+  },
+  {
+   "key": "op",
+   "before": 30,
+   "after": 35,
+   "pairs": 2149
+  }
+ ],
+ "n_keys_gaining": 622
+}

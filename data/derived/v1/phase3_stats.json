@@ -1,0 +1,1326 @@
+{
+ "seed": 20260820,
+ "input_pairs": 1424314,
+ "control_lexicon_size": 36477,
+ "correction_type": {
+  "NONE": 1411911,
+  "GEMINATIO_COLLAPSE": 8986,
+  "NUMERAL_TYPE1": 338,
+  "NUMERAL_TYPE2": 2571,
+  "NUMERAL_TYPE3": 508
+ },
+ "numeral_class": {
+  "NONE": 1420823,
+  "TYPE1_NUMERAL_WORD": 338,
+  "UNRESOLVED_NUMERAL": 74,
+  "TYPE2_NUMERAL_ELLIPSIS": 2571,
+  "TYPE3_NUMERAL_PREFIX": 508
+ },
+ "confidence": {
+  "NA": 1387811,
+  "DECISIVE": 32143,
+  "UNRESOLVED": 3350,
+  "THIN": 1010
+ },
+ "excluded_reason": {
+  "NUMERAL_ELLIPSIS_NOT_AN_ABBREVIATION": 2571
+ },
+ "unresolved_reason": {
+  "geminatio": 3276,
+  "numeral prefix, paren content 'arciorum' in no word list": 2,
+  "numeral prefix, paren content 'ecimorum' in no word list": 41,
+  "numeral prefix, paren content 'i' in no word list": 12,
+  "numeral prefix, paren content 'anis' in no word list": 1,
+  "numeral prefix, paren content 'vi' in no word list": 1,
+  "numeral prefix, paren content 'hereditatium' in no word list": 1,
+  "numeral prefix, paren content 'uciuorum' in no word list": 1,
+  "numeral prefix, paren content 'aiis' in no word list": 1,
+  "numeral prefix, paren content 'annos' in no word list": 1,
+  "numeral prefix, paren content 'octavanorum' in no word list": 1,
+  "numeral prefix, paren content 'indicium' in no word list": 1,
+  "numeral prefix, paren content 'ii' in no word list": 2,
+  "numeral prefix, paren content 'ecimis' in no word list": 1,
+  "numeral prefix, paren content 'aniorum' in no word list": 2,
+  "numeral prefix, paren content 'marci' in no word list": 1,
+  "numeral prefix, paren content 'iterum' in no word list": 1,
+  "numeral prefix, paren content 'omis' in no word list": 1,
+  "numeral prefix, paren content 'omins' in no word list": 1,
+  "numeral prefix, paren content 'audius' in no word list": 1,
+  "numeral prefix, paren content 'ominos' in no word list": 1
+ },
+ "date_flag": {
+  "NONE": 1423581,
+  "POST700": 618,
+  "LATE_OVER_1000": 86,
+  "MISKEYED": 29
+ },
+ "linebreak_fragment": 9506,
+ "geminatio_forms": {
+  "augg": 1792,
+  "nn": 1701,
+  "dd": 1043,
+  "cc": 446,
+  "caess": 400,
+  "conss": 399,
+  "impp": 387,
+  "vv": 299,
+  "nnn": 297,
+  "ddd": 253,
+  "pp": 201,
+  "auggg": 187,
+  "nobb": 156,
+  "mm": 140,
+  "ll": 137,
+  "ff": 103,
+  "qq": 91,
+  "magg": 43,
+  "dddd": 41,
+  "nnnn": 40,
+  "ss": 39,
+  "eqq": 36,
+  "tt": 35,
+  "aa": 28,
+  "praeff": 27,
+  "ppp": 24,
+  "hh": 24,
+  "xx": 23,
+  "poll": 23,
+  "caesss": 20,
+  "ccc": 18,
+  "imppp": 17,
+  "nobill": 17,
+  "bb": 17,
+  "gg": 14,
+  "ii": 14,
+  "ann": 12,
+  "fff": 12,
+  "avill": 12,
+  "legg": 12,
+  "libb": 12,
+  "mmm": 12,
+  "procc": 11,
+  "aurell": 10,
+  "decc": 9,
+  "iii": 9,
+  "nobbb": 9,
+  "iull": 9,
+  "lll": 7,
+  "cohh": 7,
+  "invv": 6,
+  "soll": 6,
+  "augggg": 6,
+  "aaa": 6,
+  "fecc": 6,
+  "att": 6,
+  "qqq": 6,
+  "domm": 5,
+  "ee": 5,
+  "catull": 5
+ },
+ "type1_hits": {
+  "vicesimae": 82,
+  "duorum": 40,
+  "vicennalibus": 34,
+  "decennalibus": 27,
+  "quadragesimae": 26,
+  "trium": 23,
+  "vicesima": 14,
+  "duo": 12,
+  "quarta": 12,
+  "tertia": 11,
+  "trecenario": 8,
+  "tricennalibus": 7,
+  "vicennalia": 5,
+  "ducenario": 3,
+  "sexta": 3,
+  "octava": 3,
+  "vicesimam": 2,
+  "ducenarius": 2,
+  "quadragennalibus": 2,
+  "sexaginta": 2,
+  "vicennalium": 2,
+  "secundum": 2,
+  "secundus": 1,
+  "ducenarium": 1,
+  "centena": 1,
+  "tertium": 1,
+  "tertius": 1,
+  "quartum": 1,
+  "novem": 1,
+  "decima": 1,
+  "trecenarius": 1,
+  "quadringenarii": 1,
+  "bis": 1,
+  "trecenarii": 1,
+  "ternis": 1,
+  "duobus": 1,
+  "trecennalibus": 1,
+  "vicesiame": 1
+ },
+ "type2_hits": {
+  "milia": 1128,
+  "milibus": 464,
+  "librae": 361,
+  "unciae": 113,
+  "sextarii": 76,
+  "libra": 66,
+  "scripula": 49,
+  "vasa": 40,
+  "milium": 26,
+  "modii": 24,
+  "libras": 24,
+  "uncia": 15,
+  "mille": 15,
+  "uncias": 14,
+  "pugnarum": 14,
+  "libellas": 13,
+  "libram": 10,
+  "assem": 9,
+  "iugera": 9,
+  "locus": 8,
+  "coronarum": 7,
+  "dodrantem": 6,
+  "unciarum": 5,
+  "librarum": 5,
+  "victoriarum": 5,
+  "didrachma": 4,
+  "scripulum": 4,
+  "asses": 4,
+  "solidi": 4,
+  "unciis": 3,
+  "assibus": 3,
+  "quadrantem": 3,
+  "libellae": 3,
+  "coronae": 3,
+  "pondera": 3,
+  "passus": 2,
+  "as": 2,
+  "pugna": 2,
+  "sicilici": 2,
+  "denarios": 1,
+  "quadrans": 1,
+  "denarium": 1,
+  "denarii": 1,
+  "milibusm": 1,
+  "assium": 1,
+  "scripuli": 1,
+  "semuncias": 1,
+  "scripulae": 1,
+  "scripulis": 1,
+  "dolium": 1,
+  "bessem": 1,
+  "sicilicus": 1,
+  "pugnae": 1,
+  "dextans": 1,
+  "denarius": 1,
+  "ollae": 1,
+  "dupondius": 1,
+  "quadrantes": 1,
+  "dextantes": 1,
+  "dodrans": 1,
+  "libris": 1,
+  "pedes": 1
+ },
+ "type3_hits": {
+  "triere": 311,
+  "quadriere": 68,
+  "vir": 31,
+  "viro": 24,
+  "virum": 20,
+  "pentere": 19,
+  "virorum": 19,
+  "hexere": 4,
+  "viri": 4,
+  "viratus": 2,
+  "trieris": 2,
+  "triremi": 1,
+  "viris": 1,
+  "virei": 1,
+  "triremes": 1
+ },
+ "numeral_unresolved": {
+  "ecimorum": 41,
+  "i": 12,
+  "arciorum": 2,
+  "ii": 2,
+  "aniorum": 2,
+  "anis": 1,
+  "vi": 1,
+  "hereditatium": 1,
+  "uciuorum": 1,
+  "aiis": 1,
+  "annos": 1,
+  "octavanorum": 1,
+  "indicium": 1,
+  "ecimis": 1,
+  "marci": 1,
+  "iterum": 1,
+  "omis": 1,
+  "omins": 1,
+  "audius": 1,
+  "ominos": 1
+ },
+ "single_char_numeral_resolved": {
+  "TYPE2_NUMERAL_ELLIPSIS": 667,
+  "TYPE1_NUMERAL_WORD": 28,
+  "TYPE3_NUMERAL_PREFIX": 17
+ },
+ "implausible_date_evidence": [
+  {
+   "record": "EDCS-05601137-0",
+   "date_from": "1781",
+   "date_to": "1782",
+   "abbrev": "reg",
+   "expansion": "regimiento",
+   "province": "Hispania citerior",
+   "context": "Tom[as] / Urbin[a] / drago[n] / del V [reg] "
+  },
+  {
+   "record": "EDCS-05800321-0",
+   "date_from": "1763",
+   "date_to": "1763",
+   "abbrev": "D",
+   "expansion": "Dis",
+   "province": "Latium et Campania / Regio I",
+   "context": " [D] M(anibus) / memoriae Luciscae / coniugi"
+  },
+  {
+   "record": "EDCS-05800321-0",
+   "date_from": "1763",
+   "date_to": "1763",
+   "abbrev": "M",
+   "expansion": "Manibus",
+   "province": "Latium et Campania / Regio I",
+   "context": "D(is) [M] / memoriae Luciscae / coniugis castissi"
+  },
+  {
+   "record": "EDCS-10900314-0",
+   "date_from": "1701",
+   "date_to": "1900",
+   "abbrev": "Tib",
+   "expansion": "Tiberius",
+   "province": "Germania superior",
+   "context": "Forum / Tiberi / [Tib] imperator"
+  },
+  {
+   "record": "EDCS-21300898-0",
+   "date_from": "1601",
+   "date_to": "1700",
+   "abbrev": "D",
+   "expansion": "Dis",
+   "province": "Latium et Campania / Regio I",
+   "context": " [D] M(anibus) / spirit(ui) b(ono?) / Flavia"
+  },
+  {
+   "record": "EDCS-21300898-0",
+   "date_from": "1601",
+   "date_to": "1700",
+   "abbrev": "M",
+   "expansion": "Manibus",
+   "province": "Latium et Campania / Regio I",
+   "context": "D(is) [M] / spirit(ui) b(ono?) / Flaviae Albinae"
+  },
+  {
+   "record": "EDCS-21300898-0",
+   "date_from": "1601",
+   "date_to": "1700",
+   "abbrev": "spirit",
+   "expansion": "spiritui",
+   "province": "Latium et Campania / Regio I",
+   "context": "D(is) M(anibus) / [spirit] b(ono?) / Flaviae Albinae / A() P() fil"
+  },
+  {
+   "record": "EDCS-21300898-0",
+   "date_from": "1601",
+   "date_to": "1700",
+   "abbrev": "b",
+   "expansion": "bono",
+   "province": "Latium et Campania / Regio I",
+   "context": "D(is) M(anibus) / spirit(ui) [b] / Flaviae Albinae / A() P() filiae comm"
+  },
+  {
+   "record": "EDCS-21300898-0",
+   "date_from": "1601",
+   "date_to": "1700",
+   "abbrev": "a",
+   "expansion": "annos",
+   "province": "Latium et Campania / Regio I",
+   "context": "iae commendato / cineres / arca condo / [a] <v=B>(ixit)"
+  },
+  {
+   "record": "EDCS-38700101-0",
+   "date_from": "1034",
+   "date_to": "1034",
+   "abbrev": "V",
+   "expansion": "Venerabilis",
+   "province": "Lusitania",
+   "context": " [V] f(rater) d(ominus) Munius Monis h(ic) i"
+  },
+  {
+   "record": "EDCS-38700101-0",
+   "date_from": "1034",
+   "date_to": "1034",
+   "abbrev": "f",
+   "expansion": "frater",
+   "province": "Lusitania",
+   "context": "V(enerabilis) [f] d(ominus) Munius Monis h(ic) i(a)cet /"
+  },
+  {
+   "record": "EDCS-38700101-0",
+   "date_from": "1034",
+   "date_to": "1034",
+   "abbrev": "d",
+   "expansion": "dominus",
+   "province": "Lusitania",
+   "context": "V(enerabilis) f(rater) [d] Munius Monis h(ic) i(a)cet / in suo ass"
+  },
+  {
+   "record": "EDCS-38700101-0",
+   "date_from": "1034",
+   "date_to": "1034",
+   "abbrev": "h",
+   "expansion": "hic",
+   "province": "Lusitania",
+   "context": "abilis) f(rater) d(ominus) Munius Monis [h] i(a)cet / in suo assisterio (a)era MLXX"
+  },
+  {
+   "record": "EDCS-38700101-0",
+   "date_from": "1034",
+   "date_to": "1034",
+   "abbrev": "icet",
+   "expansion": "iacet",
+   "province": "Lusitania",
+   "context": ") f(rater) d(ominus) Munius Monis h(ic) [icet] / in suo assisterio (a)era MLXXII"
+  },
+  {
+   "record": "EDCS-38700101-0",
+   "date_from": "1034",
+   "date_to": "1034",
+   "abbrev": "era",
+   "expansion": "aera",
+   "province": "Lusitania",
+   "context": "Monis h(ic) i(a)cet / in suo assisterio [era] MLXXII"
+  },
+  {
+   "record": "EDCS-41800130-0",
+   "date_from": "1169",
+   "date_to": "1169",
+   "abbrev": "H",
+   "expansion": "Hoc",
+   "province": "Britannia",
+   "context": " [H] est sepulcrum Wleder matris / Odelev qu"
+  },
+  {
+   "record": "EDCS-41800130-0",
+   "date_from": "1169",
+   "date_to": "1169",
+   "abbrev": "eclesia",
+   "expansion": "ecclesiam",
+   "province": "Britannia",
+   "context": "delev qui primum (a)edificav[it] / hanc [eclesia] / in t(e)mpore Ewini regis"
+  },
+  {
+   "record": "EDCS-41800130-0",
+   "date_from": "1169",
+   "date_to": "1169",
+   "abbrev": "tmpore",
+   "expansion": "tempore",
+   "province": "Britannia",
+   "context": ")edificav[it] / hanc ec(c)lesia(m) / in [tmpore] Ewini regis"
+  },
+  {
+   "record": "EDCS-48700548-0",
+   "date_from": "1101",
+   "date_to": "1200",
+   "abbrev": "mar",
+   "expansion": "martyr",
+   "province": "Latium et Campania / Regio I",
+   "context": "Hic requi/escit bea/tus Ypoli/tus [mar] "
+  },
+  {
+   "record": "EDCS-74600010-0",
+   "date_from": "601",
+   "date_to": "1200",
+   "abbrev": "Martinu",
+   "expansion": "Martinus",
+   "province": "Hispania citerior",
+   "context": " [Martinu] "
+  },
+  {
+   "record": "EDCS-75900020-0",
+   "date_from": "1501",
+   "date_to": "1700",
+   "abbrev": "nra",
+   "expansion": "nostra",
+   "province": "Samnium / Regio IV",
+   "context": "EPS sa cosi la / [v]ita [nra] al mon<d=N>o passa"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "Chr",
+   "expansion": "Christi",
+   "province": "Africa proconsularis",
+   "context": "In [Chr] nomine in hoc tumu[lo iacet cor]/pus bo"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "bone",
+   "expansion": "bonae",
+   "province": "Africa proconsularis",
+   "context": "i) nomine in hoc tumu[lo iacet cor]/pus [bone] memori(a)e Petrus <c=K>l[arissimus(?)]"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "memorie",
+   "expansion": "memoriae",
+   "province": "Africa proconsularis",
+   "context": "e in hoc tumu[lo iacet cor]/pus bon(a)e [memorie] Petrus <c=K>l[arissimus(?)] / iudex <v="
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "sclo",
+   "expansion": "saeculo",
+   "province": "Africa proconsularis",
+   "context": "[arissimus(?)] / iudex <v=B>ixit in hoc [sclo] annos se[xa]/ginta plus minus in anno V"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "millo",
+   "expansion": "millesimo",
+   "province": "Africa proconsularis",
+   "context": "nnos se[xa]/ginta plus minus in anno VI [millo] [3] / ind(i)ct(i)o(ne) quintadecima in"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "indcto",
+   "expansion": "indictione",
+   "province": "Africa proconsularis",
+   "context": "plus minus in anno VI mill(esim)o [3] / [indcto] quintadecima in prima d[ie] / mense Mar"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "Martiu",
+   "expansion": "Martius",
+   "province": "Africa proconsularis",
+   "context": "ne) quintadecima in prima d[ie] / mense [Martiu] migra<v=B>it de hoc s(ae)c(u)lo / requi"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "sclo",
+   "expansion": "saeculo",
+   "province": "Africa proconsularis",
+   "context": "] / mense Martiu(s) migra<v=B>it de hoc [sclo] / requiem (a)eternam (h)abeat et <v=B>i"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "eternam",
+   "expansion": "aeternam",
+   "province": "Africa proconsularis",
+   "context": "gra<v=B>it de hoc s(ae)c(u)lo / requiem [eternam] (h)abeat et <v=B>itam / (a)eternam poss"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "abeat",
+   "expansion": "habeat",
+   "province": "Africa proconsularis",
+   "context": "de hoc s(ae)c(u)lo / requiem (a)eternam [abeat] et <v=B>itam / (a)eternam possideat cum"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "eternam",
+   "expansion": "aeternam",
+   "province": "Africa proconsularis",
+   "context": "uiem (a)eternam (h)abeat et <v=B>itam / [eternam] possideat cum s(an)c(t)is et el/ectis o"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "scis",
+   "expansion": "sanctis",
+   "province": "Africa proconsularis",
+   "context": "et <v=B>itam / (a)eternam possideat cum [scis] et el/ectis omnibus am(en) am(en) am(en"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "am",
+   "expansion": "amen",
+   "province": "Africa proconsularis",
+   "context": "eat cum s(an)c(t)is et el/ectis omnibus [am] am(en) am(en) in te d(omi)ne / sperabi"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "am",
+   "expansion": "amen",
+   "province": "Africa proconsularis",
+   "context": "s(an)c(t)is et el/ectis omnibus am(en) [am] am(en) in te d(omi)ne / sperabi non con"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "am",
+   "expansion": "amen",
+   "province": "Africa proconsularis",
+   "context": "(t)is et el/ectis omnibus am(en) am(en) [am] in te d(omi)ne / sperabi non confundar"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "dne",
+   "expansion": "domine",
+   "province": "Africa proconsularis",
+   "context": "ctis omnibus am(en) am(en) am(en) in te [dne] / sperabi non confundar in (a)eternum"
+  },
+  {
+   "record": "EDCS-82200094-0",
+   "date_from": "1017",
+   "date_to": "1017",
+   "abbrev": "eternum",
+   "expansion": "aeternum",
+   "province": "Africa proconsularis",
+   "context": "te d(omi)ne / sperabi non confundar in [eternum] "
+  },
+  {
+   "record": "EDCS-82200095-0",
+   "date_from": "971",
+   "date_to": "1050",
+   "abbrev": "bone",
+   "expansion": "bonae",
+   "province": "Africa proconsularis",
+   "context": "In hoc tumulo ia<c=K>et <c=K>orpus [bone] memori(a)e Fokio[n(?) 3] / miseri<c=K>o"
+  },
+  {
+   "record": "EDCS-82200095-0",
+   "date_from": "971",
+   "date_to": "1050",
+   "abbrev": "memorie",
+   "expansion": "memoriae",
+   "province": "Africa proconsularis",
+   "context": "hoc tumulo ia<c=K>et <c=K>orpus bon(a)e [memorie] Fokio[n(?) 3] / miseri<c=K>ordia d(e)i"
+  },
+  {
+   "record": "EDCS-82200095-0",
+   "date_from": "971",
+   "date_to": "1050",
+   "abbrev": "di",
+   "expansion": "dei",
+   "province": "Africa proconsularis",
+   "context": "ri(a)e Fokio[n(?) 3] / miseri<c=K>ordia [di] plus minus annos L re<c=K>essit de (h)o"
+  },
+  {
+   "record": "EDCS-82200095-0",
+   "date_from": "971",
+   "date_to": "1050",
+   "abbrev": "reqiem",
+   "expansion": "requiem",
+   "province": "Africa proconsularis",
+   "context": "K>embre indi<c=K>tio(ne) o<c=K>ta<v=B>a [reqiem] (a)eternam det tibi d(omi)n(u)s / et l("
+  },
+  {
+   "record": "EDCS-82200095-0",
+   "date_from": "971",
+   "date_to": "1050",
+   "abbrev": "eternam",
+   "expansion": "aeternam",
+   "province": "Africa proconsularis",
+   "context": "di<c=K>tio(ne) o<c=K>ta<v=B>a req(u)iem [eternam] det tibi d(omi)n(u)s / et l(u)x perpetu"
+  },
+  {
+   "record": "EDCS-82200095-0",
+   "date_from": "971",
+   "date_to": "1050",
+   "abbrev": "dns",
+   "expansion": "dominus",
+   "province": "Africa proconsularis",
+   "context": ">ta<v=B>a req(u)iem (a)eternam det tibi [dns] / et l(u)x perpetua l(u)<g=K>eat tibi o"
+  },
+  {
+   "record": "EDCS-82200095-0",
+   "date_from": "971",
+   "date_to": "1050",
+   "abbrev": "lx",
+   "expansion": "lux",
+   "province": "Africa proconsularis",
+   "context": "em (a)eternam det tibi d(omi)n(u)s / et [lx] perpetua l(u)<g=K>eat tibi ossa arida r"
+  },
+  {
+   "record": "EDCS-82200095-0",
+   "date_from": "971",
+   "date_to": "1050",
+   "abbrev": "dni",
+   "expansion": "dominui",
+   "province": "Africa proconsularis",
+   "context": "etis et <v=B>(i)debitis ma<i=G>e/statem [dni] "
+  },
+  {
+   "record": "EDCS-82200096-0",
+   "date_from": "1021",
+   "date_to": "1021",
+   "abbrev": "sclo",
+   "expansion": "saeculo",
+   "province": "Africa proconsularis",
+   "context": "memoriae 3 vixit] / [plus minus] in hoc [sclo] annos [3 sub qua]r[t]adecima [die mensi"
+  },
+  {
+   "record": "EDCS-82200096-0",
+   "date_from": "1021",
+   "date_to": "1021",
+   "abbrev": "sclo",
+   "expansion": "saeculo",
+   "province": "Africa proconsularis",
+   "context": "di[c(tione)] quarta migra<v=B>it de hoc [sclo] requiem (a)eterna[m] / (h)abeat et [vit"
+  },
+  {
+   "record": "EDCS-82200096-0",
+   "date_from": "1021",
+   "date_to": "1021",
+   "abbrev": "abeat",
+   "expansion": "habeat",
+   "province": "Africa proconsularis",
+   "context": "hoc s(ae)c(u)lo requiem (a)eterna[m] / [abeat] et [vita]m (a)ete[rna]m pos[sidea]t cum"
+  },
+  {
+   "record": "EDCS-82200096-0",
+   "date_from": "1021",
+   "date_to": "1021",
+   "abbrev": "scis",
+   "expansion": "sanctis",
+   "province": "Africa proconsularis",
+   "context": "et [vita]m (a)ete[rna]m pos[sidea]t cum [scis] et electis am(en)"
+  },
+  {
+   "record": "EDCS-82200096-0",
+   "date_from": "1021",
+   "date_to": "1021",
+   "abbrev": "am",
+   "expansion": "amen",
+   "province": "Africa proconsularis",
+   "context": "pos[sidea]t cum s(an)c(t)is et electis [am] "
+  },
+  {
+   "record": "EDCS-82200097-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "lo",
+   "expansion": "lor",
+   "province": "Africa proconsularis",
+   "context": "aspicite et <v=B>idetis IFA [si est do]/ [lo] (veste)r qualis e(st) dolor meus"
+  },
+  {
+   "record": "EDCS-82200097-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "r",
+   "expansion": "vester",
+   "province": "Africa proconsularis",
+   "context": "te et <v=B>idetis IFA [si est do]/lo(r) [r] qualis e(st) dolor meus"
+  },
+  {
+   "record": "EDCS-82200097-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "e",
+   "expansion": "est",
+   "province": "Africa proconsularis",
+   "context": "s IFA [si est do]/lo(r) (veste)r qualis [e] dolor meus"
+  },
+  {
+   "record": "EDCS-82200098-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "bne",
+   "expansion": "bonae",
+   "province": "Africa proconsularis",
+   "context": "In hoc tumulo iacet corpus [bne] / mem(o)r(ia)e Solomonine <v=B>ita(m) ("
+  },
+  {
+   "record": "EDCS-82200098-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "memre",
+   "expansion": "memoriae",
+   "province": "Africa proconsularis",
+   "context": "In hoc tumulo iacet corpus b(o)n(a)e / [memre] Solomonine <v=B>ita(m) (a)eternam"
+  },
+  {
+   "record": "EDCS-82200098-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "eternam",
+   "expansion": "aeternam",
+   "province": "Africa proconsularis",
+   "context": "e / mem(o)r(ia)e Solomonine <v=B>ita(m) [eternam] "
+  },
+  {
+   "record": "EDCS-82200102-0",
+   "date_from": "1003",
+   "date_to": "1003",
+   "abbrev": "sclo",
+   "expansion": "saeculo",
+   "province": "Africa proconsularis",
+   "context": "Speratus Petrus filius <v=B>ixit in hoc [sclo] annos pl[us minus] / XXXX migra<v=B>it"
+  },
+  {
+   "record": "EDCS-82200102-0",
+   "date_from": "1003",
+   "date_to": "1003",
+   "abbrev": "sclo",
+   "expansion": "saeculo",
+   "province": "Africa proconsularis",
+   "context": "pl[us minus] / XXXX migra<v=B>it de hoc [sclo] in anno sexto mill(esim)o DXII ind(i)ct"
+  },
+  {
+   "record": "EDCS-82200102-0",
+   "date_from": "1003",
+   "date_to": "1003",
+   "abbrev": "millo",
+   "expansion": "millesimo",
+   "province": "Africa proconsularis",
+   "context": "v=B>it de hoc s(ae)c(u)lo in anno sexto [millo] DXII ind(i)ct(i)o(ne) / secunda in mens"
+  },
+  {
+   "record": "EDCS-82200102-0",
+   "date_from": "1003",
+   "date_to": "1003",
+   "abbrev": "indcto",
+   "expansion": "indictione",
+   "province": "Africa proconsularis",
+   "context": "e)c(u)lo in anno sexto mill(esim)o DXII [indcto] / secunda in mense No<v=B>embre re<q=C>"
+  },
+  {
+   "record": "EDCS-82200102-0",
+   "date_from": "1003",
+   "date_to": "1003",
+   "abbrev": "eternam",
+   "expansion": "aeternam",
+   "province": "Africa proconsularis",
+   "context": "cunda in mense No<v=B>embre re<q=C>uiem [eternam] (h)abeat et / <v=B>itam (a)eternam poss"
+  },
+  {
+   "record": "EDCS-82200102-0",
+   "date_from": "1003",
+   "date_to": "1003",
+   "abbrev": "abeat",
+   "expansion": "habeat",
+   "province": "Africa proconsularis",
+   "context": "nse No<v=B>embre re<q=C>uiem (a)eternam [abeat] et / <v=B>itam (a)eternam possideat am("
+  },
+  {
+   "record": "EDCS-82200102-0",
+   "date_from": "1003",
+   "date_to": "1003",
+   "abbrev": "eternam",
+   "expansion": "aeternam",
+   "province": "Africa proconsularis",
+   "context": "uiem (a)eternam (h)abeat et / <v=B>itam [eternam] possideat am(en) am(en) am(en)"
+  },
+  {
+   "record": "EDCS-82200102-0",
+   "date_from": "1003",
+   "date_to": "1003",
+   "abbrev": "am",
+   "expansion": "amen",
+   "province": "Africa proconsularis",
+   "context": "eat et / <v=B>itam (a)eternam possideat [am] am(en) am(en)"
+  },
+  {
+   "record": "EDCS-82200102-0",
+   "date_from": "1003",
+   "date_to": "1003",
+   "abbrev": "am",
+   "expansion": "amen",
+   "province": "Africa proconsularis",
+   "context": "/ <v=B>itam (a)eternam possideat am(en) [am] am(en)"
+  },
+  {
+   "record": "EDCS-82200102-0",
+   "date_from": "1003",
+   "date_to": "1003",
+   "abbrev": "am",
+   "expansion": "amen",
+   "province": "Africa proconsularis",
+   "context": "itam (a)eternam possideat am(en) am(en) [am] "
+  },
+  {
+   "record": "EDCS-82200103-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "bone",
+   "expansion": "bonae",
+   "province": "Africa proconsularis",
+   "context": "In (h)o<c=K> [tumulo] ia<c=K>et corpus [bone] memori(a)e ab(b)a Laurentius mona<c=K>("
+  },
+  {
+   "record": "EDCS-82200103-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "memorie",
+   "expansion": "memoriae",
+   "province": "Africa proconsularis",
+   "context": "<c=K> [tumulo] ia<c=K>et corpus bon(a)e [memorie] ab(b)a Laurentius mona<c=K>(h)us / dul<"
+  },
+  {
+   "record": "EDCS-82200103-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "aba",
+   "expansion": "abba",
+   "province": "Africa proconsularis",
+   "context": "lo] ia<c=K>et corpus bon(a)e memori(a)e [aba] Laurentius mona<c=K>(h)us / dul<c=K>iss"
+  },
+  {
+   "record": "EDCS-82200103-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "d",
+   "expansion": "die",
+   "province": "Africa proconsularis",
+   "context": "III re<c=K>essit [de hoc saeculo] / sub [d] tertiu(s) Kalendas De<c=K>ember ind(ict"
+  },
+  {
+   "record": "EDCS-82200103-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "tertiu",
+   "expansion": "tertius",
+   "province": "Africa proconsularis",
+   "context": "<c=K>essit [de hoc saeculo] / sub d(ie) [tertiu] Kalendas De<c=K>ember ind(ictione) XIII"
+  },
+  {
+   "record": "EDCS-82200103-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "ind",
+   "expansion": "indictione",
+   "province": "Africa proconsularis",
+   "context": "b d(ie) tertiu(s) Kalendas De<c=K>ember [ind] XIII"
+  },
+  {
+   "record": "EDCS-82200104-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "bone",
+   "expansion": "bonae",
+   "province": "Africa proconsularis",
+   "context": "[In hoc] tumulo ia<c=K>et <c=K>orpus [bone] memori(a)e ab(b)a Petrus mon(ach)u(s) /"
+  },
+  {
+   "record": "EDCS-82200104-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "memorie",
+   "expansion": "memoriae",
+   "province": "Africa proconsularis",
+   "context": "oc] tumulo ia<c=K>et <c=K>orpus bon(a)e [memorie] ab(b)a Petrus mon(ach)u(s) / <v=B>ixit"
+  },
+  {
+   "record": "EDCS-82200104-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "aba",
+   "expansion": "abba",
+   "province": "Africa proconsularis",
+   "context": "ia<c=K>et <c=K>orpus bon(a)e memori(a)e [aba] Petrus mon(ach)u(s) / <v=B>ixit in pa<c"
+  },
+  {
+   "record": "EDCS-82200104-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "monu",
+   "expansion": "monachus",
+   "province": "Africa proconsularis",
+   "context": ">orpus bon(a)e memori(a)e ab(b)a Petrus [monu] / <v=B>ixit in pa<c=K>e annos plus minu"
+  },
+  {
+   "record": "EDCS-82200104-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "se",
+   "expansion": "sae",
+   "province": "Africa proconsularis",
+   "context": "us minus LXXV re<c=K>essit de (h)o<c=K> [se] /<c=K>ulo sub die XXI indictionis X requ"
+  },
+  {
+   "record": "EDCS-82200104-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "eternam",
+   "expansion": "aeternam",
+   "province": "Africa proconsularis",
+   "context": "K>ulo sub die XXI indictionis X requiem [eternam] det / tibi dominus et l(u)x perpetua lu"
+  },
+  {
+   "record": "EDCS-82200104-0",
+   "date_from": "951",
+   "date_to": "1050",
+   "abbrev": "lx",
+   "expansion": "lux",
+   "province": "Africa proconsularis",
+   "context": "equiem (a)eternam det / tibi dominus et [lx] perpetua lu<g=K>eat tibi indulgentia"
+  },
+  {
+   "record": "EDCS-83200023-0",
+   "date_from": "1501",
+   "date_to": "1600",
+   "abbrev": "cur",
+   "expansion": "curator",
+   "province": "Aemilia / Regio VIII",
+   "context": "[3 F]lavius [cur] aedium Arim[inensium 3]"
+  },
+  {
+   "record": "EDCS-85200148-0",
+   "date_from": "1435",
+   "date_to": "1435",
+   "abbrev": "fcm",
+   "expansion": "factum",
+   "province": "Umbria / Regio VI",
+   "context": "1435 / [fcm] e(st) h(oc) p(er) m(agistrum) Th()"
+  },
+  {
+   "record": "EDCS-85200148-0",
+   "date_from": "1435",
+   "date_to": "1435",
+   "abbrev": "e",
+   "expansion": "est",
+   "province": "Umbria / Regio VI",
+   "context": "1435 / f(a)c(tu)m [e] h(oc) p(er) m(agistrum) Th()"
+  },
+  {
+   "record": "EDCS-85200148-0",
+   "date_from": "1435",
+   "date_to": "1435",
+   "abbrev": "h",
+   "expansion": "hoc",
+   "province": "Umbria / Regio VI",
+   "context": "1435 / f(a)c(tu)m e(st) [h] p(er) m(agistrum) Th()"
+  },
+  {
+   "record": "EDCS-85200148-0",
+   "date_from": "1435",
+   "date_to": "1435",
+   "abbrev": "p",
+   "expansion": "per",
+   "province": "Umbria / Regio VI",
+   "context": "1435 / f(a)c(tu)m e(st) h(oc) [p] m(agistrum) Th()"
+  },
+  {
+   "record": "EDCS-85200148-0",
+   "date_from": "1435",
+   "date_to": "1435",
+   "abbrev": "m",
+   "expansion": "magistrum",
+   "province": "Umbria / Regio VI",
+   "context": "1435 / f(a)c(tu)m e(st) h(oc) p(er) [m] Th()"
+  }
+ ],
+ "linebreak_examples": [
+  {
+   "record": "EDCS-00000160-0",
+   "abbrev": "tine",
+   "expansion": "tinae",
+   "left_context": "D(is) M(anibus) Teren/tiae Quin/",
+   "right_context": "def(unctae) an(norum) / XXVII Ti{o}/tul"
+  },
+  {
+   "record": "EDCS-00000163-0",
+   "abbrev": "adiae",
+   "expansion": "audiae",
+   "left_context": "D(is) M(anibus) / Alexan/dria Cl/",
+   "right_context": "Da/fin{n}e a/nim(a)e in/nocen/ti qu(a)e"
+  },
+  {
+   "record": "EDCS-00000163-0",
+   "abbrev": "nime",
+   "expansion": "nimae",
+   "left_context": "/ Alexan/dria Cl/a(u)diae Da/fin{n}e a/",
+   "right_context": "in/nocen/ti qu(a)e / vixit a/n(n)os V /"
+  },
+  {
+   "record": "EDCS-00000163-0",
+   "abbrev": "nos",
+   "expansion": "nnos",
+   "left_context": "a/nim(a)e in/nocen/ti qu(a)e / vixit a/",
+   "right_context": "V / m(enses) IIII (i)nfe/licis(s)im(a)e"
+  },
+  {
+   "record": "EDCS-00000163-0",
+   "abbrev": "licisime",
+   "expansion": "licissimae",
+   "left_context": "vixit a/n(n)os V / m(enses) IIII (i)nfe/",
+   "right_context": ""
+  },
+  {
+   "record": "EDCS-00000237-0",
+   "abbrev": "ib",
+   "expansion": "ibunicia",
+   "left_context": "German/ico maximo pon/tifici maximo tr/",
+   "right_context": "pot(estate) XVII imp(eratori) III co(n)"
+  },
+  {
+   "record": "EDCS-00000245-2",
+   "abbrev": "rit",
+   "expansion": "ritis",
+   "left_context": "Caecio Severo XXVI stipend(iis) eme/",
+   "right_context": "dimissi(s) honest(a) mission(e), qu"
+  },
+  {
+   "record": "EDCS-00000601-0",
+   "abbrev": "nonis",
+   "expansion": "nnonis",
+   "left_context": "Times Va/",
+   "right_context": "vic(o?) / Muc(--) vixit / an(n)os / IX"
+  },
+  {
+   "record": "EDCS-00000620-0",
+   "abbrev": "tur",
+   "expansion": "turum",
+   "left_context": "ricor(um) et III Lusitan(orum) et II As/",
+   "right_context": "et Callaec(orum) et VII Breucor(um) et"
+  },
+  {
+   "record": "EDCS-00000897-0",
+   "abbrev": "madar",
+   "expansion": "madariorum",
+   "left_context": "eteran(a) Gaetul(orum) et I Ulp(ia) dro/",
+   "right_context": "(miliaria) et I Aug(usta) Thracum et I"
+  },
+  {
+   "record": "EDCS-00000897-0",
+   "abbrev": "script",
+   "expansion": "scripta",
+   "left_context": "o/nesta mission(e), quorum nomin(a) sub/",
+   "right_context": "sunt, civitatem Roman(am), qui / eorum"
+  },
+  {
+   "record": "EDCS-00000909-0",
+   "abbrev": "ne",
+   "expansion": "nervae",
+   "left_context": "Mi/",
+   "right_context": ""
+  },
+  {
+   "record": "EDCS-00001215-0",
+   "abbrev": "c",
+   "expansion": "cillum",
+   "left_context": "C() C() S() p{a}eni/",
+   "right_context": "l(ene) ad imp(etum)"
+  },
+  {
+   "record": "EDCS-00001237-0",
+   "abbrev": "terorumq",
+   "expansion": "terorumque",
+   "left_context": "fidem clientelam/que suam liberorum pos/",
+   "right_context": "suorum recepit / egerunt M(arcus) Papir"
+  },
+  {
+   "record": "EDCS-00001324-0",
+   "abbrev": "l",
+   "expansion": "licis",
+   "left_context": "Imp(eratoris) Commo/di Aug(usti) Pii Fe/",
+   "right_context": "positi per / Aurelium I/asonem proc(ura"
+  },
+  {
+   "record": "EDCS-00001341-0",
+   "abbrev": "lente",
+   "expansion": "alentes",
+   "left_context": "α οππρε/σ(σ)ειτ ρουει/να §An(na)ei V/",
+   "right_context": "/ annoru(m) / quadragi(n)/ta oppre/s(s)"
+  },
+  {
+   "record": "EDCS-00001341-0",
+   "abbrev": "sit",
+   "expansion": "ssit",
+   "left_context": "e(s) / annoru(m) / quadragi(n)/ta oppre/",
+   "right_context": "rui/na"
+  },
+  {
+   "record": "EDCS-00300147-0",
+   "abbrev": "nilis",
+   "expansion": "nialis",
+   "left_context": "Respecta / san(c)timo/",
+   "right_context": "fide/[l]is in pace"
+  },
+  {
+   "record": "EDCS-00300190-0",
+   "abbrev": "beorum",
+   "expansion": "baeorum",
+   "left_context": "(m) fratrum / (h)ic me(moriae) Mac(ch)a/",
+   "right_context": ""
+  },
+  {
+   "record": "EDCS-00300250-0",
+   "abbrev": "i",
+   "expansion": "is",
+   "left_context": "Hostrild/",
+   "right_context": "fidelis in / pace vixit / ann[os"
+  },
+  {
+   "record": "EDCS-00300257-0",
+   "abbrev": "ue",
+   "expansion": "uie",
+   "left_context": "Bic/tor(!) in / pa[ce e]t / in [re]q/",
+   "right_context": ""
+  },
+  {
+   "record": "EDCS-00300352-0",
+   "abbrev": "dict",
+   "expansion": "dictione",
+   "left_context": "d(e)p(ositus) IIII Id(us) April(es) in/",
+   "right_context": "XII"
+  },
+  {
+   "record": "EDCS-00380092-1",
+   "abbrev": "ua",
+   "expansion": "uae",
+   "left_context": "X mensi(b)us IIII / Cresce(n)s filiae s/",
+   "right_context": "fecit"
+  },
+  {
+   "record": "EDCS-00380166-0",
+   "abbrev": "lcissime",
+   "expansion": "lcissimae",
+   "left_context": "moriae Sa/binae anim(a)e / innocenti du/",
+   "right_context": "Maxi/mus amicus / eius b(ene) m(erenti)"
+  },
+  {
+   "record": "EDCS-00380169-0",
+   "abbrev": "tute",
+   "expansion": "tutae",
+   "left_context": "D(is) M(anibus) / Vibiae Res/",
+   "right_context": "fil(iae) / kar(issimae) q(uae) vix(it)"
+  },
+  {
+   "record": "EDCS-00380175-0",
+   "abbrev": "ule",
+   "expansion": "ulae",
+   "left_context": "D(is) M(anibus) s(acrum) / Iuliae Felic/",
+   "right_context": "Iulius / [3] co(n)iugi / ["
+  },
+  {
+   "record": "EDCS-00380242-0",
+   "abbrev": "aesa",
+   "expansion": "aesar",
+   "left_context": ") I/nvictus Aug(ustus) et Imp(erator) C/",
+   "right_context": "M(arcus) Aurelius Val/erius Maxi[mianus"
+  },
+  {
+   "record": "EDCS-00380336-0",
+   "abbrev": "n",
+   "expansion": "nos",
+   "left_context": "M(arco) / Aur(elio) Val() / vi{c}xit an/",
+   "right_context": "LXVII"
+  },
+  {
+   "record": "EDCS-00380429-0",
+   "abbrev": "r",
+   "expansion": "ram",
+   "left_context": "D[eo La]/ri Be/ro Br/eo a/",
+   "right_context": "posui"
+  },
+  {
+   "record": "EDCS-00380450-0",
+   "abbrev": "i",
+   "expansion": "io",
+   "left_context": "Clout/",
+   "right_context": "Ama / anno(rum) / LXXXV / h(ic) s(itus)"
+  },
+  {
+   "record": "EDCS-00380453-0",
+   "abbrev": "n",
+   "expansion": "nnorum",
+   "left_context": "Luci/us Qu/adra/ti f(ilius) a/",
+   "right_context": "XXX/V h(ic) s(itus) / e(st) s(it) t(ibi"
+  },
+  {
+   "record": "EDCS-00380454-0",
+   "abbrev": "o",
+   "expansion": "orum",
+   "left_context": "D(is) M(anibus) / [3]o[3] / [3 a]nn/",
+   "right_context": "[3] / [h(ic) s(itus?) t(ibi)] t(erra) l"
+  },
+  {
+   "record": "EDCS-00380487-2",
+   "abbrev": "an",
+   "expansion": "anae",
+   "left_context": "Filius / matri p(ientissimae?) / Valeri/",
+   "right_context": "d(e) s(uo) t(estamento?) / anno/ru(m) L"
+  },
+  {
+   "record": "EDCS-00380487-2",
+   "abbrev": "ru",
+   "expansion": "rum",
+   "left_context": "/an(ae) d(e) s(uo) t(estamento?) / anno/",
+   "right_context": "LXXV / s(it) t(erra) l(evis)"
+  },
+  {
+   "record": "EDCS-00380525-0",
+   "abbrev": "ortuni",
+   "expansion": "ortunio",
+   "left_context": "L(ucio) Pet() F/",
+   "right_context": "/ an(norum) XXXV"
+  },
+  {
+   "record": "EDCS-00380670-0",
+   "abbrev": "i",
+   "expansion": "ia",
+   "left_context": "Viva/s Mic/",
+   "right_context": "Dom()"
+  },
+  {
+   "record": "EDCS-00380802-0",
+   "abbrev": "ngr",
+   "expansion": "ngrorum",
+   "left_context": "a/ri f(ilius) Ubius / eq(ues) ala(e) Tu/",
+   "right_context": "ann(orum) / XXVI sti(pendiorum) V / h(i"
+  },
+  {
+   "record": "EDCS-00380809-0",
+   "abbrev": "me",
+   "expansion": "mae",
+   "left_context": "ubli) f(iliae) Panoni / coniugi carissi/",
+   "right_context": "T(itus) Curiatius / Seneca marit[us] /"
+  },
+  {
+   "record": "EDCS-00380816-0",
+   "abbrev": "carunt",
+   "expansion": "caverunt",
+   "left_context": "n[t] et locu(m) sepultur(a)e [a]ed(i)fi/",
+   "right_context": "qui[s]quis volu/eret [se]p[ul]tus vexa["
+  },
+  {
+   "record": "EDCS-00380829-0",
+   "abbrev": "abusqe",
+   "expansion": "abusque",
+   "left_context": "n(oni) et Min(ervae) / ceter(is) dis de/",
+   "right_context": "Aces/tius Victor / b(ene)f(iciarius) co"
+  }
+ ]
+}

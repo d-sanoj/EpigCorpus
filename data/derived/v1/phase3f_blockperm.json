@@ -1,0 +1,245 @@
+{
+ "seed": 20260820,
+ "permutations": 200,
+ "v|province": {
+  "n_pairs": 38855,
+  "n_stones": 35063,
+  "nmi": 0.37092,
+  "pair_null_p95": 0.02822,
+  "block_null_p95": 0.03037,
+  "ratio_block": 12.21
+ },
+ "v|century": {
+  "n_pairs": 11539,
+  "n_stones": 10577,
+  "nmi": 0.3357,
+  "pair_null_p95": 0.02425,
+  "block_null_p95": 0.02584,
+  "ratio_block": 12.99
+ },
+ "c|province": {
+  "n_pairs": 64425,
+  "n_stones": 45133,
+  "nmi": 0.16111,
+  "pair_null_p95": 0.03309,
+  "block_null_p95": 0.04624,
+  "ratio_block": 3.48
+ },
+ "c|century": {
+  "n_pairs": 23212,
+  "n_stones": 16066,
+  "nmi": 0.25853,
+  "pair_null_p95": 0.02471,
+  "block_null_p95": 0.02777,
+  "ratio_block": 9.31
+ },
+ "a|province": {
+  "n_pairs": 30531,
+  "n_stones": 25661,
+  "nmi": 0.31265,
+  "pair_null_p95": 0.03898,
+  "block_null_p95": 0.04616,
+  "ratio_block": 6.77
+ },
+ "a|century": {
+  "n_pairs": 8134,
+  "n_stones": 6763,
+  "nmi": 0.22094,
+  "pair_null_p95": 0.04512,
+  "block_null_p95": 0.05379,
+  "ratio_block": 4.11
+ },
+ "l|province": {
+  "n_pairs": 90830,
+  "n_stones": 60503,
+  "nmi": 0.16491,
+  "pair_null_p95": 0.01162,
+  "block_null_p95": 0.01729,
+  "ratio_block": 9.54
+ },
+ "l|century": {
+  "n_pairs": 33058,
+  "n_stones": 21094,
+  "nmi": 0.17426,
+  "pair_null_p95": 0.00936,
+  "block_null_p95": 0.01215,
+  "ratio_block": 14.35
+ },
+ "aug|province": {
+  "n_pairs": 29467,
+  "n_stones": 24175,
+  "nmi": 0.15604,
+  "pair_null_p95": 0.0132,
+  "block_null_p95": 0.01467,
+  "ratio_block": 10.64
+ },
+ "aug|century": {
+  "n_pairs": 14694,
+  "n_stones": 11726,
+  "nmi": 0.10868,
+  "pair_null_p95": 0.00558,
+  "block_null_p95": 0.00596,
+  "ratio_block": 18.24
+ },
+ "dist_v_province": {
+  "Numidia": {
+   "vixit": 7958,
+   "votum": 214,
+   "vir": 119,
+   "viro": 85,
+   "viri": 47
+  },
+  "Roma": {
+   "vixit": 2938,
+   "vir": 497,
+   "viro": 461,
+   "viri": 427,
+   "vivus": 243
+  },
+  "Africa proconsularis": {
+   "vixit": 3495,
+   "votum": 513,
+   "viro": 220,
+   "viri": 146,
+   "vir": 118
+  },
+  "Latium et Campania / Regio I": {
+   "vos": 988,
+   "vixit": 413,
+   "viro": 175,
+   "virum": 160,
+   "viri": 148
+  },
+  "Venetia et Histria / Regio X": {
+   "vivus": 540,
+   "votum": 516,
+   "viva": 207,
+   "vivi": 59,
+   "vir": 44
+  },
+  "Britannia": {
+   "victrix": 550,
+   "valeria": 448,
+   "votum": 281,
+   "victricis": 92,
+   "valeriae": 75
+  },
+  "Gallia Narbonensis": {
+   "votum": 471,
+   "vivus": 94,
+   "vivit": 77,
+   "viennae": 63,
+   "viva": 54
+  },
+  "Pannonia superior": {
+   "votum": 625,
+   "vivus": 94,
+   "victrix": 40,
+   "viva": 33,
+   "victricis": 31
+  },
+  "Mauretania Caesariensis": {
+   "vixit": 734,
+   "votum": 79,
+   "vir": 29,
+   "viro": 22,
+   "viri": 19
+  },
+  "Germania superior": {
+   "votum": 541,
+   "victrix": 227,
+   "victricis": 21,
+   "voto": 19,
+   "voluntariorum": 6
+  },
+  "Apulia et Calabria / Regio II": {
+   "vixit": 610,
+   "viro": 45,
+   "vir": 27,
+   "votum": 25,
+   "viri": 17
+  },
+  "Transpadana / Regio XI": {
+   "votum": 303,
+   "vivus": 166,
+   "vixit": 50,
+   "viva": 49,
+   "viro": 46
+  }
+ },
+ "dist_c_century": {
+  "1AD": {
+   "cai": 3766,
+   "caius": 2949,
+   "caio": 1341,
+   "curavit": 348,
+   "caium": 187
+  },
+  "2AD": {
+   "caius": 1787,
+   "cai": 1379,
+   "caio": 999,
+   "curavit": 496,
+   "civium": 451
+  },
+  "3AD": {
+   "caius": 588,
+   "caio": 493,
+   "cai": 262,
+   "cohors": 201,
+   "curavit": 162
+  },
+  "1BC": {
+   "cai": 1095,
+   "caius": 756,
+   "caio": 188,
+   "consulto": 165,
+   "comitialis": 49
+  },
+  "4AD": {
+   "clarissimus": 265,
+   "clarissimo": 213,
+   "clarissimi": 105,
+   "clarissimae": 48,
+   "caio": 48
+  },
+  "5AD": {
+   "clarissimo": 172,
+   "clarissimi": 94,
+   "clarissimus": 79,
+   "clarissimis": 54,
+   "clarissimorum": 25
+  },
+  "6AD": {
+   "consulatum": 160,
+   "clarissimi": 145,
+   "clarissimo": 88,
+   "clarissimus": 21,
+   "consule": 15
+  },
+  "2BC": {
+   "cai": 128,
+   "caius": 107,
+   "caio": 9,
+   "curaverunt": 2,
+   "coiravere": 1
+  },
+  "3BC": {
+   "cai": 45,
+   "caius": 44,
+   "caios": 9,
+   "caiae": 1,
+   "caio": 1
+  },
+  "7AD": {
+   "consulatum": 5,
+   "cum": 2,
+   "clarissimi": 2,
+   "consulis": 1,
+   "christus": 1
+  },
+  "8AD": {
+   "cum": 1
+  }
+ }
+}
