@@ -172,3 +172,112 @@ corrupted.
 the brief and unnecessary.
 
 **Status.** SETTLED.
+
+---
+
+## D-0006 — Phase 0 re-verified in the current session; D-0001..D-0003 stand
+
+**Decided.** The 1,424,314-pair base is re-confirmed by computation performed
+in *this* session, not inherited from the prior session's log. Phases 1-12
+may build on it.
+
+**Evidence.** Commit `537c159`, tracked tree clean, Python 3.13.13, pandas
+3.0.1, numpy 2.4.3 (full package set in `reports/env/phase0_environment.md`).
+
+`scripts/abbrev_probe.py` re-run **unmodified**; `data/derived/abbrev_pairs.tsv`
+and `reports/abbrev_probe.md` are byte-identical to the frozen prior copies
+(`fabb6e0e…`, `7799f9b8…`). Counts were then re-derived *independently of the
+report* by `scripts/phase0_verify.py`: 588,509 records by a fresh JSON pass
+(0 parse failures, 0 missing required fields) and 1,424,314 pairs by
+`csv.reader` (0 malformed rows, 0 embedded newlines, 0 TSV ids absent from
+the raw corpus). Working `.jsonl` and committed `.jsonl.gz` hash identically.
+
+Determinism re-tested this session under `PYTHONHASHSEED` 1, 12345 and
+`random`, and from a different working directory: all outputs unchanged.
+
+**Alternatives rejected.** Accepting D-0002 as already settled. Rejected
+under R1 — a decision log entry written by an earlier session is a claim, not
+a computation, and the standing rule requires the number to be traceable to
+work done here. The re-run cost 15 s; the alternative cost credibility.
+
+**Overturned by.** Any change to `data/edcs_inscriptions.jsonl` (D-0001) or
+to `scripts/abbrev_probe.py`.
+
+**Status.** SETTLED.
+
+---
+
+## D-0007 — Extractor correctness is corroborated by a second implementation, not by re-running the first
+
+**Decided.** The primary extractor is treated as free of *coding* defects at
+the 10⁻⁴ level. Its *interpretive* correctness remains open and is delegated
+to Phase 1.
+
+**Evidence.** `scripts/phase0_second_implementation.py` is a separately
+written extractor built from the EDCS convention rather than from
+`abbrev_probe.py`. Multiset comparison on (record_id, abbrev, expansion):
+
+| | pairs |
+| --- | --- |
+| primary | 1,424,314 |
+| second implementation | 1,471,175 |
+| agreement | 1,424,238 (99.995% of primary) |
+| only in second | 46,937 |
+| only in primary | 76 |
+
+All 76 primary-only pairs were mechanically classified by
+`scripts/phase0_explain_disagreements.py`: 74 are trailing-punctuation or
+combining-diacritic noise the second version fails to normalise, 2 are the
+second version failing to treat the interpunct `·` as a token boundary
+(`EDCS-00000567-0`). **Zero unexplained.** The 46,937 second-only pairs are
+bracket-contaminated fragments (`[3 qui frumen]t(o)` → `t → to`) that the
+primary correctly rejects.
+
+**Why this matters beyond Phase 0.** The 46,937 figure is incidental
+independent support for the `inside_bracket_markup` exclusion being a genuine
+noise filter rather than arbitrary data loss — but it is *not* a measurement
+of that exclusion and must not be quoted as one. Phase 1 measures it properly.
+
+**Alternatives rejected.** Treating byte-identical re-runs as sufficient.
+Rejected: reproducing a bug reproduces the bug. This is the single most
+likely reviewer attack on Phase 0 and needed an answer that does not reuse
+the code under test.
+
+**Limitation, stated plainly.** A misreading of the EDCS convention shared by
+both implementations is invisible to this check. Nothing in Phase 0 rules
+that out.
+
+**Overturned by.** A third implementation, or a Latinist review of the
+convention, disagreeing materially. [VERIFY — LATINIST]
+
+**Status.** SETTLED as to coding correctness. Interpretive correctness
+UNRESOLVED, deferred to Phase 1.
+
+---
+
+## D-0008 — Two observations logged but deliberately not quantified in Phase 0
+
+**Decided.** Recorded so they are not lost, and explicitly barred from any
+table of computed figures until their own phase measures them.
+
+**Evidence and status.**
+
+1. **42,538 records carry `(` yet yield no pair.** 380,282 raw records
+   contain an opening parenthesis; 337,744 distinct ids appear in the pair
+   TSV. Both counts are computed (`scripts/phase0_verify.py`). The *reason*
+   for the gap is not. This is the total exclusion surface Phase 1 must
+   reconcile against its per-category counts — if the categories do not sum
+   to something consistent with this, a category is missing.
+   **Status:** SETTLED as a count, UNRESOLVED as an explanation.
+
+2. **U+0305 combining overline is present in the corpus.** Observed in
+   `EDCS-00000939-0` (`q̅(uaestori)`). **Impression, 1 example examined.** No
+   rate, share, or prevalence claim is made or permitted from this. It
+   raises the prior that Phase 2's vinculum scan will not be a pure negative
+   result — which is precisely why Phase 2 must run before any numeral rule
+   is written, rather than being skipped as an expected null.
+   **Status:** UNRESOLVED, owned by Phase 2.
+
+**Alternatives rejected.** Folding either into the Phase 0 result tables.
+Rejected under R6 — one is an unexplained count and the other is an
+eyeballed sighting; neither is a finding yet.
