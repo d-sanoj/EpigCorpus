@@ -33,7 +33,9 @@ Doddapaneni, S. (n.d.). EpigCorpus: A reproducible Latin epigraphy pipeline for 
 - Two cleaning outputs for analysis workflows:
   - Conservative Cleaned Inscriptions
   - Interpretive Cleaned Inscriptions
-- Interactive map with Roman provinces, roads, cities, and inscription points.
+- Interactive dark-basemap map: one circle per place sized by its inscription
+  count, a teal "known places" layer with tangerine search results drawn above
+  it, and optional Roman provinces, roads and cities overlays.
 - Search across raw and cleaned text.
 - TSV download and publication-style PNG map export.
 
@@ -74,7 +76,6 @@ Core packages:
 - geopandas
 - matplotlib
 - pandas
-- folium
 - requests
 - streamlit
 
@@ -89,7 +90,7 @@ uv sync
 Using pip:
 
 ```bash
-pip install geopandas matplotlib pandas folium requests streamlit
+pip install geopandas matplotlib pandas requests streamlit
 ```
 
 ## Quick Start
@@ -172,9 +173,13 @@ Implemented in src/edcs_cleaner.py:
 
 Implemented in src/edcs_streamlit_map.py:
 - Search modes: Raw inscriptions, Interpretive Cleaned Inscriptions, Conservative Cleaned Inscriptions.
-- Interactive map with layers and popups.
+- Interactive Leaflet map with layer toggles, hover tooltips and result popups.
 - TSV export for result tables.
-- PNG export with attribution footer.
+- Multi-select filters for material, category, language, province and place,
+  combinable with the keyword search.
+- PNG export in the map's own dark palette, always available: it carries the
+  title, the search term, every active filter, the result count, search mode,
+  data source and the attribution footer.
 
 ## Data and Software References
 
@@ -200,7 +205,7 @@ Implemented in src/edcs_streamlit_map.py:
 2. pandas. https://pandas.pydata.org/
 3. GeoPandas. https://geopandas.org/
 4. Matplotlib. https://matplotlib.org/
-5. Folium. https://python-visualization.github.io/folium/
+5. Leaflet. https://leafletjs.com/
 6. Requests. https://requests.readthedocs.io/
 7. Streamlit. https://streamlit.io/
 
