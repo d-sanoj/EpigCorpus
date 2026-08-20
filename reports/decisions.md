@@ -281,3 +281,227 @@ table of computed figures until their own phase measures them.
 **Alternatives rejected.** Folding either into the Phase 0 result tables.
 Rejected under R6 — one is an unexplained count and the other is an
 eyeballed sighting; neither is a finding yet.
+
+---
+
+## D-0009 — Every published exclusion count is a first-match count; two categories are materially undercounted
+
+**Decided.** `reports/exclusion_audit.md`'s ten category totals are retained
+as *first-match* counts and relabelled as such. Two are corrected:
+`editorial_marker_paren` 58,720 → **88,339 true membership**, `greek_script`
+12,987 → **15,800 (+21.7%)**.
+
+**Evidence.** `abbrev_probe.extract_pairs` applies ten tests in fixed order
+and stops at the first failure, so a count is "caught first", not
+"described by". `scripts/phase1_supplement.py` evaluates every test against
+every token independently of order. The chain was re-implemented three times
+across the supplement scripts and returned 1,424,314 kept / 342,714 dropped
+each time, so the mirror is faithful.
+
+The other eight ratios (up to 7069×) are **mechanical, not findings**: a
+token overlapping a bracket span usually contains a literal `[`, which makes
+it non-alphabetic and markup-carrying by construction; and EDCS writes
+lacunae as `[3]`, so Arabic digits are almost all bracketed (1,130 of 1,150).
+Greekness and empty-parenthesis-ness are the only two properties that hold
+independently of bracketing, which is why only those two are real.
+
+**Alternatives rejected.** Reporting the raw membership counts as
+corrections. Rejected: it would claim 190,822 concealed symbol
+abbreviations, which is false and would not survive one reviewer question.
+
+**Overturned by.** Reordering the filter chain in `abbrev_probe.py`, which
+would change every first-match count. This is a reason to freeze the
+extractor.
+
+**Status.** SETTLED.
+
+---
+
+## D-0010 — The undercount does NOT enlarge the abstention class; the prior recommendation stands
+
+**Decided.** `editorial_marker_paren → RECOVER AS SEPARATE CLASS` stands. The
+abstention pool is **42,805 → at most 45,288 (+5.8%)**, not +50%.
+
+**Evidence.** `scripts/phase1_supplement2.py` sub-classifies the 29,606
+hidden empty-paren tokens by the prior audit's own rule: 24,623 are `x(?)`
+uncertain-reading marks, 2,432 standalone `(?)`, 44 `(!)`, 24 bare — and only
+**2,483** are the "editor could not resolve it" abstention sub-class. Those
+2,483 sit inside editorial restorations and carry the section-D circularity
+risk, so the defensible increment is smaller still.
+
+**Why this is logged as its own decision.** D-0009 found a real 50%
+undercount, and the natural inference — that the headline recommendation
+built on it grows by 50% — is wrong. Logging only D-0009 would leave that
+inference open for a later phase to make.
+
+**Alternatives rejected.** Quoting 88,339 as the abstention-class supply.
+Rejected: it is the category total, not the sub-class, and the two differ by
+a factor of two.
+
+**Status.** SETTLED. I expected this check to overturn the prior audit and it
+confirmed it.
+
+---
+
+## D-0011 — Circularity is written as a continuous restored-letter fraction, not a boolean
+
+**Decided.** Phase 3's `circularity_risk` column carries the share of the
+abbreviation's letters supplied by the editor: 0.0 = every letter carved,
+1.0 = wholly editorial. Rows at 1.0 are barred from every test set (4e).
+
+**Evidence.** Over 251,283 `inside_bracket_markup` tokens carrying ≥1
+abbreviation letter: **63.25% (158,945) are fully editorial; only 1.35%
+(3,401) are fully attested;** 35.39% partial.
+
+Cross-validated against the prior audit by a different method: its sub-classes
+"whole thing is editorial reconstruction" (149,582) + "abbreviation restored,
+expansion outside the bracket" (9,359) + "abbreviation restored, expansion
+straddles the bracket" (4) = **158,945**, exactly the count at fraction 1.0.
+
+**Consequence.** The 253,256 "recoverable in principle" shrinks to **3,401**
+tokens clean under the strictest reading. The 64,991 partly-restored middle
+remains a Latinist's call. **[VERIFY — LATINIST]**
+
+**Alternatives rejected.** A boolean flag. Rejected: it forces the 64,991
+partial cases into one bucket or the other, which is the exact judgement the
+prior audit correctly refused to automate.
+
+**Status.** SETTLED as a measure. The threshold for test-set exclusion above
+1.0 is UNRESOLVED and belongs to Phase 4.
+
+---
+
+## D-0012 — Bias verdicts require a bootstrap null; six of the prior audit's readings are withdrawn
+
+**Decided.** TVD is reported against a bootstrapped null at the same n, never
+against an absolute threshold. The prior audit's flat rule ("above about 0.15
+is materially different") is withdrawn and its verdicts for six categories
+must not be quoted.
+
+**Evidence.** 200 draws from the kept province distribution at each category's
+n, seed 20260820 (`scripts/phase1_supplement2.py`). TVD is upward-biased by
+sampling noise, severely at small n — the null p95 is 0.012 at n=253,256 but
+0.586 at n=19.
+
+Withdrawn: `contains_numeral` 0.490 was "a different population", null p95
+0.586 — **0.8×, indistinguishable from noise**. `nested_parens` at n=1 —
+no claim possible. `non_alphabetic_expansion` 1.4×, `unbalanced_parens` 1.6×,
+`token_carries_markup` 2.1× — weak to modest, not "materially different".
+Confirmed and strengthened: `greek_script` **22.6×**, the most skewed
+exclusion in the dataset; `editorial_marker_paren` 16.4×;
+`inside_bracket_markup` 12.0×; `non_alphabetic_abbrev` 9.5×.
+
+**No recommendation changes** — each small category was recommended on other
+grounds.
+
+**Also.** The prior summary's `bias risk if kept out` column conflates *is
+the excluded set different* with *does excluding it bias the Latin task*.
+For `greek_script` the answers are "emphatically yes" and "arguably no". The
+paper must separate them.
+
+**Alternatives rejected.** A chi-square or G-test. Rejected: at n=253,256
+every difference is significant, so a p-value would answer a question nobody
+asked. The null-TVD ratio reports effect size against noise, which is the
+question.
+
+**Status.** SETTLED.
+
+---
+
+## D-0013 — The `|` inventory is a separate resource but is NOT a symbol-to-word mapping
+
+**Decided.** The 376 distinct `|(...)` forms (16,194 occurrences) are
+released as a separate class. The brief's framing of it as "a symbol-to-word
+mapping" is rejected on evidence.
+
+**Evidence.** Full enumeration in `data/derived/phase1_supplement.json`. One
+ASCII pipe stands for at least eight unrelated glyphs — centurial sign
+(4,944), reversed C = *mulieris*/*Gaiae* (4,077), monetary/denarius (3,135),
+milliary (1,429), fractions and weights (922), *obitus* theta nigrum (702),
+Greek numerals and measures (591), Christian signs (5), plus 291 occurrences
+across 64 forms left unclassified. Expanding `|` is therefore the same
+context-disambiguation problem as expanding `V`, on a symbol vocabulary.
+
+Three structural properties, each measured:
+- **Plurality by repetition** — `||(mulierum)` 28, `||(centuriones)` 8,
+  `||(librae)` 11, `|||(mulierum)`, `||||(milia)`. The same geminatio
+  principle as `DD(ominis)`; Phase 3a must treat them as one phenomenon.
+- **Inflectional ambiguity inside the symbol set** — ten inflections of
+  *centurio* behind one glyph.
+- **Its own abstention class** — `|()` / `||()`, 98 occurrences.
+
+**Label noise, measured.** 56 forms have count ≤2 and Levenshtein distance 1
+from a form with count ≥20 (`|(mulierus)`, `|(cenurionis)`, `|(mlliaria)`,
+`|(denarrii)`). Ancient orthographic variation and editor keying errors
+cannot be separated mechanically — **[VERIFY — LATINIST]** — but the count
+establishes that editor-side noise exists in the gold labels at a measurable
+rate, in the most formulaic corner of the corpus. It is a lower bound.
+
+**Alternatives rejected.** Publishing a `|` → word lookup. Rejected: it would
+be wrong for every form outside the majority family and would silently encode
+a false claim about the database.
+
+**Status.** SETTLED as an enumeration. The family grouping is a stated
+rule-based pass and is **[VERIFY — LATINIST]**.
+
+---
+
+## D-0014 — 2,230 rasura tokens are misfiled and belong with `token_carries_markup`
+
+**Decided.** The `⟦ ⟧` tokens inside the prior audit's "other non-letter
+character" bucket (2,572) are re-assigned: **2,230 erasure, 304 `« »`, 46
+other, 25 Greek, 4 combining diacritic.**
+
+**Evidence.** `scripts/phase1_supplement.py`. `⟦Fl(avio) Constanti⟧no` is an
+abbreviation that *was* carved and was later chiselled out — *damnatio
+memoriae*, recorded by EDCS. That is the epigraphic opposite of an editorial
+restoration: the letters are attested, not supplied, so `circularity_risk`
+for these is 0.0, not 1.0. Recommendation for `token_carries_markup` becomes
+RECOVER, 339 → **2,569**.
+
+**Overturned by.** Evidence that EDCS uses `⟦ ⟧` for something other than
+rasura. Inferred from the data's structure and from the Leiden conventions,
+**not** from EDCS documentation. **[NEEDS CITATION]** — EDCS's own statement
+of its bracket conventions.
+
+**Status.** SETTLED as a count. The rasura reading is ASSUMPTION.
+
+---
+
+## D-0015 — The pooled exclusion reshapes the corpus along the candidate finding's own two axes
+
+**Decided.** Flagged as the most serious open threat in the project.
+Phase 3f must re-derive the province and century signal on the
+**pre-exclusion** population as well as the kept set and report both.
+
+**Evidence.** `scripts/phase1_supplement3.py`, all ten filters pooled.
+Province TVD **0.131** against null p95 0.012 (**10.9×**); century TVD
+**0.097** against 0.006 (**16×**); dropped texts mean 504 chars against 280
+kept. The exclusion is reshaping the dataset, not filtering it.
+
+The skew runs along exactly the axes the candidate finding is claimed on:
+
+| | lift (drop share ÷ kept share) |
+| --- | --- |
+| Numidia — where *V = vixit* is claimed | **0.53** (least-excluded large province) |
+| Asia / Achaia / Thracia / Cappadocia — Greek East | 2.4–3.9 |
+| 1AD — where *C = Caius* is claimed | **0.71** |
+| 5AD — where *C = clarissimo* is claimed | **1.51** |
+
+A 2.1× differential across precisely the span over which `C` is said to shift,
+and the province carrying the *vixit* reading survives filtering at roughly
+twice the corpus rate.
+
+**What this does and does not show.** It does **not** show the candidate
+finding is an artifact. It shows the finding is currently measured on a
+corpus whose relevant strata were unevenly thinned by a filter designed
+without this hypothesis in view, and that a reviewer can say so in one
+sentence. If the signal exists only in the kept set, it belongs to the
+filter, not to Rome.
+
+**Alternatives rejected.** Deferring the observation to Phase 6. Rejected:
+Phase 4 freezes the splits, and a split built on a skewed base cannot be
+un-skewed afterwards.
+
+**Status.** UNRESOLVED. Owned by Phase 3f. The most important open question
+in the project.
