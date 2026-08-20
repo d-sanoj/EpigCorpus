@@ -857,3 +857,204 @@ Rejected: a reviewer would read its absence as the question not having been
 asked.
 
 **Status.** SETTLED.
+
+---
+
+## D-0028 — Splits are grouped by EDCS base id, and the grouping is verified, not asserted
+
+**Decided.** Primary split 80/10/10 (1,140,108 / 139,591 / 139,580) over
+**monuments**, not records. Assignment is `blake2b(SEED:base_id)` mapped to
+[0,1), seed 20260820.
+
+**Evidence.** D-0004 established that 588,509 records are 542,854 monuments:
+the `-0`/`-1`/`-2` suffix marks faces of one stone, 100% of multi-segment
+groups share a province, 299 carry byte-identical text. Verified after
+building: **0 of 319,514 groups straddle train/val/test**, and 0 straddle the
+held-out province split.
+
+**Alternatives rejected.** (a) `random.shuffle` over the row list — depends on
+read order. (b) Python `hash()` — salted per process. Both would make the
+split irreproducible in exactly the way R9 forbids.
+
+**Status.** SETTLED. FROZEN.
+
+---
+
+## D-0029 — Monument grouping does not stop leakage: 13.17% of test rows are byte-identical to a training row
+
+**Decided.** The duplicates are neither removed from nor left silently in the
+primary test split. `primary_test` keeps them; `test_no_context_duplicate`
+(121,199 rows) drops them. **Phase 6 must report both.**
+
+**Evidence.** 18,381 of 139,580 test rows share their exact (abbrev,
+expansion, left context, right context) with a training row — 10,534 distinct
+context types. `Leg → Legio` 715, `f → fecit` 618, `Of → Officina` 565,
+`D → Dis` 451. These are **different monuments carrying byte-identical text**:
+the corpus is formulaic and the context window is 40 characters, so no
+identity-based grouping rule can catch it.
+
+**Why not simply drop them.** Whether this is leakage or the domain is a real
+question — an epigrapher reading `D(is) M(anibus)` for the thousandth time is
+also doing lookup. The gap between the two test sets *is* the share of
+apparent performance that is memorised string matching, and that gap is worth
+more as a reported quantity than either choice would be alone.
+
+**Overturned by.** A Latinist judgement that formulaic recurrence is the task
+rather than contamination. **[VERIFY — LATINIST]**
+
+**Status.** SETTLED as a measurement. The interpretation is UNRESOLVED.
+
+---
+
+## D-0030 — The primary splits are comparable, measured at the monument level
+
+**Decided.** `primary_val` and `primary_test` are comparable to
+`primary_train`. The apparent skew at pair level is a block-structure artifact.
+
+**Evidence.**
+
+| statistic | observed | null p95 | ratio |
+| --- | --- | --- | --- |
+| province TVD, by pairs | 0.0262 | 0.0103 | 2.6× |
+| province TVD, **by monuments** | **0.0126** | **0.0163** | **0.8×** |
+
+Every pair on one stone shares that stone's province, so the effective sample
+size is 31,799 monuments, not 139,580 pairs. At the unit the split is drawn
+on, the test split is **indistinguishable from a random draw**. Century
+profiles agree directly: train 26.9/36.7/19.1 for 1AD/2AD/3AD against test
+26.8/37.4/18.9.
+
+**Same correction as D-0025.** A pair-level null applied to grouped data
+overstates skew; this is the second place in the project where it mattered.
+
+**Status.** SETTLED.
+
+---
+
+## D-0031 — Held-out provinces chosen by genre regime and zone; the split confounds province with century
+
+**Decided.** Britannia (military, *victrix* 36% / *valeria* 30%), Mauretania
+Caesariensis (funerary, *vixit* 81%), Pannonia inferior (votive, *votum* 79%).
+71,697 rows, **5.04% of the task**. Criteria fixed before the split was drawn:
+one province per genre regime as separated by the `V` reading in D-0025, three
+separated zones, comparable size, and a same-regime sister province left in
+training so the test measures transfer rather than absence.
+
+**Numidia rejected** despite being the cleanest funerary case: at 7.72% it
+would remove a tenth of training and the dominant funerary province at once.
+Mauretania Caesariensis carries the same regime at a fifth of the cost.
+
+**The confound, found and reported here rather than in Phase 6.** Province TVD
+0.9494 is by construction. **Century TVD 0.3022 is not.** 1AD is 26.8% of the
+primary test and **5.7%** of the held-out test; 3AD is 18.9% against **47.1%**.
+The withheld provinces are frontier territory, Romanised late.
+
+**Consequence.** A model that fails here may be failing on the era, not the
+geography. **Phase 6 must report held-out province results stratified by
+century, not pooled.** If stratification cannot separate them, the held-out
+result must be reported as inconclusive rather than as a generalisation gap.
+
+**Partly irreducible.** Genre regime and century are correlated in the world:
+the frontier provinces where votive and military formulae dominate were
+incorporated later than Italy. No choice of three provinces removes it.
+
+**Status.** SETTLED as a split. The confound is UNRESOLVED and constrains
+Phase 6.
+
+---
+
+## D-0032 — The lexical-only set is 88% of the test split, so a discriminating variant is supplied
+
+**Decided.** `test_lexical_only` (122,928 rows) is kept and published as the
+brief defines it. `test_lexical_hard` (69,150 rows, 49.5% of test) is added as
+the difficulty measure.
+
+**Evidence.** The head keys — `m`, `d`, `c`, `l`, `f`, `p`, `s`, `v`, `a` — are
+all lexically ambiguous and carry most of the volume, so **lexical ambiguity is
+the majority case by pairs as well as by keys**, following directly from
+D-0024. `test_lexical_hard` requires a lexically ambiguous key *and* a gold
+label the most-frequent-expansion baseline gets wrong; its century profile
+stays close to the primary test (1AD 28.7%, 2AD 34.1%), so it is not silently
+an era subset.
+
+**Key statistics are computed on `primary_train` only** — deriving "lexically
+ambiguous" or "rare" from the whole corpus would let the test set's definition
+peek at the test set.
+
+**Status.** SETTLED.
+
+---
+
+## D-0033 — Rare means fewer than 10 training occurrences; the full band table is published
+
+**Decided.** `RARE_N = 10`. `test_rare_form` 6,311 rows / 5,165 keys;
+`test_unseen_form` (frequency 0) 2,352 rows / 2,139 keys.
+
+**Evidence and justification.** Measured band structure of the test split by
+training frequency of each row's key: 0 → 2,352 · 1–9 → 3,959 · 10–99 → 8,139 ·
+100–999 → 14,126 · ≥1000 → 111,004. Below 10 observations a
+most-frequent-expansion lookup is fitting a multinomial from single digits.
+10 also sits below the ≥20 threshold used for ambiguity tables (D-0024), so
+the rare and lexical sets do not overlap by construction, and above 1, so the
+set is not purely hapax.
+
+**A property that must travel with any rare-band result.** Rare forms are
+**mostly unambiguous** — ambiguity rate 0.103 against 0.918 on the full test
+split — so this set measures *coverage*, not disambiguation. They also skew
+late: 4AD 13.3% against 8.0%, 6AD 3.9% against 1.5%.
+
+**Alternatives rejected.** Choosing N to make the set a round size. The band
+table is published so a reader who prefers a different N can cut it.
+
+**Status.** SETTLED.
+
+---
+
+## D-0034 — `circularity_risk` bars zero rows, and three further bars are declared
+
+**Decided.** Rows barred from every test set: **12,817** distinct, of which
+2,464 fall in primary val/test and 1,030 in the held-out test. All are **kept
+in training** and both barred sets are written to disk so the decision is
+inspectable and reversible.
+
+**Evidence.**
+
+| bar | rows | basis |
+| --- | --- | --- |
+| `circularity_risk > 0` | **0** | the brief's rule; D-0027 |
+| `linebreak_fragment` | 9,492 | D-0026 |
+| `unresolved_correction` | 3,350 | D-0020 |
+| `miskeyed_date` | 29 | D-0023 |
+
+**The zero is reported, not passed over.** Every kept pair sits wholly outside
+brackets by construction of the extractor, so no abbreviation letter in v1 is
+editor-supplied. The check stays in the code because it would bar 63.25% of
+the bracket-excluded population (D-0011) if Phase 1's recoverable rows were
+merged in.
+
+**The other three bars are my decision, not the brief's**, and are logged as
+such: a test set containing `ix → ixit` measures the extractor, not the model.
+
+**Status.** SETTLED.
+
+---
+
+## D-0035 — The split's difficulty is published before any model is built
+
+**Decided.** Most-frequent-expansion lookup, fitted on `primary_train`, scores
+**45.84% (63,977 / 139,580)** on `primary_test`. Published now so the splits
+can be judged before modelling, and because it defines `test_lexical_hard`.
+
+**This is a property of the split, not a result.** Phase 5 must recompute it
+as M1 under three seeds, and **that** recomputation is what may appear in the
+paper (R2). This number exists here precisely so it cannot be tuned against
+later.
+
+Two further split properties: **96.6%** of test rows have their (key,
+expansion) type present in training — not leakage, but the task; the 3.4%
+remainder is where `test_unseen_form` lives. **54.2%** of test rows carry a
+gold label the majority baseline gets wrong, close enough to the 54.5% lexical
+share (D-0024) to suggest both measure the same structure.
+
+**Status.** SETTLED. Splits FROZEN; test sets not to be inspected again until
+Phase 6.
