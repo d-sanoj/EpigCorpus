@@ -75,6 +75,10 @@ def get_jsonl_files() -> list[Path]:
     corpus wins over a committed snapshot.
     """
     files = list(DATA_DIR.glob("*.jsonl")) + list(DATA_DIR.glob("*.jsonl.gz"))
+    # Exclude our own output. It is the newest file in data/ after a run, so
+    # without this the next invocation would load the cleaned corpus and clean
+    # it a second time, applying every rule twice.
+    files = [p for p in files if "_cleaned" not in p.name]
     return sorted(
         files,
         key=lambda p: (p.stat().st_mtime, p.suffix != ".gz"),
