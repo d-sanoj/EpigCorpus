@@ -1,0 +1,56 @@
+{
+ "seed": 20260820,
+ "rare_n": 10,
+ "lex_min_n": 20,
+ "heldout_provinces": [
+  "Britannia",
+  "Mauretania Caesariensis",
+  "Pannonia inferior"
+ ],
+ "v1_rows": 1424314,
+ "task_rows": 1421743,
+ "excluded_from_task": {
+  "NUMERAL_ELLIPSIS_NOT_AN_ABBREVIATION": 2571
+ },
+ "barred_from_test_counts": {
+  "linebreak_fragment": 9492,
+  "unresolved_correction": 3350,
+  "miskeyed_date": 29
+ },
+ "barred_rows_total": 12817,
+ "written": {
+  "primary_train": 1140108,
+  "primary_val": 139591,
+  "primary_test": 139580,
+  "heldout_province_train": 1349016,
+  "heldout_province_test": 71697,
+  "test_lexical_only": 122928,
+  "test_rare_form": 6311,
+  "test_unseen_form": 2352,
+  "test_no_context_duplicate": 121199,
+  "test_lexical_hard": 69150,
+  "barred_from_test_primary": 2464,
+  "barred_from_test_heldout": 1030
+ },
+ "leak_check": {
+  "primary_groups_total": 319514,
+  "primary_groups_straddling_splits": 0,
+  "heldout_groups_straddling": 0,
+  "identical_context_types_shared_train_test": 10534,
+  "test_rows_with_exact_context_in_train": 18381,
+  "test_rows_with_exact_context_in_train_pct": 13.17,
+  "majority_baseline_on_primary_test": 63977,
+  "majority_baseline_on_primary_test_pct": 45.84,
+  "train_context_types": 1018766,
+  "test_context_types": 131371
+ },
+ "train_key_freq_bands": {
+  "0 (unseen in train)": 2352,
+  "1-9": 3959,
+  "10-99": 8139,
+  "100-999": 14126,
+  ">=1000": 111004
+ },
+ "lexical_keys_from_train": 887,
+ "train_keys_total": 32138
+}
