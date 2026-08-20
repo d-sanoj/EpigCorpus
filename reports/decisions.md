@@ -630,3 +630,230 @@ failed: run the census, not the grep.
 
 **Status.** SETTLED. Logged because R7 requires reporting outcomes that
 damage my own earlier claims.
+
+---
+
+## D-0020 — Geminatio doubles the FINAL letter, not the first; the leading-run rule undercounts by 41%
+
+**Decided.** The geminatio marker is a **trailing** repeated-letter run.
+Correction reduces that run to one letter in abbreviation and expansion
+together. 8,986 pairs corrected.
+
+**Evidence.** EDCS writes `Aug → Augg(ustorum)`, `Imp → Impp(eratoribus)`,
+`Cos → Coss(ulibus)`, `Nob → Nobb(ilissimis)`, `Caes → Caess(aribus)`. A
+one-letter abbreviation doubles a letter that is both first and last
+(`D → DD`), which is why a leading-run rule looks correct on the headline
+examples. My first implementation used a leading run and found **5,293**
+collapses; the trailing-run rule finds **8,986** — a 41% undercount that
+missed the entire AUGG/IMPP/CONSS/CAESS/NOBB family.
+
+Arbitration against a control lexicon of 36,477 expansions from tokens
+carrying **no** doubled run, so the test cannot feed on what it judges.
+DECISIVE at ≥3× the runner-up. Independent agreement with `dd_diagnostic.md`
+§4b to within 1% on all ten of its top forms (augg 1,792 v 1,793; nn 1,701 v
+1,702; caess/conss/impp/vv/nnn/ddd exact).
+
+**Alternatives rejected.** Trusting my first implementation because it ran
+clean. Rejected: it produced a plausible number and a wrong one.
+
+**Status.** SETTLED. 3,350 rows remain UNRESOLVED and uncorrected.
+
+---
+
+## D-0021 — Numeral classification is gated on explicit printed word lists, never on a shape rule
+
+**Decided.** A token is a numeral case iff its parenthesis content appears on
+one of three lists in `scripts/phase3_wordlists.py` (50 / 100 / 15 entries,
+zero cross-list overlap). Type 1 → 338 pairs, Type 2 → 2,571, Type 3 → 508.
+
+**Evidence.** Lists built from the complete evidence base — every parenthesis
+content following an all-Roman-numeral prefix, with counts. Coverage: of 3,876
+multi-character numeral-prefix pairs, all but **74** are reached; those 74 are
+written UNRESOLVED_NUMERAL with the unmatched word recorded.
+
+**Why a gate and not a shape rule.** An earlier version classified any
+single-character Roman-numeral abbreviation whose expansion began with it as a
+numeral candidate. That flagged **268,253** rows — `M(anibus)`, `D(is)`,
+`C(aius)`, `L(uci)`, the whole praenomen vocabulary of Latin epigraphy. The
+list gate reduces it to 712. The failure is invisible in aggregate statistics.
+
+**Type 3 gold labels.** The gold label is the EDCS **surface form** (`VIvir`);
+the Latin reading (`sevir`) is confined to `normalized_form`. 16 (numeral,
+word) → office mappings across 8 offices are recorded; *sevir* appears as both
+`VI(vir)` and `IIIIII(vir)` and the surface forms stay distinct in the label.
+
+**Limitation.** Assigning a Latin word to a semantic class is philological.
+**[VERIFY — LATINIST]** on all three lists.
+
+**Status.** SETTLED as a procedure. List membership is ASSUMPTION.
+
+---
+
+## D-0022 — The §6b "~four-fifths" impression is replaced by a measured 712, using the same gate
+
+**Decided.** `dd_diagnostic.md` §6b's eyeballed ~80% of 753 is **not carried
+forward**. The measured count of single-character numeral cases is **712**
+(Type 2 667, Type 1 28, Type 3 17).
+
+**Evidence.** The single-character blind spot is closed not by a new heuristic
+but by removing the two-letter threshold that created it: the same explicit
+word-list gate applies at every prefix length. 0.8 × 753 ≈ 602 is what the
+impression implied; the two are close, which favours the prior work, but 712
+has a stated rule behind it and 602 was never a number.
+
+**Alternatives rejected.** Tuning a new attestation threshold for
+single-character tokens. Rejected: it would reproduce the original blind spot
+with different parameters.
+
+**Status.** SETTLED.
+
+---
+
+## D-0023 — No date is dropped; exactly two are flagged mis-keyed, with per-record evidence
+
+**Decided.** 618 POST700 and 86 LATE_OVER_1000 pairs are **kept unchanged**.
+Two records are flagged MISKEYED (29 pairs) and neither is removed.
+
+**Evidence.** All 21 records dated after 1000 AD were read individually.
+**19 are correctly dated** — `In hoc tumulo iacet corpus bonae memoriae abba
+Laurentius monachus` (951–1050), a self-dated Latin inscription containing the
+year **1435**, an Italian vernacular text (1501–1700), and a **Spanish 1781
+dragoon inscription** (`Tomas Urbina dragon del V regimiento`). The 618
+POST700 pairs are early-medieval Christian vocabulary: *presbyter*,
+*monachus*, *humilis*, *aeternam*.
+
+The two mis-keyed, with the evidence stored beside the identifier in code:
+- `EDCS-27500083` (1998): text reads `d(omini) n(ostri) Fl(avi) Val(eri)` —
+  tetrarchic titulature, cannot be 1998 AD.
+- `EDCS-30400458` (121–1125): a 1,004-year span on a Domitia Lucilla brick
+  stamp, a tightly dated Hadrianic type. `1125` is `125` with a leading 1.
+
+**Alternatives rejected.** A `date_to > 1000` threshold rule. Rejected on its
+own output: it caught 21 records of which 19 are correct, and would have
+discarded a genuine 18th-century Spanish inscription and a self-dated 1435
+Latin one. The threshold is a flag for review, not a defect detector.
+
+**Status.** SETTLED.
+
+---
+
+## D-0024 — The lexical share of ambiguity is 34.5% over all keys and 54.5% over keys with n ≥ 20; the second is the benchmark figure
+
+**Decided.** `abbrev_probe.md`'s 35.2% is **confirmed** by an independently
+written rule (34.5%, 2,706 of 7,836). It is also **the wrong denominator to
+quote for a benchmark.**
+
+**Evidence.** Rule stated: two expansions are inflectional variants if their
+longest common prefix is ≥3 characters and ≥60% of the shorter form.
+
+| population | ambiguous keys | lexical | share |
+| --- | --- | --- | --- |
+| all keys, V0 | 7,836 | 2,706 | **34.5%** |
+| keys n ≥ 20, V0 | 1,937 | 1,056 | **54.5%** |
+| keys n ≥ 20, V1c | 1,865 | 1,017 | 54.5% |
+
+Keys seen fewer than 20 times cannot be meaningfully evaluated by a test set,
+and they are where the inflectional cases concentrate. On the population a
+benchmark can actually score, **lexical ambiguity is the majority case, not a
+third.** Cleaning moves neither figure.
+
+**Consequence.** Phase 4c builds the lexical-only test set on the n ≥ 20
+figure and must state which denominator it used.
+
+**Limitation.** A prefix proxy, not a lemmatiser. **[VERIFY — LATINIST]**
+
+**Status.** SETTLED.
+
+---
+
+## D-0025 — The candidate finding SURVIVES cleaning, the exclusion filter, and an inscription-level null
+
+**Decided.** D-0015's threat is answered **against my own hypothesis**. The
+province and century signal is not an artifact of the exclusion.
+
+**Evidence.** Normalised mutual information between the conditioning variable
+and expansion choice, per abbreviation, against permutation nulls, seed
+20260820, 200 draws. Three populations: V0 (1,424,314), V1c (1,421,743), and
+**PRE-EXCLUSION** — V0 plus **204,207 recovered bracket-excluded pairs**
+(1,628,521), drawn from exactly the strata Phase 1 showed were over-filtered.
+
+- **Cleaning:** every V0 → V1c change is third-decimal. Sole exception
+  `aug|province` 0.1757 → 0.1560, the AUGG merge, expected.
+- **Exclusion:** restoring the filtered strata leaves values unchanged or
+  **higher** — `c|century` 0.2511 → 0.2630, `l|century` 0.1739 → 0.1797,
+  `c|province` 0.1621 → 0.1687. A manufactured signal would dilute. It does not.
+- **Inscription-level block permutation** (pairs from one stone kept together):
+  costs at most 1.4 ratio points. `v|province` 12.2×, `v|century` 13.0×,
+  `c|century` 9.3×, `l|century` 14.3×, `aug|century` 18.2×, worst case
+  `c|province` 3.5×.
+
+**The substance, not just the statistic.** *V*: **Numidia vixit 93%**,
+Mauretania Caesariensis 81%, Africa proconsularis 76%; **Pannonia superior
+votum 67%**, Germania superior 63%, Gallia Narbonensis 48%. *C*: 1AD **cai
+40% + caius 32%**; 4AD **clarissimus 28% + clarissimo 22%**; 5AD **clarissimo
+34%**.
+
+**Two refinements the brief did not anticipate.**
+1. **Britannia carries a third reading — `V → victrix` 36%, `valeria` 30%** —
+   legionary titles (*legio VI Victrix*, *legio XX Valeria Victrix*), not
+   funerary or votive. Germania superior shows the same at 26%. Part of the
+   province signal is **military nomenclature, not genre**. The hypothesis as
+   stated is incomplete.
+2. **6AD adds a fourth reading — `C → consulatum` 33%**, overtaking
+   *clarissimus*. The era shift does not stop where the brief stops it.
+
+**What this does NOT establish.** That province and century predict expansion
+in the data is not that a **model gains** from being told them. The signal
+could be already captured by local text context, or exploitable only where the
+majority baseline wins anyway. That is the C1→C2→C3 delta and it is open.
+
+**Overturned by.** A C2/C3 lift in Phase 6 that does not exceed seed variance —
+in which case the association is real but useless, and the paper becomes a
+resource paper (the brief's instruction stands unchanged).
+
+**Status.** SETTLED as an association in the data. UNRESOLVED as an
+experimental result.
+
+---
+
+## D-0026 — Line-break fragmentation: a new artifact class, 9,506 pairs
+
+**Decided.** Flagged (`linebreak_fragment = 1`), not removed.
+
+**Evidence.** EDCS breaks lines mid-word. `v/` ends one line and `ix(it)`
+begins the next, so the extractor emits `ix → ixit` — 48 of that pair alone.
+Detection: left context ends in `/` immediately preceded by a letter.
+**9,506 pairs, 0.67% of the dataset.** Found while chasing a false positive in
+Phase 2 (D-0018); absent from `abbrev_probe.md`, `dd_diagnostic.md` and
+`exclusion_audit.md`.
+
+**Why it matters beyond its size.** It poisons downstream heuristics rather
+than just adding noise: the 48 spurious `ixit` expansions are what made the
+Phase 2 fusion rule misclassify the genuine `V(ixit)` = *vixit*.
+
+**Status.** SETTLED as a count. Which fragments are genuinely broken needs
+the Latin. **[VERIFY — LATINIST]**
+
+---
+
+## D-0027 — `circularity_risk` is 0.0 on every row of v1, and that is correct
+
+**Decided.** The column is emitted as 0.0 throughout and documented rather
+than dropped.
+
+**Evidence.** `abbrev_probe` drops any token overlapping a bracket span, so
+every kept pair sits wholly outside `[ ] < > { }` and no abbreviation letter
+in this file is editor-supplied. The column becomes informative only if
+Phase 1's recoverable rows are merged in, where D-0011 measured 63.25% at
+risk 1.0.
+
+**The circularity this column does NOT capture.** Every *expansion* in the
+dataset is an editorial interpretation — that is what the parentheses mean. It
+is a property of the corpus, not of a row, and no per-row column can carry it.
+Owned by Phase 7's circularity probe and by the datasheet.
+
+**Alternatives rejected.** Omitting the column because it is constant.
+Rejected: a reviewer would read its absence as the question not having been
+asked.
+
+**Status.** SETTLED.
