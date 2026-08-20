@@ -1,0 +1,186 @@
+{
+ "records": 588509,
+ "total_chars": 39470885,
+ "distinct_chars": 414,
+ "named_codepoints": {
+  "U+0305 COMBINING OVERLINE": {
+   "occurrences": 2,
+   "records": 2,
+   "bases": {
+    "q": 1,
+    "I": 1
+   },
+   "rides_on": {
+    "non-numeral letter": 1,
+    "numeral letter inside a word token": 1
+   },
+   "example_tokens": {
+    "q̅(uaestori),": 1,
+    "II[I̅viro(?)": 1
+   }
+  },
+  "U+0304 COMBINING MACRON": {
+   "occurrences": 0,
+   "records": 0,
+   "bases": {},
+   "rides_on": {},
+   "example_tokens": {}
+  },
+  "U+0332 COMBINING LOW LINE": {
+   "occurrences": 1,
+   "records": 1,
+   "bases": {
+    "τ": 1
+   },
+   "rides_on": {
+    "non-numeral letter": 1
+   },
+   "example_tokens": {
+    "τ̲<e=η>§Dionysos": 1
+   }
+  }
+ },
+ "all_combining_marks": {
+  "U+0323 COMBINING DOT BELOW": {
+   "occurrences": 208,
+   "records": 75,
+   "rides_on": {
+    "non-numeral letter": 188,
+    "non-letter base '('": 1,
+    "numeral letter inside a word token": 16,
+    "non-letter base '['": 2,
+    "roman numeral (all-numeral token)": 1
+   },
+   "top_tokens": {
+    "ṛẹṣṭịṭuerunt": 6,
+    "YNWḤ": 6,
+    "dilạp̣ṣọṣ": 5,
+    "corrụp̣ṭụṃ": 5,
+    "ṆẠṆẠẠ": 5,
+    "ịṭẹṛ": 4,
+    "Ῥ]ω̣μ̣α̣ί̣[ων": 4,
+    "Calaṃḍạṣ": 4,
+    "Ṃịc̣ạuran›": 4,
+    "ἀρ̣χ̣ᾶς̣": 3
+   }
+  },
+  "U+0301 COMBINING ACUTE ACCENT": {
+   "occurrences": 5,
+   "records": 5,
+   "rides_on": {
+    "non-numeral letter": 5
+   },
+   "top_tokens": {
+    "YŚR᾿L": 1,
+    "YŚR᾿L.": 1,
+    "ŚMḤH": 1,
+    "(Y)ŚR᾿L›": 1,
+    "῾ŚRH": 1
+   }
+  },
+  "U+0300 COMBINING GRAVE ACCENT": {
+   "occurrences": 2,
+   "records": 1,
+   "rides_on": {
+    "non-numeral letter": 2
+   },
+   "top_tokens": {
+    "τοὺ̀ς": 1,
+    "περὶ̀": 1
+   }
+  },
+  "U+0305 COMBINING OVERLINE": {
+   "occurrences": 2,
+   "records": 2,
+   "rides_on": {
+    "non-numeral letter": 1,
+    "numeral letter inside a word token": 1
+   },
+   "top_tokens": {
+    "q̅(uaestori),": 1,
+    "II[I̅viro(?)": 1
+   }
+  },
+  "U+0332 COMBINING LOW LINE": {
+   "occurrences": 1,
+   "records": 1,
+   "rides_on": {
+    "non-numeral letter": 1
+   },
+   "top_tokens": {
+    "τ̲<e=η>§Dionysos": 1
+   }
+  },
+  "U+05B4 HEBREW POINT HIRIQ": {
+   "occurrences": 1,
+   "records": 1,
+   "rides_on": {
+    "non-letter base '['": 1
+   },
+   "top_tokens": {
+    "[[ִ3]]": 1
+   }
+  },
+  "U+030A COMBINING RING ABOVE": {
+   "occurrences": 1,
+   "records": 1,
+   "rides_on": {
+    "non-numeral letter": 1
+   },
+   "top_tokens": {
+    "hyp̊ᶜy/m": 1
+   }
+  },
+  "U+0327 COMBINING CEDILLA": {
+   "occurrences": 1,
+   "records": 1,
+   "rides_on": {
+    "non-numeral letter": 1
+   },
+   "top_tokens": {
+    "‹mşbt": 1
+   }
+  },
+  "U+0302 COMBINING CIRCUMFLEX ACCENT": {
+   "occurrences": 1,
+   "records": 1,
+   "rides_on": {
+    "non-numeral letter": 1
+   },
+   "top_tokens": {
+    "ἄρμ̂α": 1
+   }
+  },
+  "U+0304 COMBINING MACRON": {
+   "occurrences": 0,
+   "records": 0,
+   "rides_on": {},
+   "top_tokens": {}
+  }
+ },
+ "precomposed_with_macron_or_overline": {
+  "ᾱ U+1FB1 GREEK SMALL LETTER ALPHA WITH MACRON": {
+   "occurrences": 25,
+   "records": 16
+  },
+  "ῡ U+1FE1 GREEK SMALL LETTER UPSILON WITH MACRON": {
+   "occurrences": 2,
+   "records": 2
+  },
+  "ῑ U+1FD1 GREEK SMALL LETTER IOTA WITH MACRON": {
+   "occurrences": 1,
+   "records": 1
+  }
+ },
+ "unicode_blocks": {
+  "Supplemental Punctuation U+2E00-2E7F": {
+   "occurrences": 8,
+   "records": 3,
+   "chars": {
+    "⸌ U+2E0C LEFT RAISED OMISSION BRACKET": 4,
+    "⸍ U+2E0D RIGHT RAISED OMISSION BRACKET": 4
+   }
+  }
+ },
+ "ascii_pipe_occurrences": 16465
+}
