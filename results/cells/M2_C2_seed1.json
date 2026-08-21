@@ -1,0 +1,7441 @@
+{
+ "train_seconds": 75.1,
+ "param_count": 1048580,
+ "epochs": 2,
+ "negatives_per_row": 4,
+ "alpha": 1e-07,
+ "averaged_sgd": true,
+ "hparam_selection": "alpha chosen on primary_val only; test untouched",
+ "feature_bits": 20,
+ "candidate_cap": 50,
+ "training_pairs_seen": 10445576,
+ "sets": {
+  "primary_test": {
+   "n": 139580,
+   "accuracy": 0.734589,
+   "macro_f1": 0.273177,
+   "acc_at_k": {
+    "acc@1": 0.734589,
+    "acc@3": 0.880234,
+    "acc@5": 0.910661
+   },
+   "by_ambiguity": {
+    "lexical": {
+     "n": 123768,
+     "accuracy": 0.743706
+    },
+    "inflectional_only": {
+     "n": 8764,
+     "accuracy": 0.714286
+    },
+    "unambiguous": {
+     "n": 7048,
+     "accuracy": 0.599745
+    }
+   },
+   "by_band": {
+    "common": {
+     "n": 111004,
+     "accuracy": 0.755874
+    },
+    "mid": {
+     "n": 22265,
+     "accuracy": 0.718033
+    },
+    "rare": {
+     "n": 3959,
+     "accuracy": 0.66734
+    },
+    "unseen": {
+     "n": 2352,
+     "accuracy": 0.0
+    }
+   },
+   "by_province": {
+    "Roma": {
+     "n": 30980,
+     "accuracy": 0.733086
+    },
+    "Africa proconsularis": {
+     "n": 12600,
+     "accuracy": 0.811746
+    },
+    "Latium et Campania / Regio I": {
+     "n": 12550,
+     "accuracy": 0.667331
+    },
+    "Numidia": {
+     "n": 11349,
+     "accuracy": 0.788528
+    },
+    "Venetia et Histria / Regio X": {
+     "n": 4786,
+     "accuracy": 0.698705
+    },
+    "Hispania citerior": {
+     "n": 4438,
+     "accuracy": 0.699639
+    },
+    "Germania superior": {
+     "n": 3707,
+     "accuracy": 0.807122
+    },
+    "Gallia Narbonensis": {
+     "n": 3635,
+     "accuracy": 0.686107
+    },
+    "Lusitania": {
+     "n": 2965,
+     "accuracy": 0.796965
+    },
+    "Dalmatia": {
+     "n": 2841,
+     "accuracy": 0.718409
+    },
+    "Baetica": {
+     "n": 2762,
+     "accuracy": 0.789283
+    },
+    "Samnium / Regio IV": {
+     "n": 2641,
+     "accuracy": 0.67323
+    },
+    "Etruria / Regio VII": {
+     "n": 2627,
+     "accuracy": 0.650933
+    },
+    "Pannonia superior": {
+     "n": 2532,
+     "accuracy": 0.731438
+    },
+    "Britannia": {
+     "n": 2519,
+     "accuracy": 0.792775
+    },
+    "Mauretania Caesariensis": {
+     "n": 2456,
+     "accuracy": 0.789495
+    },
+    "Apulia et Calabria / Regio II": {
+     "n": 2338,
+     "accuracy": 0.695038
+    },
+    "Provincia incerta": {
+     "n": 2283,
+     "accuracy": 0.78318
+    },
+    "Dacia": {
+     "n": 2279,
+     "accuracy": 0.74989
+    },
+    "Pannonia inferior": {
+     "n": 2007,
+     "accuracy": 0.741405
+    },
+    "Germania inferior": {
+     "n": 1703,
+     "accuracy": 0.772167
+    },
+    "Umbria / Regio VI": {
+     "n": 1688,
+     "accuracy": 0.686611
+    },
+    "Noricum": {
+     "n": 1627,
+     "accuracy": 0.687154
+    },
+    "Lugudunensis": {
+     "n": 1618,
+     "accuracy": 0.736094
+    },
+    "Transpadana / Regio XI": {
+     "n": 1535,
+     "accuracy": 0.710098
+    }
+   },
+   "by_century": {
+    "UNK": {
+     "n": 107334,
+     "accuracy": 0.745495
+    },
+    "2AD": {
+     "n": 10262,
+     "accuracy": 0.720133
+    },
+    "1AD": {
+     "n": 8233,
+     "accuracy": 0.685291
+    },
+    "3AD": {
+     "n": 7232,
+     "accuracy": 0.707135
+    },
+    "4AD": {
+     "n": 2486,
+     "accuracy": 0.700322
+    },
+    "1BC": {
+     "n": 2239,
+     "accuracy": 0.643591
+    },
+    "6AD": {
+     "n": 642,
+     "accuracy": 0.700935
+    },
+    "5AD": {
+     "n": 623,
+     "accuracy": 0.653291
+    },
+    "2BC": {
+     "n": 289,
+     "accuracy": 0.643599
+    },
+    "3BC": {
+     "n": 96,
+     "accuracy": 0.583333
+    },
+    "7AD": {
+     "n": 95,
+     "accuracy": 0.6
+    },
+    "9AD": {
+     "n": 20,
+     "accuracy": 0.5
+    },
+    "8AD": {
+     "n": 10,
+     "accuracy": 0.8
+    },
+    "10AD": {
+     "n": 10,
+     "accuracy": 0.7
+    }
+   },
+   "per_form_province": {
+    "v": {
+     "Numidia": {
+      "n": 832,
+      "accuracy": 0.96274
+     },
+     "Roma": {
+      "n": 562,
+      "accuracy": 0.754448
+     },
+     "Africa proconsularis": {
+      "n": 509,
+      "accuracy": 0.929273
+     },
+     "Latium et Campania / Regio I": {
+      "n": 261,
+      "accuracy": 0.743295
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 141,
+      "accuracy": 0.702128
+     },
+     "Britannia": {
+      "n": 131,
+      "accuracy": 0.862595
+     },
+     "Gallia Narbonensis": {
+      "n": 103,
+      "accuracy": 0.592233
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 93,
+      "accuracy": 0.849462
+     },
+     "Noricum": {
+      "n": 92,
+      "accuracy": 0.73913
+     },
+     "Germania superior": {
+      "n": 91,
+      "accuracy": 0.945055
+     },
+     "Pannonia superior": {
+      "n": 79,
+      "accuracy": 0.860759
+     },
+     "Mauretania Caesariensis": {
+      "n": 79,
+      "accuracy": 0.911392
+     }
+    },
+    "c": {
+     "Roma": {
+      "n": 1441,
+      "accuracy": 0.678001
+     },
+     "Latium et Campania / Regio I": {
+      "n": 759,
+      "accuracy": 0.623188
+     },
+     "Numidia": {
+      "n": 406,
+      "accuracy": 0.748768
+     },
+     "Africa proconsularis": {
+      "n": 338,
+      "accuracy": 0.718935
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 283,
+      "accuracy": 0.70318
+     },
+     "Etruria / Regio VII": {
+      "n": 245,
+      "accuracy": 0.6
+     },
+     "Samnium / Regio IV": {
+      "n": 195,
+      "accuracy": 0.764103
+     },
+     "Hispania citerior": {
+      "n": 180,
+      "accuracy": 0.527778
+     },
+     "Gallia Narbonensis": {
+      "n": 176,
+      "accuracy": 0.596591
+     },
+     "Umbria / Regio VI": {
+      "n": 167,
+      "accuracy": 0.622754
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 160,
+      "accuracy": 0.50625
+     },
+     "Germania superior": {
+      "n": 125,
+      "accuracy": 0.64
+     }
+    },
+    "a": {
+     "Numidia": {
+      "n": 827,
+      "accuracy": 0.945586
+     },
+     "Roma": {
+      "n": 607,
+      "accuracy": 0.706755
+     },
+     "Africa proconsularis": {
+      "n": 422,
+      "accuracy": 0.914692
+     },
+     "Latium et Campania / Regio I": {
+      "n": 257,
+      "accuracy": 0.51751
+     },
+     "Mauretania Caesariensis": {
+      "n": 106,
+      "accuracy": 0.933962
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 101,
+      "accuracy": 0.821782
+     },
+     "Etruria / Regio VII": {
+      "n": 67,
+      "accuracy": 0.776119
+     },
+     "Provincia incerta": {
+      "n": 54,
+      "accuracy": 0.722222
+     },
+     "Gallia Narbonensis": {
+      "n": 48,
+      "accuracy": 0.5625
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 47,
+      "accuracy": 0.638298
+     },
+     "Lusitania": {
+      "n": 41,
+      "accuracy": 0.878049
+     },
+     "Samnium / Regio IV": {
+      "n": 40,
+      "accuracy": 0.625
+     }
+    },
+    "l": {
+     "Roma": {
+      "n": 2400,
+      "accuracy": 0.58375
+     },
+     "Latium et Campania / Regio I": {
+      "n": 1106,
+      "accuracy": 0.527125
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 537,
+      "accuracy": 0.610801
+     },
+     "Africa proconsularis": {
+      "n": 392,
+      "accuracy": 0.757653
+     },
+     "Samnium / Regio IV": {
+      "n": 333,
+      "accuracy": 0.570571
+     },
+     "Numidia": {
+      "n": 321,
+      "accuracy": 0.841121
+     },
+     "Hispania citerior": {
+      "n": 310,
+      "accuracy": 0.703226
+     },
+     "Gallia Narbonensis": {
+      "n": 300,
+      "accuracy": 0.673333
+     },
+     "Baetica": {
+      "n": 281,
+      "accuracy": 0.839858
+     },
+     "Etruria / Regio VII": {
+      "n": 266,
+      "accuracy": 0.684211
+     },
+     "Lusitania": {
+      "n": 245,
+      "accuracy": 0.873469
+     },
+     "Germania superior": {
+      "n": 241,
+      "accuracy": 0.721992
+     }
+    },
+    "aug": {
+     "Roma": {
+      "n": 642,
+      "accuracy": 0.67757
+     },
+     "Africa proconsularis": {
+      "n": 315,
+      "accuracy": 0.704762
+     },
+     "Numidia": {
+      "n": 223,
+      "accuracy": 0.73991
+     },
+     "Latium et Campania / Regio I": {
+      "n": 202,
+      "accuracy": 0.584158
+     },
+     "Britannia": {
+      "n": 137,
+      "accuracy": 0.839416
+     },
+     "Hispania citerior": {
+      "n": 84,
+      "accuracy": 0.535714
+     },
+     "Gallia Narbonensis": {
+      "n": 75,
+      "accuracy": 0.44
+     },
+     "Mauretania Caesariensis": {
+      "n": 74,
+      "accuracy": 0.621622
+     },
+     "UNK": {
+      "n": 70,
+      "accuracy": 0.971429
+     },
+     "Provincia incerta": {
+      "n": 68,
+      "accuracy": 0.735294
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 64,
+      "accuracy": 0.4375
+     },
+     "Germania superior": {
+      "n": 62,
+      "accuracy": 0.83871
+     }
+    },
+    "d": {
+     "Roma": {
+      "n": 2423,
+      "accuracy": 0.859678
+     },
+     "Africa proconsularis": {
+      "n": 1111,
+      "accuracy": 0.958596
+     },
+     "Numidia": {
+      "n": 964,
+      "accuracy": 0.870332
+     },
+     "Latium et Campania / Regio I": {
+      "n": 880,
+      "accuracy": 0.870455
+     },
+     "Gallia Narbonensis": {
+      "n": 239,
+      "accuracy": 0.912134
+     },
+     "Hispania citerior": {
+      "n": 236,
+      "accuracy": 0.915254
+     },
+     "Mauretania Caesariensis": {
+      "n": 224,
+      "accuracy": 0.924107
+     },
+     "Dalmatia": {
+      "n": 219,
+      "accuracy": 0.90411
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 194,
+      "accuracy": 0.845361
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 160,
+      "accuracy": 0.9
+     },
+     "Baetica": {
+      "n": 156,
+      "accuracy": 0.839744
+     },
+     "Lusitania": {
+      "n": 155,
+      "accuracy": 0.922581
+     }
+    },
+    "f": {
+     "Roma": {
+      "n": 1090,
+      "accuracy": 0.479817
+     },
+     "Latium et Campania / Regio I": {
+      "n": 704,
+      "accuracy": 0.535511
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 535,
+      "accuracy": 0.530841
+     },
+     "Germania superior": {
+      "n": 382,
+      "accuracy": 0.91623
+     },
+     "Hispania citerior": {
+      "n": 297,
+      "accuracy": 0.464646
+     },
+     "Lusitania": {
+      "n": 290,
+      "accuracy": 0.544828
+     },
+     "Numidia": {
+      "n": 275,
+      "accuracy": 0.614545
+     },
+     "Africa proconsularis": {
+      "n": 248,
+      "accuracy": 0.451613
+     },
+     "Samnium / Regio IV": {
+      "n": 247,
+      "accuracy": 0.48583
+     },
+     "Gallia Narbonensis": {
+      "n": 235,
+      "accuracy": 0.53617
+     },
+     "Belgica": {
+      "n": 231,
+      "accuracy": 0.948052
+     },
+     "Etruria / Regio VII": {
+      "n": 206,
+      "accuracy": 0.480583
+     }
+    },
+    "p": {
+     "Roma": {
+      "n": 1370,
+      "accuracy": 0.705839
+     },
+     "Africa proconsularis": {
+      "n": 694,
+      "accuracy": 0.674352
+     },
+     "Latium et Campania / Regio I": {
+      "n": 619,
+      "accuracy": 0.612278
+     },
+     "Numidia": {
+      "n": 501,
+      "accuracy": 0.51497
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 427,
+      "accuracy": 0.796253
+     },
+     "Germania superior": {
+      "n": 287,
+      "accuracy": 0.811847
+     },
+     "Hispania citerior": {
+      "n": 236,
+      "accuracy": 0.610169
+     },
+     "Gallia Narbonensis": {
+      "n": 182,
+      "accuracy": 0.725275
+     },
+     "Samnium / Regio IV": {
+      "n": 180,
+      "accuracy": 0.744444
+     },
+     "Dalmatia": {
+      "n": 168,
+      "accuracy": 0.720238
+     },
+     "Etruria / Regio VII": {
+      "n": 163,
+      "accuracy": 0.539877
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 139,
+      "accuracy": 0.784173
+     }
+    },
+    "m": {
+     "Roma": {
+      "n": 3451,
+      "accuracy": 0.851637
+     },
+     "Latium et Campania / Regio I": {
+      "n": 1313,
+      "accuracy": 0.791318
+     },
+     "Africa proconsularis": {
+      "n": 1292,
+      "accuracy": 0.925697
+     },
+     "Numidia": {
+      "n": 1046,
+      "accuracy": 0.933078
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 456,
+      "accuracy": 0.796053
+     },
+     "Hispania citerior": {
+      "n": 374,
+      "accuracy": 0.799465
+     },
+     "Dalmatia": {
+      "n": 372,
+      "accuracy": 0.870968
+     },
+     "Gallia Narbonensis": {
+      "n": 370,
+      "accuracy": 0.889189
+     },
+     "Mauretania Caesariensis": {
+      "n": 305,
+      "accuracy": 0.885246
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 244,
+      "accuracy": 0.901639
+     },
+     "Germania superior": {
+      "n": 240,
+      "accuracy": 0.85
+     },
+     "Pannonia superior": {
+      "n": 215,
+      "accuracy": 0.846512
+     }
+    },
+    "s": {
+     "Africa proconsularis": {
+      "n": 1707,
+      "accuracy": 0.798477
+     },
+     "Numidia": {
+      "n": 1202,
+      "accuracy": 0.691348
+     },
+     "Lusitania": {
+      "n": 454,
+      "accuracy": 0.779736
+     },
+     "Baetica": {
+      "n": 440,
+      "accuracy": 0.825
+     },
+     "Roma": {
+      "n": 371,
+      "accuracy": 0.749326
+     },
+     "Hispania citerior": {
+      "n": 307,
+      "accuracy": 0.778502
+     },
+     "Latium et Campania / Regio I": {
+      "n": 223,
+      "accuracy": 0.713004
+     },
+     "Mauretania Caesariensis": {
+      "n": 203,
+      "accuracy": 0.91133
+     },
+     "Pannonia superior": {
+      "n": 153,
+      "accuracy": 0.79085
+     },
+     "Germania superior": {
+      "n": 121,
+      "accuracy": 0.842975
+     },
+     "Dalmatia": {
+      "n": 119,
+      "accuracy": 0.739496
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 106,
+      "accuracy": 0.726415
+     }
+    }
+   },
+   "per_form_century": {
+    "v": {
+     "UNK": {
+      "n": 3222,
+      "accuracy": 0.862508
+     },
+     "1AD": {
+      "n": 194,
+      "accuracy": 0.685567
+     },
+     "3AD": {
+      "n": 157,
+      "accuracy": 0.630573
+     },
+     "2AD": {
+      "n": 114,
+      "accuracy": 0.789474
+     },
+     "4AD": {
+      "n": 86,
+      "accuracy": 0.732558
+     },
+     "5AD": {
+      "n": 47,
+      "accuracy": 0.680851
+     },
+     "6AD": {
+      "n": 42,
+      "accuracy": 0.714286
+     },
+     "1BC": {
+      "n": 36,
+      "accuracy": 0.638889
+     },
+     "3BC": {
+      "n": 3,
+      "accuracy": 0.0
+     },
+     "2BC": {
+      "n": 3,
+      "accuracy": 1.0
+     }
+    },
+    "c": {
+     "UNK": {
+      "n": 4783,
+      "accuracy": 0.674054
+     },
+     "1AD": {
+      "n": 567,
+      "accuracy": 0.634921
+     },
+     "2AD": {
+      "n": 290,
+      "accuracy": 0.534483
+     },
+     "3AD": {
+      "n": 235,
+      "accuracy": 0.425532
+     },
+     "1BC": {
+      "n": 210,
+      "accuracy": 0.671429
+     },
+     "4AD": {
+      "n": 65,
+      "accuracy": 0.584615
+     },
+     "6AD": {
+      "n": 55,
+      "accuracy": 0.545455
+     },
+     "5AD": {
+      "n": 44,
+      "accuracy": 0.545455
+     },
+     "2BC": {
+      "n": 21,
+      "accuracy": 0.952381
+     },
+     "3BC": {
+      "n": 9,
+      "accuracy": 0.666667
+     }
+    },
+    "a": {
+     "UNK": {
+      "n": 2596,
+      "accuracy": 0.808552
+     },
+     "1AD": {
+      "n": 158,
+      "accuracy": 0.632911
+     },
+     "2AD": {
+      "n": 111,
+      "accuracy": 0.621622
+     },
+     "1BC": {
+      "n": 67,
+      "accuracy": 0.820896
+     },
+     "3AD": {
+      "n": 59,
+      "accuracy": 0.525424
+     },
+     "4AD": {
+      "n": 13,
+      "accuracy": 0.692308
+     },
+     "2BC": {
+      "n": 7,
+      "accuracy": 0.857143
+     },
+     "6AD": {
+      "n": 4,
+      "accuracy": 0.5
+     },
+     "5AD": {
+      "n": 2,
+      "accuracy": 1.0
+     },
+     "3BC": {
+      "n": 1,
+      "accuracy": 1.0
+     }
+    },
+    "l": {
+     "UNK": {
+      "n": 6920,
+      "accuracy": 0.661705
+     },
+     "1AD": {
+      "n": 999,
+      "accuracy": 0.546547
+     },
+     "1BC": {
+      "n": 395,
+      "accuracy": 0.668354
+     },
+     "2AD": {
+      "n": 387,
+      "accuracy": 0.599483
+     },
+     "3AD": {
+      "n": 210,
+      "accuracy": 0.690476
+     },
+     "2BC": {
+      "n": 43,
+      "accuracy": 0.72093
+     },
+     "3BC": {
+      "n": 12,
+      "accuracy": 0.916667
+     },
+     "4AD": {
+      "n": 7,
+      "accuracy": 0.142857
+     },
+     "4BC": {
+      "n": 3,
+      "accuracy": 1.0
+     },
+     "5AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "aug": {
+     "UNK": {
+      "n": 1718,
+      "accuracy": 0.663562
+     },
+     "2AD": {
+      "n": 461,
+      "accuracy": 0.722343
+     },
+     "3AD": {
+      "n": 409,
+      "accuracy": 0.701711
+     },
+     "1AD": {
+      "n": 215,
+      "accuracy": 0.702326
+     },
+     "4AD": {
+      "n": 136,
+      "accuracy": 0.389706
+     },
+     "5AD": {
+      "n": 20,
+      "accuracy": 0.0
+     },
+     "6AD": {
+      "n": 7,
+      "accuracy": 0.142857
+     },
+     "1BC": {
+      "n": 6,
+      "accuracy": 0.5
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.0
+     },
+     "9AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "d": {
+     "UNK": {
+      "n": 7545,
+      "accuracy": 0.895825
+     },
+     "2AD": {
+      "n": 430,
+      "accuracy": 0.886047
+     },
+     "3AD": {
+      "n": 293,
+      "accuracy": 0.863481
+     },
+     "4AD": {
+      "n": 210,
+      "accuracy": 0.842857
+     },
+     "1AD": {
+      "n": 208,
+      "accuracy": 0.836538
+     },
+     "1BC": {
+      "n": 64,
+      "accuracy": 0.640625
+     },
+     "6AD": {
+      "n": 42,
+      "accuracy": 0.857143
+     },
+     "5AD": {
+      "n": 41,
+      "accuracy": 0.780488
+     },
+     "2BC": {
+      "n": 5,
+      "accuracy": 0.2
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.75
+     }
+    },
+    "f": {
+     "UNK": {
+      "n": 5527,
+      "accuracy": 0.580062
+     },
+     "1AD": {
+      "n": 744,
+      "accuracy": 0.598118
+     },
+     "2AD": {
+      "n": 437,
+      "accuracy": 0.427918
+     },
+     "1BC": {
+      "n": 258,
+      "accuracy": 0.616279
+     },
+     "3AD": {
+      "n": 175,
+      "accuracy": 0.537143
+     },
+     "2BC": {
+      "n": 49,
+      "accuracy": 0.857143
+     },
+     "4AD": {
+      "n": 38,
+      "accuracy": 0.447368
+     },
+     "3BC": {
+      "n": 14,
+      "accuracy": 0.571429
+     },
+     "5AD": {
+      "n": 5,
+      "accuracy": 0.2
+     },
+     "4BC": {
+      "n": 2,
+      "accuracy": 0.5
+     }
+    },
+    "p": {
+     "UNK": {
+      "n": 5063,
+      "accuracy": 0.662848
+     },
+     "3AD": {
+      "n": 619,
+      "accuracy": 0.736672
+     },
+     "2AD": {
+      "n": 582,
+      "accuracy": 0.683849
+     },
+     "1AD": {
+      "n": 466,
+      "accuracy": 0.736052
+     },
+     "1BC": {
+      "n": 195,
+      "accuracy": 0.789744
+     },
+     "4AD": {
+      "n": 153,
+      "accuracy": 0.666667
+     },
+     "6AD": {
+      "n": 38,
+      "accuracy": 0.842105
+     },
+     "5AD": {
+      "n": 21,
+      "accuracy": 0.809524
+     },
+     "2BC": {
+      "n": 15,
+      "accuracy": 0.866667
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.75
+     }
+    },
+    "m": {
+     "UNK": {
+      "n": 11350,
+      "accuracy": 0.869692
+     },
+     "3AD": {
+      "n": 658,
+      "accuracy": 0.849544
+     },
+     "2AD": {
+      "n": 620,
+      "accuracy": 0.791935
+     },
+     "1AD": {
+      "n": 417,
+      "accuracy": 0.671463
+     },
+     "4AD": {
+      "n": 135,
+      "accuracy": 0.755556
+     },
+     "1BC": {
+      "n": 120,
+      "accuracy": 0.75
+     },
+     "6AD": {
+      "n": 37,
+      "accuracy": 0.864865
+     },
+     "5AD": {
+      "n": 27,
+      "accuracy": 0.740741
+     },
+     "2BC": {
+      "n": 17,
+      "accuracy": 0.647059
+     },
+     "3BC": {
+      "n": 8,
+      "accuracy": 0.75
+     }
+    },
+    "s": {
+     "UNK": {
+      "n": 5916,
+      "accuracy": 0.768425
+     },
+     "1AD": {
+      "n": 200,
+      "accuracy": 0.745
+     },
+     "2AD": {
+      "n": 197,
+      "accuracy": 0.751269
+     },
+     "3AD": {
+      "n": 141,
+      "accuracy": 0.680851
+     },
+     "1BC": {
+      "n": 65,
+      "accuracy": 0.6
+     },
+     "6AD": {
+      "n": 17,
+      "accuracy": 0.882353
+     },
+     "4AD": {
+      "n": 14,
+      "accuracy": 0.642857
+     },
+     "5AD": {
+      "n": 11,
+      "accuracy": 0.636364
+     },
+     "2BC": {
+      "n": 7,
+      "accuracy": 0.0
+     },
+     "3BC": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    }
+   },
+   "abstention": [
+    {
+     "coverage": 0.05,
+     "n": 6979,
+     "accuracy": 0.768735
+    },
+    {
+     "coverage": 0.1,
+     "n": 13958,
+     "accuracy": 0.76723
+    },
+    {
+     "coverage": 0.15,
+     "n": 20937,
+     "accuracy": 0.76883
+    },
+    {
+     "coverage": 0.2,
+     "n": 27916,
+     "accuracy": 0.775613
+    },
+    {
+     "coverage": 0.25,
+     "n": 34895,
+     "accuracy": 0.77461
+    },
+    {
+     "coverage": 0.3,
+     "n": 41874,
+     "accuracy": 0.780031
+    },
+    {
+     "coverage": 0.35,
+     "n": 48853,
+     "accuracy": 0.780669
+    },
+    {
+     "coverage": 0.4,
+     "n": 55832,
+     "accuracy": 0.780825
+    },
+    {
+     "coverage": 0.45,
+     "n": 62811,
+     "accuracy": 0.775469
+    },
+    {
+     "coverage": 0.5,
+     "n": 69790,
+     "accuracy": 0.769179
+    },
+    {
+     "coverage": 0.55,
+     "n": 76769,
+     "accuracy": 0.773307
+    },
+    {
+     "coverage": 0.6,
+     "n": 83748,
+     "accuracy": 0.776448
+    },
+    {
+     "coverage": 0.65,
+     "n": 90727,
+     "accuracy": 0.776836
+    },
+    {
+     "coverage": 0.7,
+     "n": 97706,
+     "accuracy": 0.778519
+    },
+    {
+     "coverage": 0.75,
+     "n": 104685,
+     "accuracy": 0.779586
+    },
+    {
+     "coverage": 0.8,
+     "n": 111664,
+     "accuracy": 0.780422
+    },
+    {
+     "coverage": 0.85,
+     "n": 118643,
+     "accuracy": 0.779591
+    },
+    {
+     "coverage": 0.9,
+     "n": 125622,
+     "accuracy": 0.781718
+    },
+    {
+     "coverage": 0.95,
+     "n": 132601,
+     "accuracy": 0.763757
+    },
+    {
+     "coverage": 1.0,
+     "n": 139580,
+     "accuracy": 0.734589
+    }
+   ],
+   "confidence_hist": {
+    "1.0": 135156,
+    "0.0": 2352,
+    "0.8": 454,
+    "0.9": 832,
+    "0.7": 337,
+    "0.5": 138,
+    "0.6": 301,
+    "0.4": 10
+   },
+   "ceiling": 0.952945
+  },
+  "primary_val": {
+   "n": 139591,
+   "accuracy": 0.738887,
+   "macro_f1": 0.268453,
+   "acc_at_k": {
+    "acc@1": 0.738887,
+    "acc@3": 0.884226,
+    "acc@5": 0.91402
+   },
+   "by_ambiguity": {
+    "lexical": {
+     "n": 123563,
+     "accuracy": 0.74842
+    },
+    "inflectional_only": {
+     "n": 8861,
+     "accuracy": 0.722718
+    },
+    "unambiguous": {
+     "n": 7167,
+     "accuracy": 0.59453
+    }
+   },
+   "by_band": {
+    "common": {
+     "n": 111018,
+     "accuracy": 0.761264
+    },
+    "mid": {
+     "n": 22181,
+     "accuracy": 0.71674
+    },
+    "rare": {
+     "n": 4009,
+     "accuracy": 0.680968
+    },
+    "unseen": {
+     "n": 2383,
+     "accuracy": 0.0
+    }
+   },
+   "by_province": {
+    "Roma": {
+     "n": 31563,
+     "accuracy": 0.736812
+    },
+    "Latium et Campania / Regio I": {
+     "n": 12286,
+     "accuracy": 0.644636
+    },
+    "Africa proconsularis": {
+     "n": 12009,
+     "accuracy": 0.80856
+    },
+    "Numidia": {
+     "n": 11094,
+     "accuracy": 0.829367
+    },
+    "Venetia et Histria / Regio X": {
+     "n": 5011,
+     "accuracy": 0.690082
+    },
+    "Hispania citerior": {
+     "n": 4192,
+     "accuracy": 0.708492
+    },
+    "Germania superior": {
+     "n": 3790,
+     "accuracy": 0.797625
+    },
+    "Gallia Narbonensis": {
+     "n": 3434,
+     "accuracy": 0.707047
+    },
+    "Provincia incerta": {
+     "n": 3076,
+     "accuracy": 0.807217
+    },
+    "Baetica": {
+     "n": 3060,
+     "accuracy": 0.766993
+    },
+    "Lusitania": {
+     "n": 2964,
+     "accuracy": 0.780027
+    },
+    "Dalmatia": {
+     "n": 2869,
+     "accuracy": 0.725688
+    },
+    "Pannonia superior": {
+     "n": 2791,
+     "accuracy": 0.734145
+    },
+    "Mauretania Caesariensis": {
+     "n": 2773,
+     "accuracy": 0.776776
+    },
+    "Britannia": {
+     "n": 2745,
+     "accuracy": 0.786521
+    },
+    "Samnium / Regio IV": {
+     "n": 2665,
+     "accuracy": 0.675797
+    },
+    "Etruria / Regio VII": {
+     "n": 2439,
+     "accuracy": 0.687577
+    },
+    "Pannonia inferior": {
+     "n": 2354,
+     "accuracy": 0.729822
+    },
+    "Dacia": {
+     "n": 2280,
+     "accuracy": 0.727193
+    },
+    "Apulia et Calabria / Regio II": {
+     "n": 2242,
+     "accuracy": 0.736842
+    },
+    "Umbria / Regio VI": {
+     "n": 1849,
+     "accuracy": 0.683072
+    },
+    "Germania inferior": {
+     "n": 1753,
+     "accuracy": 0.78494
+    },
+    "Transpadana / Regio XI": {
+     "n": 1534,
+     "accuracy": 0.701434
+    },
+    "Aemilia / Regio VIII": {
+     "n": 1519,
+     "accuracy": 0.658328
+    },
+    "Lugudunensis": {
+     "n": 1438,
+     "accuracy": 0.732267
+    }
+   },
+   "by_century": {
+    "UNK": {
+     "n": 107151,
+     "accuracy": 0.749895
+    },
+    "2AD": {
+     "n": 9963,
+     "accuracy": 0.727492
+    },
+    "1AD": {
+     "n": 8139,
+     "accuracy": 0.689028
+    },
+    "3AD": {
+     "n": 7784,
+     "accuracy": 0.69964
+    },
+    "1BC": {
+     "n": 2537,
+     "accuracy": 0.672448
+    },
+    "4AD": {
+     "n": 2448,
+     "accuracy": 0.716095
+    },
+    "5AD": {
+     "n": 646,
+     "accuracy": 0.630031
+    },
+    "6AD": {
+     "n": 515,
+     "accuracy": 0.702913
+    },
+    "2BC": {
+     "n": 215,
+     "accuracy": 0.739535
+    },
+    "3BC": {
+     "n": 78,
+     "accuracy": 0.5
+    },
+    "7AD": {
+     "n": 67,
+     "accuracy": 0.641791
+    },
+    "8AD": {
+     "n": 42,
+     "accuracy": 0.404762
+    },
+    "15AD": {
+     "n": 5,
+     "accuracy": 0.2
+    },
+    "4BC": {
+     "n": 1,
+     "accuracy": 1.0
+    }
+   },
+   "per_form_province": {
+    "v": {
+     "Numidia": {
+      "n": 876,
+      "accuracy": 0.954338
+     },
+     "Roma": {
+      "n": 581,
+      "accuracy": 0.712565
+     },
+     "Africa proconsularis": {
+      "n": 473,
+      "accuracy": 0.909091
+     },
+     "Latium et Campania / Regio I": {
+      "n": 253,
+      "accuracy": 0.766798
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 165,
+      "accuracy": 0.709091
+     },
+     "Britannia": {
+      "n": 157,
+      "accuracy": 0.910828
+     },
+     "Mauretania Caesariensis": {
+      "n": 124,
+      "accuracy": 0.927419
+     },
+     "Germania superior": {
+      "n": 110,
+      "accuracy": 0.945455
+     },
+     "Pannonia superior": {
+      "n": 89,
+      "accuracy": 0.88764
+     },
+     "Gallia Narbonensis": {
+      "n": 88,
+      "accuracy": 0.727273
+     },
+     "Dalmatia": {
+      "n": 82,
+      "accuracy": 0.817073
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 79,
+      "accuracy": 0.848101
+     }
+    },
+    "c": {
+     "Roma": {
+      "n": 1503,
+      "accuracy": 0.667332
+     },
+     "Latium et Campania / Regio I": {
+      "n": 818,
+      "accuracy": 0.559902
+     },
+     "Numidia": {
+      "n": 330,
+      "accuracy": 0.781818
+     },
+     "Africa proconsularis": {
+      "n": 310,
+      "accuracy": 0.635484
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 279,
+      "accuracy": 0.695341
+     },
+     "Samnium / Regio IV": {
+      "n": 250,
+      "accuracy": 0.704
+     },
+     "Etruria / Regio VII": {
+      "n": 200,
+      "accuracy": 0.75
+     },
+     "Hispania citerior": {
+      "n": 184,
+      "accuracy": 0.586957
+     },
+     "Umbria / Regio VI": {
+      "n": 180,
+      "accuracy": 0.75
+     },
+     "Gallia Narbonensis": {
+      "n": 179,
+      "accuracy": 0.558659
+     },
+     "Lusitania": {
+      "n": 149,
+      "accuracy": 0.778523
+     },
+     "Provincia incerta": {
+      "n": 146,
+      "accuracy": 0.842466
+     }
+    },
+    "a": {
+     "Numidia": {
+      "n": 850,
+      "accuracy": 0.952941
+     },
+     "Roma": {
+      "n": 615,
+      "accuracy": 0.700813
+     },
+     "Africa proconsularis": {
+      "n": 412,
+      "accuracy": 0.917476
+     },
+     "Latium et Campania / Regio I": {
+      "n": 274,
+      "accuracy": 0.489051
+     },
+     "Mauretania Caesariensis": {
+      "n": 140,
+      "accuracy": 0.907143
+     },
+     "Etruria / Regio VII": {
+      "n": 80,
+      "accuracy": 0.7375
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 74,
+      "accuracy": 0.864865
+     },
+     "Provincia incerta": {
+      "n": 47,
+      "accuracy": 0.893617
+     },
+     "Lusitania": {
+      "n": 44,
+      "accuracy": 0.818182
+     },
+     "Britannia": {
+      "n": 43,
+      "accuracy": 0.860465
+     },
+     "Samnium / Regio IV": {
+      "n": 42,
+      "accuracy": 0.714286
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 41,
+      "accuracy": 0.780488
+     }
+    },
+    "l": {
+     "Roma": {
+      "n": 2521,
+      "accuracy": 0.563269
+     },
+     "Latium et Campania / Regio I": {
+      "n": 972,
+      "accuracy": 0.512346
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 564,
+      "accuracy": 0.62234
+     },
+     "Africa proconsularis": {
+      "n": 316,
+      "accuracy": 0.787975
+     },
+     "Etruria / Regio VII": {
+      "n": 305,
+      "accuracy": 0.688525
+     },
+     "Gallia Narbonensis": {
+      "n": 304,
+      "accuracy": 0.667763
+     },
+     "Hispania citerior": {
+      "n": 292,
+      "accuracy": 0.691781
+     },
+     "Numidia": {
+      "n": 284,
+      "accuracy": 0.767606
+     },
+     "Baetica": {
+      "n": 270,
+      "accuracy": 0.851852
+     },
+     "Samnium / Regio IV": {
+      "n": 263,
+      "accuracy": 0.585551
+     },
+     "Germania superior": {
+      "n": 253,
+      "accuracy": 0.762846
+     },
+     "Lusitania": {
+      "n": 248,
+      "accuracy": 0.875
+     }
+    },
+    "aug": {
+     "Roma": {
+      "n": 587,
+      "accuracy": 0.679727
+     },
+     "Africa proconsularis": {
+      "n": 317,
+      "accuracy": 0.687697
+     },
+     "Numidia": {
+      "n": 281,
+      "accuracy": 0.779359
+     },
+     "Latium et Campania / Regio I": {
+      "n": 179,
+      "accuracy": 0.502793
+     },
+     "Britannia": {
+      "n": 154,
+      "accuracy": 0.915584
+     },
+     "Provincia incerta": {
+      "n": 123,
+      "accuracy": 0.772358
+     },
+     "Hispania citerior": {
+      "n": 91,
+      "accuracy": 0.681319
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 87,
+      "accuracy": 0.482759
+     },
+     "Pannonia inferior": {
+      "n": 67,
+      "accuracy": 0.716418
+     },
+     "Gallia Narbonensis": {
+      "n": 65,
+      "accuracy": 0.630769
+     },
+     "Pannonia superior": {
+      "n": 64,
+      "accuracy": 0.546875
+     },
+     "Germania superior": {
+      "n": 60,
+      "accuracy": 0.866667
+     }
+    },
+    "d": {
+     "Roma": {
+      "n": 2343,
+      "accuracy": 0.876654
+     },
+     "Africa proconsularis": {
+      "n": 1082,
+      "accuracy": 0.95841
+     },
+     "Numidia": {
+      "n": 919,
+      "accuracy": 0.966268
+     },
+     "Latium et Campania / Regio I": {
+      "n": 868,
+      "accuracy": 0.857143
+     },
+     "Hispania citerior": {
+      "n": 257,
+      "accuracy": 0.844358
+     },
+     "Dalmatia": {
+      "n": 243,
+      "accuracy": 0.925926
+     },
+     "Mauretania Caesariensis": {
+      "n": 231,
+      "accuracy": 0.939394
+     },
+     "Gallia Narbonensis": {
+      "n": 225,
+      "accuracy": 0.902222
+     },
+     "Baetica": {
+      "n": 205,
+      "accuracy": 0.84878
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 186,
+      "accuracy": 0.897849
+     },
+     "Lusitania": {
+      "n": 172,
+      "accuracy": 0.686047
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 163,
+      "accuracy": 0.95092
+     }
+    },
+    "f": {
+     "Roma": {
+      "n": 1039,
+      "accuracy": 0.479307
+     },
+     "Latium et Campania / Regio I": {
+      "n": 666,
+      "accuracy": 0.472973
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 541,
+      "accuracy": 0.530499
+     },
+     "Germania superior": {
+      "n": 332,
+      "accuracy": 0.927711
+     },
+     "Samnium / Regio IV": {
+      "n": 306,
+      "accuracy": 0.51634
+     },
+     "Hispania citerior": {
+      "n": 297,
+      "accuracy": 0.464646
+     },
+     "Lusitania": {
+      "n": 296,
+      "accuracy": 0.543919
+     },
+     "Gallia Narbonensis": {
+      "n": 247,
+      "accuracy": 0.591093
+     },
+     "Numidia": {
+      "n": 242,
+      "accuracy": 0.595041
+     },
+     "Africa proconsularis": {
+      "n": 234,
+      "accuracy": 0.482906
+     },
+     "Belgica": {
+      "n": 221,
+      "accuracy": 0.959276
+     },
+     "Provincia incerta": {
+      "n": 175,
+      "accuracy": 0.794286
+     }
+    },
+    "p": {
+     "Roma": {
+      "n": 1349,
+      "accuracy": 0.726464
+     },
+     "Africa proconsularis": {
+      "n": 712,
+      "accuracy": 0.639045
+     },
+     "Latium et Campania / Regio I": {
+      "n": 587,
+      "accuracy": 0.60477
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 497,
+      "accuracy": 0.77666
+     },
+     "Numidia": {
+      "n": 395,
+      "accuracy": 0.670886
+     },
+     "Germania superior": {
+      "n": 266,
+      "accuracy": 0.800752
+     },
+     "Samnium / Regio IV": {
+      "n": 216,
+      "accuracy": 0.689815
+     },
+     "Hispania citerior": {
+      "n": 197,
+      "accuracy": 0.634518
+     },
+     "Dalmatia": {
+      "n": 190,
+      "accuracy": 0.705263
+     },
+     "Mauretania Caesariensis": {
+      "n": 169,
+      "accuracy": 0.715976
+     },
+     "Gallia Narbonensis": {
+      "n": 160,
+      "accuracy": 0.6625
+     },
+     "Provincia incerta": {
+      "n": 145,
+      "accuracy": 0.855172
+     }
+    },
+    "m": {
+     "Roma": {
+      "n": 3659,
+      "accuracy": 0.861164
+     },
+     "Latium et Campania / Regio I": {
+      "n": 1271,
+      "accuracy": 0.780488
+     },
+     "Africa proconsularis": {
+      "n": 1248,
+      "accuracy": 0.89984
+     },
+     "Numidia": {
+      "n": 1119,
+      "accuracy": 0.915996
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 459,
+      "accuracy": 0.793028
+     },
+     "Gallia Narbonensis": {
+      "n": 371,
+      "accuracy": 0.876011
+     },
+     "Hispania citerior": {
+      "n": 370,
+      "accuracy": 0.835135
+     },
+     "Dalmatia": {
+      "n": 358,
+      "accuracy": 0.891061
+     },
+     "Mauretania Caesariensis": {
+      "n": 324,
+      "accuracy": 0.891975
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 268,
+      "accuracy": 0.869403
+     },
+     "Germania superior": {
+      "n": 251,
+      "accuracy": 0.836653
+     },
+     "Pannonia superior": {
+      "n": 218,
+      "accuracy": 0.802752
+     }
+    },
+    "s": {
+     "Africa proconsularis": {
+      "n": 1610,
+      "accuracy": 0.815528
+     },
+     "Numidia": {
+      "n": 1196,
+      "accuracy": 0.770067
+     },
+     "Baetica": {
+      "n": 454,
+      "accuracy": 0.797357
+     },
+     "Lusitania": {
+      "n": 441,
+      "accuracy": 0.816327
+     },
+     "Roma": {
+      "n": 420,
+      "accuracy": 0.769048
+     },
+     "Latium et Campania / Regio I": {
+      "n": 325,
+      "accuracy": 0.698462
+     },
+     "Hispania citerior": {
+      "n": 314,
+      "accuracy": 0.77707
+     },
+     "Mauretania Caesariensis": {
+      "n": 230,
+      "accuracy": 0.9
+     },
+     "Germania superior": {
+      "n": 145,
+      "accuracy": 0.793103
+     },
+     "Pannonia superior": {
+      "n": 145,
+      "accuracy": 0.751724
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 133,
+      "accuracy": 0.789474
+     },
+     "Dalmatia": {
+      "n": 116,
+      "accuracy": 0.810345
+     }
+    }
+   },
+   "per_form_century": {
+    "v": {
+     "UNK": {
+      "n": 3312,
+      "accuracy": 0.863829
+     },
+     "1AD": {
+      "n": 197,
+      "accuracy": 0.771574
+     },
+     "3AD": {
+      "n": 152,
+      "accuracy": 0.710526
+     },
+     "2AD": {
+      "n": 124,
+      "accuracy": 0.846774
+     },
+     "4AD": {
+      "n": 88,
+      "accuracy": 0.715909
+     },
+     "5AD": {
+      "n": 43,
+      "accuracy": 0.767442
+     },
+     "1BC": {
+      "n": 38,
+      "accuracy": 0.605263
+     },
+     "6AD": {
+      "n": 29,
+      "accuracy": 0.793103
+     },
+     "2BC": {
+      "n": 3,
+      "accuracy": 1.0
+     },
+     "3BC": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "c": {
+     "UNK": {
+      "n": 4788,
+      "accuracy": 0.665205
+     },
+     "1AD": {
+      "n": 557,
+      "accuracy": 0.671454
+     },
+     "2AD": {
+      "n": 353,
+      "accuracy": 0.524079
+     },
+     "1BC": {
+      "n": 236,
+      "accuracy": 0.682203
+     },
+     "3AD": {
+      "n": 226,
+      "accuracy": 0.517699
+     },
+     "4AD": {
+      "n": 72,
+      "accuracy": 0.361111
+     },
+     "5AD": {
+      "n": 43,
+      "accuracy": 0.627907
+     },
+     "6AD": {
+      "n": 40,
+      "accuracy": 0.525
+     },
+     "2BC": {
+      "n": 21,
+      "accuracy": 0.904762
+     },
+     "3BC": {
+      "n": 10,
+      "accuracy": 0.5
+     }
+    },
+    "a": {
+     "UNK": {
+      "n": 2615,
+      "accuracy": 0.825239
+     },
+     "1AD": {
+      "n": 141,
+      "accuracy": 0.58156
+     },
+     "2AD": {
+      "n": 129,
+      "accuracy": 0.620155
+     },
+     "1BC": {
+      "n": 72,
+      "accuracy": 0.833333
+     },
+     "3AD": {
+      "n": 61,
+      "accuracy": 0.508197
+     },
+     "4AD": {
+      "n": 20,
+      "accuracy": 0.75
+     },
+     "2BC": {
+      "n": 10,
+      "accuracy": 0.8
+     },
+     "5AD": {
+      "n": 5,
+      "accuracy": 0.4
+     },
+     "6AD": {
+      "n": 1,
+      "accuracy": 1.0
+     }
+    },
+    "l": {
+     "UNK": {
+      "n": 6920,
+      "accuracy": 0.648699
+     },
+     "1AD": {
+      "n": 948,
+      "accuracy": 0.537975
+     },
+     "1BC": {
+      "n": 396,
+      "accuracy": 0.661616
+     },
+     "2AD": {
+      "n": 341,
+      "accuracy": 0.645161
+     },
+     "3AD": {
+      "n": 201,
+      "accuracy": 0.661692
+     },
+     "2BC": {
+      "n": 33,
+      "accuracy": 0.818182
+     },
+     "4AD": {
+      "n": 17,
+      "accuracy": 0.352941
+     },
+     "3BC": {
+      "n": 5,
+      "accuracy": 0.6
+     },
+     "6AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "aug": {
+     "UNK": {
+      "n": 1783,
+      "accuracy": 0.688727
+     },
+     "2AD": {
+      "n": 474,
+      "accuracy": 0.719409
+     },
+     "3AD": {
+      "n": 447,
+      "accuracy": 0.677852
+     },
+     "1AD": {
+      "n": 201,
+      "accuracy": 0.641791
+     },
+     "4AD": {
+      "n": 125,
+      "accuracy": 0.4
+     },
+     "5AD": {
+      "n": 15,
+      "accuracy": 0.466667
+     },
+     "1BC": {
+      "n": 6,
+      "accuracy": 0.333333
+     },
+     "6AD": {
+      "n": 4,
+      "accuracy": 0.25
+     }
+    },
+    "d": {
+     "UNK": {
+      "n": 7581,
+      "accuracy": 0.900937
+     },
+     "2AD": {
+      "n": 420,
+      "accuracy": 0.864286
+     },
+     "3AD": {
+      "n": 311,
+      "accuracy": 0.85209
+     },
+     "1AD": {
+      "n": 218,
+      "accuracy": 0.816514
+     },
+     "4AD": {
+      "n": 214,
+      "accuracy": 0.850467
+     },
+     "1BC": {
+      "n": 62,
+      "accuracy": 0.709677
+     },
+     "5AD": {
+      "n": 38,
+      "accuracy": 0.736842
+     },
+     "6AD": {
+      "n": 22,
+      "accuracy": 0.909091
+     },
+     "2BC": {
+      "n": 6,
+      "accuracy": 0.666667
+     },
+     "7AD": {
+      "n": 5,
+      "accuracy": 0.8
+     }
+    },
+    "f": {
+     "UNK": {
+      "n": 5530,
+      "accuracy": 0.567993
+     },
+     "1AD": {
+      "n": 671,
+      "accuracy": 0.627422
+     },
+     "2AD": {
+      "n": 407,
+      "accuracy": 0.525799
+     },
+     "1BC": {
+      "n": 305,
+      "accuracy": 0.613115
+     },
+     "3AD": {
+      "n": 200,
+      "accuracy": 0.615
+     },
+     "4AD": {
+      "n": 54,
+      "accuracy": 0.666667
+     },
+     "2BC": {
+      "n": 35,
+      "accuracy": 0.828571
+     },
+     "3BC": {
+      "n": 10,
+      "accuracy": 0.7
+     },
+     "5AD": {
+      "n": 9,
+      "accuracy": 0.111111
+     },
+     "6AD": {
+      "n": 3,
+      "accuracy": 0.333333
+     }
+    },
+    "p": {
+     "UNK": {
+      "n": 4856,
+      "accuracy": 0.689456
+     },
+     "3AD": {
+      "n": 669,
+      "accuracy": 0.704036
+     },
+     "2AD": {
+      "n": 567,
+      "accuracy": 0.66843
+     },
+     "1AD": {
+      "n": 498,
+      "accuracy": 0.732932
+     },
+     "1BC": {
+      "n": 190,
+      "accuracy": 0.831579
+     },
+     "4AD": {
+      "n": 189,
+      "accuracy": 0.666667
+     },
+     "5AD": {
+      "n": 38,
+      "accuracy": 0.657895
+     },
+     "6AD": {
+      "n": 29,
+      "accuracy": 0.62069
+     },
+     "2BC": {
+      "n": 9,
+      "accuracy": 1.0
+     },
+     "3BC": {
+      "n": 3,
+      "accuracy": 0.333333
+     }
+    },
+    "m": {
+     "UNK": {
+      "n": 11566,
+      "accuracy": 0.864171
+     },
+     "3AD": {
+      "n": 657,
+      "accuracy": 0.81583
+     },
+     "2AD": {
+      "n": 605,
+      "accuracy": 0.783471
+     },
+     "1AD": {
+      "n": 404,
+      "accuracy": 0.705446
+     },
+     "1BC": {
+      "n": 137,
+      "accuracy": 0.832117
+     },
+     "4AD": {
+      "n": 131,
+      "accuracy": 0.80916
+     },
+     "6AD": {
+      "n": 32,
+      "accuracy": 0.84375
+     },
+     "5AD": {
+      "n": 32,
+      "accuracy": 0.8125
+     },
+     "2BC": {
+      "n": 21,
+      "accuracy": 0.714286
+     },
+     "3BC": {
+      "n": 7,
+      "accuracy": 1.0
+     }
+    },
+    "s": {
+     "UNK": {
+      "n": 5889,
+      "accuracy": 0.785193
+     },
+     "1AD": {
+      "n": 243,
+      "accuracy": 0.8107
+     },
+     "2AD": {
+      "n": 212,
+      "accuracy": 0.773585
+     },
+     "3AD": {
+      "n": 137,
+      "accuracy": 0.649635
+     },
+     "1BC": {
+      "n": 121,
+      "accuracy": 0.727273
+     },
+     "4AD": {
+      "n": 15,
+      "accuracy": 0.866667
+     },
+     "5AD": {
+      "n": 11,
+      "accuracy": 0.818182
+     },
+     "6AD": {
+      "n": 9,
+      "accuracy": 0.888889
+     },
+     "2BC": {
+      "n": 2,
+      "accuracy": 1.0
+     },
+     "7AD": {
+      "n": 1,
+      "accuracy": 1.0
+     }
+    }
+   },
+   "abstention": [
+    {
+     "coverage": 0.05,
+     "n": 6980,
+     "accuracy": 0.771347
+    },
+    {
+     "coverage": 0.1,
+     "n": 13959,
+     "accuracy": 0.766602
+    },
+    {
+     "coverage": 0.15,
+     "n": 20939,
+     "accuracy": 0.771193
+    },
+    {
+     "coverage": 0.2,
+     "n": 27918,
+     "accuracy": 0.776417
+    },
+    {
+     "coverage": 0.25,
+     "n": 34898,
+     "accuracy": 0.777523
+    },
+    {
+     "coverage": 0.3,
+     "n": 41877,
+     "accuracy": 0.782816
+    },
+    {
+     "coverage": 0.35,
+     "n": 48857,
+     "accuracy": 0.786704
+    },
+    {
+     "coverage": 0.4,
+     "n": 55836,
+     "accuracy": 0.783831
+    },
+    {
+     "coverage": 0.45,
+     "n": 62816,
+     "accuracy": 0.779483
+    },
+    {
+     "coverage": 0.5,
+     "n": 69796,
+     "accuracy": 0.77801
+    },
+    {
+     "coverage": 0.55,
+     "n": 76775,
+     "accuracy": 0.780306
+    },
+    {
+     "coverage": 0.6,
+     "n": 83755,
+     "accuracy": 0.782843
+    },
+    {
+     "coverage": 0.65,
+     "n": 90734,
+     "accuracy": 0.78221
+    },
+    {
+     "coverage": 0.7,
+     "n": 97714,
+     "accuracy": 0.783255
+    },
+    {
+     "coverage": 0.75,
+     "n": 104693,
+     "accuracy": 0.783405
+    },
+    {
+     "coverage": 0.8,
+     "n": 111673,
+     "accuracy": 0.784639
+    },
+    {
+     "coverage": 0.85,
+     "n": 118652,
+     "accuracy": 0.785566
+    },
+    {
+     "coverage": 0.9,
+     "n": 125632,
+     "accuracy": 0.786448
+    },
+    {
+     "coverage": 0.95,
+     "n": 132611,
+     "accuracy": 0.767614
+    },
+    {
+     "coverage": 1.0,
+     "n": 139591,
+     "accuracy": 0.738887
+    }
+   ],
+   "confidence_hist": {
+    "1.0": 135202,
+    "0.9": 799,
+    "0.7": 331,
+    "0.0": 2383,
+    "0.6": 281,
+    "0.8": 437,
+    "0.5": 147,
+    "0.4": 11
+   },
+   "ceiling": 0.953679
+  },
+  "heldout_province_test": {
+   "n": 71697,
+   "accuracy": 0.803283,
+   "macro_f1": 0.486409,
+   "acc_at_k": {
+    "acc@1": 0.803283,
+    "acc@3": 0.92538,
+    "acc@5": 0.948994
+   },
+   "by_ambiguity": {
+    "lexical": {
+     "n": 64107,
+     "accuracy": 0.798181
+    },
+    "inflectional_only": {
+     "n": 4358,
+     "accuracy": 0.802203
+    },
+    "unambiguous": {
+     "n": 3232,
+     "accuracy": 0.905941
+    }
+   },
+   "by_band": {
+    "common": {
+     "n": 56530,
+     "accuracy": 0.805731
+    },
+    "mid": {
+     "n": 12136,
+     "accuracy": 0.786173
+    },
+    "rare": {
+     "n": 2790,
+     "accuracy": 0.897491
+    },
+    "unseen": {
+     "n": 241,
+     "accuracy": 0.0
+    }
+   },
+   "by_province": {
+    "Britannia": {
+     "n": 26606,
+     "accuracy": 0.81647
+    },
+    "Mauretania Caesariensis": {
+     "n": 24997,
+     "accuracy": 0.808977
+    },
+    "Pannonia inferior": {
+     "n": 20094,
+     "accuracy": 0.77874
+    }
+   },
+   "by_century": {
+    "UNK": {
+     "n": 51303,
+     "accuracy": 0.82003
+    },
+    "3AD": {
+     "n": 10094,
+     "accuracy": 0.75639
+    },
+    "2AD": {
+     "n": 6297,
+     "accuracy": 0.757186
+    },
+    "4AD": {
+     "n": 1816,
+     "accuracy": 0.795705
+    },
+    "5AD": {
+     "n": 906,
+     "accuracy": 0.837748
+    },
+    "1AD": {
+     "n": 865,
+     "accuracy": 0.669364
+    },
+    "6AD": {
+     "n": 377,
+     "accuracy": 0.806366
+    },
+    "7AD": {
+     "n": 36,
+     "accuracy": 0.888889
+    },
+    "12AD": {
+     "n": 3,
+     "accuracy": 0.333333
+    }
+   },
+   "per_form_province": {
+    "v": {
+     "Britannia": {
+      "n": 1512,
+      "accuracy": 0.891534
+     },
+     "Mauretania Caesariensis": {
+      "n": 909,
+      "accuracy": 0.924092
+     },
+     "Pannonia inferior": {
+      "n": 589,
+      "accuracy": 0.928693
+     }
+    },
+    "c": {
+     "Britannia": {
+      "n": 664,
+      "accuracy": 0.412651
+     },
+     "Mauretania Caesariensis": {
+      "n": 609,
+      "accuracy": 0.684729
+     },
+     "Pannonia inferior": {
+      "n": 534,
+      "accuracy": 0.634831
+     }
+    },
+    "a": {
+     "Mauretania Caesariensis": {
+      "n": 1025,
+      "accuracy": 0.926829
+     },
+     "Britannia": {
+      "n": 252,
+      "accuracy": 0.72619
+     },
+     "Pannonia inferior": {
+      "n": 106,
+      "accuracy": 0.613208
+     }
+    },
+    "l": {
+     "Britannia": {
+      "n": 757,
+      "accuracy": 0.714663
+     },
+     "Pannonia inferior": {
+      "n": 740,
+      "accuracy": 0.797297
+     },
+     "Mauretania Caesariensis": {
+      "n": 707,
+      "accuracy": 0.75389
+     }
+    },
+    "aug": {
+     "Britannia": {
+      "n": 1493,
+      "accuracy": 0.885466
+     },
+     "Mauretania Caesariensis": {
+      "n": 592,
+      "accuracy": 0.636824
+     },
+     "Pannonia inferior": {
+      "n": 511,
+      "accuracy": 0.69863
+     }
+    },
+    "d": {
+     "Mauretania Caesariensis": {
+      "n": 2129,
+      "accuracy": 0.930484
+     },
+     "Pannonia inferior": {
+      "n": 656,
+      "accuracy": 0.885671
+     },
+     "Britannia": {
+      "n": 503,
+      "accuracy": 0.727634
+     }
+    },
+    "f": {
+     "Britannia": {
+      "n": 847,
+      "accuracy": 0.85124
+     },
+     "Pannonia inferior": {
+      "n": 721,
+      "accuracy": 0.733703
+     },
+     "Mauretania Caesariensis": {
+      "n": 544,
+      "accuracy": 0.511029
+     }
+    },
+    "p": {
+     "Mauretania Caesariensis": {
+      "n": 1489,
+      "accuracy": 0.732035
+     },
+     "Britannia": {
+      "n": 1136,
+      "accuracy": 0.658451
+     },
+     "Pannonia inferior": {
+      "n": 1016,
+      "accuracy": 0.704724
+     }
+    },
+    "m": {
+     "Mauretania Caesariensis": {
+      "n": 2896,
+      "accuracy": 0.909185
+     },
+     "Pannonia inferior": {
+      "n": 1968,
+      "accuracy": 0.876016
+     },
+     "Britannia": {
+      "n": 1554,
+      "accuracy": 0.814672
+     }
+    },
+    "s": {
+     "Mauretania Caesariensis": {
+      "n": 2148,
+      "accuracy": 0.875233
+     },
+     "Pannonia inferior": {
+      "n": 845,
+      "accuracy": 0.768047
+     },
+     "Britannia": {
+      "n": 673,
+      "accuracy": 0.710253
+     }
+    }
+   },
+   "per_form_century": {
+    "v": {
+     "UNK": {
+      "n": 2594,
+      "accuracy": 0.923285
+     },
+     "3AD": {
+      "n": 235,
+      "accuracy": 0.821277
+     },
+     "2AD": {
+      "n": 154,
+      "accuracy": 0.844156
+     },
+     "4AD": {
+      "n": 16,
+      "accuracy": 0.75
+     },
+     "5AD": {
+      "n": 6,
+      "accuracy": 0.5
+     },
+     "1AD": {
+      "n": 4,
+      "accuracy": 0.25
+     },
+     "6AD": {
+      "n": 1,
+      "accuracy": 1.0
+     }
+    },
+    "c": {
+     "UNK": {
+      "n": 1357,
+      "accuracy": 0.557848
+     },
+     "3AD": {
+      "n": 234,
+      "accuracy": 0.559829
+     },
+     "2AD": {
+      "n": 158,
+      "accuracy": 0.677215
+     },
+     "1AD": {
+      "n": 33,
+      "accuracy": 0.69697
+     },
+     "4AD": {
+      "n": 18,
+      "accuracy": 0.611111
+     },
+     "5AD": {
+      "n": 5,
+      "accuracy": 0.2
+     },
+     "6AD": {
+      "n": 2,
+      "accuracy": 0.0
+     }
+    },
+    "a": {
+     "UNK": {
+      "n": 1111,
+      "accuracy": 0.873987
+     },
+     "3AD": {
+      "n": 109,
+      "accuracy": 0.844037
+     },
+     "4AD": {
+      "n": 81,
+      "accuracy": 0.901235
+     },
+     "2AD": {
+      "n": 40,
+      "accuracy": 0.675
+     },
+     "5AD": {
+      "n": 28,
+      "accuracy": 0.892857
+     },
+     "1AD": {
+      "n": 8,
+      "accuracy": 0.5
+     },
+     "6AD": {
+      "n": 6,
+      "accuracy": 1.0
+     }
+    },
+    "l": {
+     "UNK": {
+      "n": 1702,
+      "accuracy": 0.780846
+     },
+     "3AD": {
+      "n": 236,
+      "accuracy": 0.711864
+     },
+     "2AD": {
+      "n": 224,
+      "accuracy": 0.660714
+     },
+     "1AD": {
+      "n": 29,
+      "accuracy": 0.413793
+     },
+     "4AD": {
+      "n": 11,
+      "accuracy": 0.454545
+     },
+     "6AD": {
+      "n": 1,
+      "accuracy": 1.0
+     },
+     "5AD": {
+      "n": 1,
+      "accuracy": 1.0
+     }
+    },
+    "aug": {
+     "UNK": {
+      "n": 1627,
+      "accuracy": 0.853719
+     },
+     "3AD": {
+      "n": 550,
+      "accuracy": 0.745455
+     },
+     "2AD": {
+      "n": 319,
+      "accuracy": 0.673981
+     },
+     "4AD": {
+      "n": 53,
+      "accuracy": 0.301887
+     },
+     "1AD": {
+      "n": 45,
+      "accuracy": 0.577778
+     },
+     "5AD": {
+      "n": 2,
+      "accuracy": 0.0
+     }
+    },
+    "d": {
+     "UNK": {
+      "n": 2632,
+      "accuracy": 0.901976
+     },
+     "3AD": {
+      "n": 316,
+      "accuracy": 0.829114
+     },
+     "4AD": {
+      "n": 132,
+      "accuracy": 0.848485
+     },
+     "2AD": {
+      "n": 117,
+      "accuracy": 0.837607
+     },
+     "5AD": {
+      "n": 56,
+      "accuracy": 0.964286
+     },
+     "6AD": {
+      "n": 22,
+      "accuracy": 0.818182
+     },
+     "1AD": {
+      "n": 10,
+      "accuracy": 0.7
+     },
+     "7AD": {
+      "n": 3,
+      "accuracy": 1.0
+     }
+    },
+    "f": {
+     "UNK": {
+      "n": 1640,
+      "accuracy": 0.713415
+     },
+     "3AD": {
+      "n": 206,
+      "accuracy": 0.796117
+     },
+     "2AD": {
+      "n": 184,
+      "accuracy": 0.733696
+     },
+     "1AD": {
+      "n": 63,
+      "accuracy": 0.746032
+     },
+     "4AD": {
+      "n": 16,
+      "accuracy": 0.6875
+     },
+     "5AD": {
+      "n": 3,
+      "accuracy": 0.333333
+     }
+    },
+    "p": {
+     "UNK": {
+      "n": 1807,
+      "accuracy": 0.613724
+     },
+     "3AD": {
+      "n": 975,
+      "accuracy": 0.789744
+     },
+     "2AD": {
+      "n": 451,
+      "accuracy": 0.709534
+     },
+     "4AD": {
+      "n": 222,
+      "accuracy": 0.896396
+     },
+     "5AD": {
+      "n": 115,
+      "accuracy": 0.904348
+     },
+     "1AD": {
+      "n": 44,
+      "accuracy": 0.590909
+     },
+     "6AD": {
+      "n": 24,
+      "accuracy": 0.958333
+     },
+     "7AD": {
+      "n": 3,
+      "accuracy": 1.0
+     }
+    },
+    "m": {
+     "UNK": {
+      "n": 4713,
+      "accuracy": 0.87736
+     },
+     "3AD": {
+      "n": 1003,
+      "accuracy": 0.879362
+     },
+     "2AD": {
+      "n": 451,
+      "accuracy": 0.851441
+     },
+     "4AD": {
+      "n": 124,
+      "accuracy": 0.919355
+     },
+     "5AD": {
+      "n": 71,
+      "accuracy": 0.971831
+     },
+     "1AD": {
+      "n": 29,
+      "accuracy": 0.482759
+     },
+     "6AD": {
+      "n": 23,
+      "accuracy": 0.913043
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 1.0
+     }
+    },
+    "s": {
+     "UNK": {
+      "n": 3040,
+      "accuracy": 0.824671
+     },
+     "3AD": {
+      "n": 287,
+      "accuracy": 0.700348
+     },
+     "2AD": {
+      "n": 162,
+      "accuracy": 0.845679
+     },
+     "4AD": {
+      "n": 72,
+      "accuracy": 0.944444
+     },
+     "5AD": {
+      "n": 44,
+      "accuracy": 0.954545
+     },
+     "1AD": {
+      "n": 38,
+      "accuracy": 0.789474
+     },
+     "6AD": {
+      "n": 20,
+      "accuracy": 0.95
+     },
+     "7AD": {
+      "n": 3,
+      "accuracy": 1.0
+     }
+    }
+   },
+   "abstention": [
+    {
+     "coverage": 0.05,
+     "n": 3585,
+     "accuracy": 0.828452
+    },
+    {
+     "coverage": 0.1,
+     "n": 7170,
+     "accuracy": 0.809344
+    },
+    {
+     "coverage": 0.15,
+     "n": 10755,
+     "accuracy": 0.800837
+    },
+    {
+     "coverage": 0.2,
+     "n": 14339,
+     "accuracy": 0.804659
+    },
+    {
+     "coverage": 0.25,
+     "n": 17924,
+     "accuracy": 0.810143
+    },
+    {
+     "coverage": 0.3,
+     "n": 21509,
+     "accuracy": 0.803617
+    },
+    {
+     "coverage": 0.35,
+     "n": 25094,
+     "accuracy": 0.805292
+    },
+    {
+     "coverage": 0.4,
+     "n": 28679,
+     "accuracy": 0.809861
+    },
+    {
+     "coverage": 0.45,
+     "n": 32264,
+     "accuracy": 0.813879
+    },
+    {
+     "coverage": 0.5,
+     "n": 35848,
+     "accuracy": 0.817507
+    },
+    {
+     "coverage": 0.55,
+     "n": 39433,
+     "accuracy": 0.817234
+    },
+    {
+     "coverage": 0.6,
+     "n": 43018,
+     "accuracy": 0.817495
+    },
+    {
+     "coverage": 0.65,
+     "n": 46603,
+     "accuracy": 0.81587
+    },
+    {
+     "coverage": 0.7,
+     "n": 50188,
+     "accuracy": 0.811808
+    },
+    {
+     "coverage": 0.75,
+     "n": 53773,
+     "accuracy": 0.822662
+    },
+    {
+     "coverage": 0.8,
+     "n": 57358,
+     "accuracy": 0.832247
+    },
+    {
+     "coverage": 0.85,
+     "n": 60942,
+     "accuracy": 0.837206
+    },
+    {
+     "coverage": 0.9,
+     "n": 64527,
+     "accuracy": 0.838176
+    },
+    {
+     "coverage": 0.95,
+     "n": 68112,
+     "accuracy": 0.828048
+    },
+    {
+     "coverage": 1.0,
+     "n": 71697,
+     "accuracy": 0.803283
+    }
+   ],
+   "confidence_hist": {
+    "1.0": 70515,
+    "0.5": 67,
+    "0.9": 347,
+    "0.7": 148,
+    "0.8": 219,
+    "0.0": 241,
+    "0.6": 155,
+    "0.4": 5
+   },
+   "ceiling": 0.976624
+  },
+  "test_lexical_only": {
+   "n": 122928,
+   "accuracy": 0.745453,
+   "macro_f1": 0.184908,
+   "acc_at_k": {
+    "acc@1": 0.745453,
+    "acc@3": 0.898615,
+    "acc@5": 0.93026
+   },
+   "by_ambiguity": {
+    "lexical": {
+     "n": 122928,
+     "accuracy": 0.745453
+    },
+    "inflectional_only": {
+     "n": 0,
+     "accuracy": null
+    },
+    "unambiguous": {
+     "n": 0,
+     "accuracy": null
+    }
+   },
+   "by_band": {
+    "common": {
+     "n": 109738,
+     "accuracy": 0.755162
+    },
+    "mid": {
+     "n": 13190,
+     "accuracy": 0.66467
+    }
+   },
+   "by_province": {
+    "Roma": {
+     "n": 26761,
+     "accuracy": 0.73495
+    },
+    "Africa proconsularis": {
+     "n": 11591,
+     "accuracy": 0.823397
+    },
+    "Latium et Campania / Regio I": {
+     "n": 10926,
+     "accuracy": 0.670511
+    },
+    "Numidia": {
+     "n": 10589,
+     "accuracy": 0.797148
+    },
+    "Venetia et Histria / Regio X": {
+     "n": 4275,
+     "accuracy": 0.707602
+    },
+    "Hispania citerior": {
+     "n": 3869,
+     "accuracy": 0.71724
+    },
+    "Germania superior": {
+     "n": 3365,
+     "accuracy": 0.826449
+    },
+    "Gallia Narbonensis": {
+     "n": 3092,
+     "accuracy": 0.703752
+    },
+    "Lusitania": {
+     "n": 2779,
+     "accuracy": 0.813962
+    },
+    "Baetica": {
+     "n": 2562,
+     "accuracy": 0.802498
+    },
+    "Dalmatia": {
+     "n": 2535,
+     "accuracy": 0.730966
+    },
+    "Samnium / Regio IV": {
+     "n": 2383,
+     "accuracy": 0.683172
+    },
+    "Etruria / Regio VII": {
+     "n": 2253,
+     "accuracy": 0.648469
+    },
+    "Pannonia superior": {
+     "n": 2247,
+     "accuracy": 0.743658
+    },
+    "Mauretania Caesariensis": {
+     "n": 2216,
+     "accuracy": 0.804603
+    },
+    "Britannia": {
+     "n": 2196,
+     "accuracy": 0.811475
+    },
+    "Apulia et Calabria / Regio II": {
+     "n": 2113,
+     "accuracy": 0.708945
+    },
+    "Dacia": {
+     "n": 2001,
+     "accuracy": 0.766117
+    },
+    "Provincia incerta": {
+     "n": 1793,
+     "accuracy": 0.770218
+    },
+    "Pannonia inferior": {
+     "n": 1760,
+     "accuracy": 0.760227
+    },
+    "Germania inferior": {
+     "n": 1520,
+     "accuracy": 0.786184
+    },
+    "Umbria / Regio VI": {
+     "n": 1499,
+     "accuracy": 0.689793
+    },
+    "Noricum": {
+     "n": 1393,
+     "accuracy": 0.707107
+    },
+    "Transpadana / Regio XI": {
+     "n": 1365,
+     "accuracy": 0.720147
+    },
+    "Lugudunensis": {
+     "n": 1294,
+     "accuracy": 0.750386
+    }
+   },
+   "by_century": {
+    "UNK": {
+     "n": 95074,
+     "accuracy": 0.757536
+    },
+    "2AD": {
+     "n": 8511,
+     "accuracy": 0.720127
+    },
+    "1AD": {
+     "n": 7397,
+     "accuracy": 0.69393
+    },
+    "3AD": {
+     "n": 6407,
+     "accuracy": 0.714843
+    },
+    "4AD": {
+     "n": 2097,
+     "accuracy": 0.709108
+    },
+    "1BC": {
+     "n": 2014,
+     "accuracy": 0.661867
+    },
+    "6AD": {
+     "n": 510,
+     "accuracy": 0.705882
+    },
+    "5AD": {
+     "n": 502,
+     "accuracy": 0.655378
+    },
+    "2BC": {
+     "n": 250,
+     "accuracy": 0.668
+    },
+    "3BC": {
+     "n": 75,
+     "accuracy": 0.546667
+    },
+    "7AD": {
+     "n": 69,
+     "accuracy": 0.594203
+    },
+    "9AD": {
+     "n": 8,
+     "accuracy": 0.375
+    },
+    "4BC": {
+     "n": 6,
+     "accuracy": 0.833333
+    },
+    "8AD": {
+     "n": 5,
+     "accuracy": 1.0
+    }
+   },
+   "per_form_province": {
+    "v": {
+     "Numidia": {
+      "n": 832,
+      "accuracy": 0.96274
+     },
+     "Roma": {
+      "n": 562,
+      "accuracy": 0.754448
+     },
+     "Africa proconsularis": {
+      "n": 509,
+      "accuracy": 0.929273
+     },
+     "Latium et Campania / Regio I": {
+      "n": 261,
+      "accuracy": 0.743295
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 141,
+      "accuracy": 0.702128
+     },
+     "Britannia": {
+      "n": 131,
+      "accuracy": 0.862595
+     },
+     "Gallia Narbonensis": {
+      "n": 103,
+      "accuracy": 0.592233
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 93,
+      "accuracy": 0.849462
+     },
+     "Noricum": {
+      "n": 92,
+      "accuracy": 0.73913
+     },
+     "Germania superior": {
+      "n": 91,
+      "accuracy": 0.945055
+     },
+     "Pannonia superior": {
+      "n": 79,
+      "accuracy": 0.860759
+     },
+     "Mauretania Caesariensis": {
+      "n": 79,
+      "accuracy": 0.911392
+     }
+    },
+    "c": {
+     "Roma": {
+      "n": 1441,
+      "accuracy": 0.678001
+     },
+     "Latium et Campania / Regio I": {
+      "n": 759,
+      "accuracy": 0.623188
+     },
+     "Numidia": {
+      "n": 406,
+      "accuracy": 0.748768
+     },
+     "Africa proconsularis": {
+      "n": 338,
+      "accuracy": 0.718935
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 283,
+      "accuracy": 0.70318
+     },
+     "Etruria / Regio VII": {
+      "n": 245,
+      "accuracy": 0.6
+     },
+     "Samnium / Regio IV": {
+      "n": 195,
+      "accuracy": 0.764103
+     },
+     "Hispania citerior": {
+      "n": 180,
+      "accuracy": 0.527778
+     },
+     "Gallia Narbonensis": {
+      "n": 176,
+      "accuracy": 0.596591
+     },
+     "Umbria / Regio VI": {
+      "n": 167,
+      "accuracy": 0.622754
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 160,
+      "accuracy": 0.50625
+     },
+     "Germania superior": {
+      "n": 125,
+      "accuracy": 0.64
+     }
+    },
+    "a": {
+     "Numidia": {
+      "n": 827,
+      "accuracy": 0.945586
+     },
+     "Roma": {
+      "n": 607,
+      "accuracy": 0.706755
+     },
+     "Africa proconsularis": {
+      "n": 422,
+      "accuracy": 0.914692
+     },
+     "Latium et Campania / Regio I": {
+      "n": 257,
+      "accuracy": 0.51751
+     },
+     "Mauretania Caesariensis": {
+      "n": 106,
+      "accuracy": 0.933962
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 101,
+      "accuracy": 0.821782
+     },
+     "Etruria / Regio VII": {
+      "n": 67,
+      "accuracy": 0.776119
+     },
+     "Provincia incerta": {
+      "n": 54,
+      "accuracy": 0.722222
+     },
+     "Gallia Narbonensis": {
+      "n": 48,
+      "accuracy": 0.5625
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 47,
+      "accuracy": 0.638298
+     },
+     "Lusitania": {
+      "n": 41,
+      "accuracy": 0.878049
+     },
+     "Samnium / Regio IV": {
+      "n": 40,
+      "accuracy": 0.625
+     }
+    },
+    "l": {
+     "Roma": {
+      "n": 2400,
+      "accuracy": 0.58375
+     },
+     "Latium et Campania / Regio I": {
+      "n": 1106,
+      "accuracy": 0.527125
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 537,
+      "accuracy": 0.610801
+     },
+     "Africa proconsularis": {
+      "n": 392,
+      "accuracy": 0.757653
+     },
+     "Samnium / Regio IV": {
+      "n": 333,
+      "accuracy": 0.570571
+     },
+     "Numidia": {
+      "n": 321,
+      "accuracy": 0.841121
+     },
+     "Hispania citerior": {
+      "n": 310,
+      "accuracy": 0.703226
+     },
+     "Gallia Narbonensis": {
+      "n": 300,
+      "accuracy": 0.673333
+     },
+     "Baetica": {
+      "n": 281,
+      "accuracy": 0.839858
+     },
+     "Etruria / Regio VII": {
+      "n": 266,
+      "accuracy": 0.684211
+     },
+     "Lusitania": {
+      "n": 245,
+      "accuracy": 0.873469
+     },
+     "Germania superior": {
+      "n": 241,
+      "accuracy": 0.721992
+     }
+    },
+    "aug": {
+     "Roma": {
+      "n": 642,
+      "accuracy": 0.67757
+     },
+     "Africa proconsularis": {
+      "n": 315,
+      "accuracy": 0.704762
+     },
+     "Numidia": {
+      "n": 223,
+      "accuracy": 0.73991
+     },
+     "Latium et Campania / Regio I": {
+      "n": 202,
+      "accuracy": 0.584158
+     },
+     "Britannia": {
+      "n": 137,
+      "accuracy": 0.839416
+     },
+     "Hispania citerior": {
+      "n": 84,
+      "accuracy": 0.535714
+     },
+     "Gallia Narbonensis": {
+      "n": 75,
+      "accuracy": 0.44
+     },
+     "Mauretania Caesariensis": {
+      "n": 74,
+      "accuracy": 0.621622
+     },
+     "UNK": {
+      "n": 70,
+      "accuracy": 0.971429
+     },
+     "Provincia incerta": {
+      "n": 68,
+      "accuracy": 0.735294
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 64,
+      "accuracy": 0.4375
+     },
+     "Germania superior": {
+      "n": 62,
+      "accuracy": 0.83871
+     }
+    },
+    "d": {
+     "Roma": {
+      "n": 2423,
+      "accuracy": 0.859678
+     },
+     "Africa proconsularis": {
+      "n": 1111,
+      "accuracy": 0.958596
+     },
+     "Numidia": {
+      "n": 964,
+      "accuracy": 0.870332
+     },
+     "Latium et Campania / Regio I": {
+      "n": 880,
+      "accuracy": 0.870455
+     },
+     "Gallia Narbonensis": {
+      "n": 239,
+      "accuracy": 0.912134
+     },
+     "Hispania citerior": {
+      "n": 236,
+      "accuracy": 0.915254
+     },
+     "Mauretania Caesariensis": {
+      "n": 224,
+      "accuracy": 0.924107
+     },
+     "Dalmatia": {
+      "n": 219,
+      "accuracy": 0.90411
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 194,
+      "accuracy": 0.845361
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 160,
+      "accuracy": 0.9
+     },
+     "Baetica": {
+      "n": 156,
+      "accuracy": 0.839744
+     },
+     "Lusitania": {
+      "n": 155,
+      "accuracy": 0.922581
+     }
+    },
+    "f": {
+     "Roma": {
+      "n": 1090,
+      "accuracy": 0.479817
+     },
+     "Latium et Campania / Regio I": {
+      "n": 704,
+      "accuracy": 0.535511
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 535,
+      "accuracy": 0.530841
+     },
+     "Germania superior": {
+      "n": 382,
+      "accuracy": 0.91623
+     },
+     "Hispania citerior": {
+      "n": 297,
+      "accuracy": 0.464646
+     },
+     "Lusitania": {
+      "n": 290,
+      "accuracy": 0.544828
+     },
+     "Numidia": {
+      "n": 275,
+      "accuracy": 0.614545
+     },
+     "Africa proconsularis": {
+      "n": 248,
+      "accuracy": 0.451613
+     },
+     "Samnium / Regio IV": {
+      "n": 247,
+      "accuracy": 0.48583
+     },
+     "Gallia Narbonensis": {
+      "n": 235,
+      "accuracy": 0.53617
+     },
+     "Belgica": {
+      "n": 231,
+      "accuracy": 0.948052
+     },
+     "Etruria / Regio VII": {
+      "n": 206,
+      "accuracy": 0.480583
+     }
+    },
+    "p": {
+     "Roma": {
+      "n": 1370,
+      "accuracy": 0.705839
+     },
+     "Africa proconsularis": {
+      "n": 694,
+      "accuracy": 0.674352
+     },
+     "Latium et Campania / Regio I": {
+      "n": 619,
+      "accuracy": 0.612278
+     },
+     "Numidia": {
+      "n": 501,
+      "accuracy": 0.51497
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 427,
+      "accuracy": 0.796253
+     },
+     "Germania superior": {
+      "n": 287,
+      "accuracy": 0.811847
+     },
+     "Hispania citerior": {
+      "n": 236,
+      "accuracy": 0.610169
+     },
+     "Gallia Narbonensis": {
+      "n": 182,
+      "accuracy": 0.725275
+     },
+     "Samnium / Regio IV": {
+      "n": 180,
+      "accuracy": 0.744444
+     },
+     "Dalmatia": {
+      "n": 168,
+      "accuracy": 0.720238
+     },
+     "Etruria / Regio VII": {
+      "n": 163,
+      "accuracy": 0.539877
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 139,
+      "accuracy": 0.784173
+     }
+    },
+    "m": {
+     "Roma": {
+      "n": 3451,
+      "accuracy": 0.851637
+     },
+     "Latium et Campania / Regio I": {
+      "n": 1313,
+      "accuracy": 0.791318
+     },
+     "Africa proconsularis": {
+      "n": 1292,
+      "accuracy": 0.925697
+     },
+     "Numidia": {
+      "n": 1046,
+      "accuracy": 0.933078
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 456,
+      "accuracy": 0.796053
+     },
+     "Hispania citerior": {
+      "n": 374,
+      "accuracy": 0.799465
+     },
+     "Dalmatia": {
+      "n": 372,
+      "accuracy": 0.870968
+     },
+     "Gallia Narbonensis": {
+      "n": 370,
+      "accuracy": 0.889189
+     },
+     "Mauretania Caesariensis": {
+      "n": 305,
+      "accuracy": 0.885246
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 244,
+      "accuracy": 0.901639
+     },
+     "Germania superior": {
+      "n": 240,
+      "accuracy": 0.85
+     },
+     "Pannonia superior": {
+      "n": 215,
+      "accuracy": 0.846512
+     }
+    },
+    "s": {
+     "Africa proconsularis": {
+      "n": 1707,
+      "accuracy": 0.798477
+     },
+     "Numidia": {
+      "n": 1202,
+      "accuracy": 0.691348
+     },
+     "Lusitania": {
+      "n": 454,
+      "accuracy": 0.779736
+     },
+     "Baetica": {
+      "n": 440,
+      "accuracy": 0.825
+     },
+     "Roma": {
+      "n": 371,
+      "accuracy": 0.749326
+     },
+     "Hispania citerior": {
+      "n": 307,
+      "accuracy": 0.778502
+     },
+     "Latium et Campania / Regio I": {
+      "n": 223,
+      "accuracy": 0.713004
+     },
+     "Mauretania Caesariensis": {
+      "n": 203,
+      "accuracy": 0.91133
+     },
+     "Pannonia superior": {
+      "n": 153,
+      "accuracy": 0.79085
+     },
+     "Germania superior": {
+      "n": 121,
+      "accuracy": 0.842975
+     },
+     "Dalmatia": {
+      "n": 119,
+      "accuracy": 0.739496
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 106,
+      "accuracy": 0.726415
+     }
+    }
+   },
+   "per_form_century": {
+    "v": {
+     "UNK": {
+      "n": 3222,
+      "accuracy": 0.862508
+     },
+     "1AD": {
+      "n": 194,
+      "accuracy": 0.685567
+     },
+     "3AD": {
+      "n": 157,
+      "accuracy": 0.630573
+     },
+     "2AD": {
+      "n": 114,
+      "accuracy": 0.789474
+     },
+     "4AD": {
+      "n": 86,
+      "accuracy": 0.732558
+     },
+     "5AD": {
+      "n": 47,
+      "accuracy": 0.680851
+     },
+     "6AD": {
+      "n": 42,
+      "accuracy": 0.714286
+     },
+     "1BC": {
+      "n": 36,
+      "accuracy": 0.638889
+     },
+     "3BC": {
+      "n": 3,
+      "accuracy": 0.0
+     },
+     "2BC": {
+      "n": 3,
+      "accuracy": 1.0
+     }
+    },
+    "c": {
+     "UNK": {
+      "n": 4783,
+      "accuracy": 0.674054
+     },
+     "1AD": {
+      "n": 567,
+      "accuracy": 0.634921
+     },
+     "2AD": {
+      "n": 290,
+      "accuracy": 0.534483
+     },
+     "3AD": {
+      "n": 235,
+      "accuracy": 0.425532
+     },
+     "1BC": {
+      "n": 210,
+      "accuracy": 0.671429
+     },
+     "4AD": {
+      "n": 65,
+      "accuracy": 0.584615
+     },
+     "6AD": {
+      "n": 55,
+      "accuracy": 0.545455
+     },
+     "5AD": {
+      "n": 44,
+      "accuracy": 0.545455
+     },
+     "2BC": {
+      "n": 21,
+      "accuracy": 0.952381
+     },
+     "3BC": {
+      "n": 9,
+      "accuracy": 0.666667
+     }
+    },
+    "a": {
+     "UNK": {
+      "n": 2596,
+      "accuracy": 0.808552
+     },
+     "1AD": {
+      "n": 158,
+      "accuracy": 0.632911
+     },
+     "2AD": {
+      "n": 111,
+      "accuracy": 0.621622
+     },
+     "1BC": {
+      "n": 67,
+      "accuracy": 0.820896
+     },
+     "3AD": {
+      "n": 59,
+      "accuracy": 0.525424
+     },
+     "4AD": {
+      "n": 13,
+      "accuracy": 0.692308
+     },
+     "2BC": {
+      "n": 7,
+      "accuracy": 0.857143
+     },
+     "6AD": {
+      "n": 4,
+      "accuracy": 0.5
+     },
+     "5AD": {
+      "n": 2,
+      "accuracy": 1.0
+     },
+     "3BC": {
+      "n": 1,
+      "accuracy": 1.0
+     }
+    },
+    "l": {
+     "UNK": {
+      "n": 6920,
+      "accuracy": 0.661705
+     },
+     "1AD": {
+      "n": 999,
+      "accuracy": 0.546547
+     },
+     "1BC": {
+      "n": 395,
+      "accuracy": 0.668354
+     },
+     "2AD": {
+      "n": 387,
+      "accuracy": 0.599483
+     },
+     "3AD": {
+      "n": 210,
+      "accuracy": 0.690476
+     },
+     "2BC": {
+      "n": 43,
+      "accuracy": 0.72093
+     },
+     "3BC": {
+      "n": 12,
+      "accuracy": 0.916667
+     },
+     "4AD": {
+      "n": 7,
+      "accuracy": 0.142857
+     },
+     "4BC": {
+      "n": 3,
+      "accuracy": 1.0
+     },
+     "5AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "aug": {
+     "UNK": {
+      "n": 1718,
+      "accuracy": 0.663562
+     },
+     "2AD": {
+      "n": 461,
+      "accuracy": 0.722343
+     },
+     "3AD": {
+      "n": 409,
+      "accuracy": 0.701711
+     },
+     "1AD": {
+      "n": 215,
+      "accuracy": 0.702326
+     },
+     "4AD": {
+      "n": 136,
+      "accuracy": 0.389706
+     },
+     "5AD": {
+      "n": 20,
+      "accuracy": 0.0
+     },
+     "6AD": {
+      "n": 7,
+      "accuracy": 0.142857
+     },
+     "1BC": {
+      "n": 6,
+      "accuracy": 0.5
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.0
+     },
+     "9AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "d": {
+     "UNK": {
+      "n": 7545,
+      "accuracy": 0.895825
+     },
+     "2AD": {
+      "n": 430,
+      "accuracy": 0.886047
+     },
+     "3AD": {
+      "n": 293,
+      "accuracy": 0.863481
+     },
+     "4AD": {
+      "n": 210,
+      "accuracy": 0.842857
+     },
+     "1AD": {
+      "n": 208,
+      "accuracy": 0.836538
+     },
+     "1BC": {
+      "n": 64,
+      "accuracy": 0.640625
+     },
+     "6AD": {
+      "n": 42,
+      "accuracy": 0.857143
+     },
+     "5AD": {
+      "n": 41,
+      "accuracy": 0.780488
+     },
+     "2BC": {
+      "n": 5,
+      "accuracy": 0.2
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.75
+     }
+    },
+    "f": {
+     "UNK": {
+      "n": 5527,
+      "accuracy": 0.580062
+     },
+     "1AD": {
+      "n": 744,
+      "accuracy": 0.598118
+     },
+     "2AD": {
+      "n": 437,
+      "accuracy": 0.427918
+     },
+     "1BC": {
+      "n": 258,
+      "accuracy": 0.616279
+     },
+     "3AD": {
+      "n": 175,
+      "accuracy": 0.537143
+     },
+     "2BC": {
+      "n": 49,
+      "accuracy": 0.857143
+     },
+     "4AD": {
+      "n": 38,
+      "accuracy": 0.447368
+     },
+     "3BC": {
+      "n": 14,
+      "accuracy": 0.571429
+     },
+     "5AD": {
+      "n": 5,
+      "accuracy": 0.2
+     },
+     "4BC": {
+      "n": 2,
+      "accuracy": 0.5
+     }
+    },
+    "p": {
+     "UNK": {
+      "n": 5063,
+      "accuracy": 0.662848
+     },
+     "3AD": {
+      "n": 619,
+      "accuracy": 0.736672
+     },
+     "2AD": {
+      "n": 582,
+      "accuracy": 0.683849
+     },
+     "1AD": {
+      "n": 466,
+      "accuracy": 0.736052
+     },
+     "1BC": {
+      "n": 195,
+      "accuracy": 0.789744
+     },
+     "4AD": {
+      "n": 153,
+      "accuracy": 0.666667
+     },
+     "6AD": {
+      "n": 38,
+      "accuracy": 0.842105
+     },
+     "5AD": {
+      "n": 21,
+      "accuracy": 0.809524
+     },
+     "2BC": {
+      "n": 15,
+      "accuracy": 0.866667
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.75
+     }
+    },
+    "m": {
+     "UNK": {
+      "n": 11350,
+      "accuracy": 0.869692
+     },
+     "3AD": {
+      "n": 658,
+      "accuracy": 0.849544
+     },
+     "2AD": {
+      "n": 620,
+      "accuracy": 0.791935
+     },
+     "1AD": {
+      "n": 417,
+      "accuracy": 0.671463
+     },
+     "4AD": {
+      "n": 135,
+      "accuracy": 0.755556
+     },
+     "1BC": {
+      "n": 120,
+      "accuracy": 0.75
+     },
+     "6AD": {
+      "n": 37,
+      "accuracy": 0.864865
+     },
+     "5AD": {
+      "n": 27,
+      "accuracy": 0.740741
+     },
+     "2BC": {
+      "n": 17,
+      "accuracy": 0.647059
+     },
+     "3BC": {
+      "n": 8,
+      "accuracy": 0.75
+     }
+    },
+    "s": {
+     "UNK": {
+      "n": 5916,
+      "accuracy": 0.768425
+     },
+     "1AD": {
+      "n": 200,
+      "accuracy": 0.745
+     },
+     "2AD": {
+      "n": 197,
+      "accuracy": 0.751269
+     },
+     "3AD": {
+      "n": 141,
+      "accuracy": 0.680851
+     },
+     "1BC": {
+      "n": 65,
+      "accuracy": 0.6
+     },
+     "6AD": {
+      "n": 17,
+      "accuracy": 0.882353
+     },
+     "4AD": {
+      "n": 14,
+      "accuracy": 0.642857
+     },
+     "5AD": {
+      "n": 11,
+      "accuracy": 0.636364
+     },
+     "2BC": {
+      "n": 7,
+      "accuracy": 0.0
+     },
+     "3BC": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    }
+   },
+   "abstention": [
+    {
+     "coverage": 0.05,
+     "n": 6146,
+     "accuracy": 0.768793
+    },
+    {
+     "coverage": 0.1,
+     "n": 12293,
+     "accuracy": 0.767998
+    },
+    {
+     "coverage": 0.15,
+     "n": 18439,
+     "accuracy": 0.766907
+    },
+    {
+     "coverage": 0.2,
+     "n": 24586,
+     "accuracy": 0.774791
+    },
+    {
+     "coverage": 0.25,
+     "n": 30732,
+     "accuracy": 0.776357
+    },
+    {
+     "coverage": 0.3,
+     "n": 36878,
+     "accuracy": 0.777455
+    },
+    {
+     "coverage": 0.35,
+     "n": 43025,
+     "accuracy": 0.780546
+    },
+    {
+     "coverage": 0.4,
+     "n": 49171,
+     "accuracy": 0.780216
+    },
+    {
+     "coverage": 0.45,
+     "n": 55318,
+     "accuracy": 0.776782
+    },
+    {
+     "coverage": 0.5,
+     "n": 61464,
+     "accuracy": 0.768255
+    },
+    {
+     "coverage": 0.55,
+     "n": 67610,
+     "accuracy": 0.769664
+    },
+    {
+     "coverage": 0.6,
+     "n": 73757,
+     "accuracy": 0.774638
+    },
+    {
+     "coverage": 0.65,
+     "n": 79903,
+     "accuracy": 0.776504
+    },
+    {
+     "coverage": 0.7,
+     "n": 86050,
+     "accuracy": 0.777037
+    },
+    {
+     "coverage": 0.75,
+     "n": 92196,
+     "accuracy": 0.777246
+    },
+    {
+     "coverage": 0.8,
+     "n": 98342,
+     "accuracy": 0.777013
+    },
+    {
+     "coverage": 0.85,
+     "n": 104489,
+     "accuracy": 0.77589
+    },
+    {
+     "coverage": 0.9,
+     "n": 110635,
+     "accuracy": 0.77913
+    },
+    {
+     "coverage": 0.95,
+     "n": 116782,
+     "accuracy": 0.769485
+    },
+    {
+     "coverage": 1.0,
+     "n": 122928,
+     "accuracy": 0.745453
+    }
+   ],
+   "confidence_hist": {
+    "1.0": 121157,
+    "0.8": 390,
+    "0.7": 294,
+    "0.5": 118,
+    "0.9": 711,
+    "0.6": 249,
+    "0.4": 9
+   },
+   "ceiling": 0.976197
+  },
+  "test_lexical_hard": {
+   "n": 69150,
+   "accuracy": 0.576153,
+   "macro_f1": 0.123897,
+   "acc_at_k": {
+    "acc@1": 0.576153,
+    "acc@3": 0.823442,
+    "acc@5": 0.878337
+   },
+   "by_ambiguity": {
+    "lexical": {
+     "n": 69150,
+     "accuracy": 0.576153
+    },
+    "inflectional_only": {
+     "n": 0,
+     "accuracy": null
+    },
+    "unambiguous": {
+     "n": 0,
+     "accuracy": null
+    }
+   },
+   "by_band": {
+    "common": {
+     "n": 63023,
+     "accuracy": 0.598908
+    },
+    "mid": {
+     "n": 6127,
+     "accuracy": 0.342092
+    }
+   },
+   "by_province": {
+    "Roma": {
+     "n": 13537,
+     "accuracy": 0.509049
+    },
+    "Latium et Campania / Regio I": {
+     "n": 6693,
+     "accuracy": 0.493949
+    },
+    "Africa proconsularis": {
+     "n": 5034,
+     "accuracy": 0.621176
+    },
+    "Numidia": {
+     "n": 4573,
+     "accuracy": 0.552373
+    },
+    "Venetia et Histria / Regio X": {
+     "n": 2718,
+     "accuracy": 0.564018
+    },
+    "Hispania citerior": {
+     "n": 2626,
+     "accuracy": 0.609673
+    },
+    "Germania superior": {
+     "n": 2219,
+     "accuracy": 0.757999
+    },
+    "Lusitania": {
+     "n": 1873,
+     "accuracy": 0.739989
+    },
+    "Gallia Narbonensis": {
+     "n": 1807,
+     "accuracy": 0.529607
+    },
+    "Baetica": {
+     "n": 1706,
+     "accuracy": 0.722743
+    },
+    "Dalmatia": {
+     "n": 1519,
+     "accuracy": 0.581962
+    },
+    "Samnium / Regio IV": {
+     "n": 1509,
+     "accuracy": 0.526176
+    },
+    "Pannonia superior": {
+     "n": 1460,
+     "accuracy": 0.630822
+    },
+    "Etruria / Regio VII": {
+     "n": 1344,
+     "accuracy": 0.447917
+    },
+    "Britannia": {
+     "n": 1195,
+     "accuracy": 0.690377
+    },
+    "Pannonia inferior": {
+     "n": 1188,
+     "accuracy": 0.669192
+    },
+    "Apulia et Calabria / Regio II": {
+     "n": 1170,
+     "accuracy": 0.499145
+    },
+    "Dacia": {
+     "n": 1169,
+     "accuracy": 0.634731
+    },
+    "Provincia incerta": {
+     "n": 1082,
+     "accuracy": 0.631238
+    },
+    "Germania inferior": {
+     "n": 1029,
+     "accuracy": 0.706511
+    },
+    "Mauretania Caesariensis": {
+     "n": 1024,
+     "accuracy": 0.608398
+    },
+    "Noricum": {
+     "n": 989,
+     "accuracy": 0.617796
+    },
+    "Transpadana / Regio XI": {
+     "n": 891,
+     "accuracy": 0.602694
+    },
+    "Umbria / Regio VI": {
+     "n": 872,
+     "accuracy": 0.510321
+    },
+    "Aemilia / Regio VIII": {
+     "n": 770,
+     "accuracy": 0.48961
+    }
+   },
+   "by_century": {
+    "UNK": {
+     "n": 51210,
+     "accuracy": 0.579203
+    },
+    "2AD": {
+     "n": 5192,
+     "accuracy": 0.566834
+    },
+    "1AD": {
+     "n": 4682,
+     "accuracy": 0.542076
+    },
+    "3AD": {
+     "n": 4486,
+     "accuracy": 0.617254
+    },
+    "4AD": {
+     "n": 1369,
+     "accuracy": 0.581446
+    },
+    "1BC": {
+     "n": 1301,
+     "accuracy": 0.511914
+    },
+    "6AD": {
+     "n": 333,
+     "accuracy": 0.573574
+    },
+    "5AD": {
+     "n": 332,
+     "accuracy": 0.506024
+    },
+    "2BC": {
+     "n": 150,
+     "accuracy": 0.506667
+    },
+    "3BC": {
+     "n": 50,
+     "accuracy": 0.38
+    },
+    "7AD": {
+     "n": 38,
+     "accuracy": 0.315789
+    },
+    "9AD": {
+     "n": 4,
+     "accuracy": 0.0
+    },
+    "4BC": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "10AD": {
+     "n": 1,
+     "accuracy": 0.0
+    }
+   },
+   "per_form_province": {
+    "v": {
+     "Roma": {
+      "n": 264,
+      "accuracy": 0.477273
+     },
+     "Latium et Campania / Regio I": {
+      "n": 220,
+      "accuracy": 0.695455
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 137,
+      "accuracy": 0.693431
+     },
+     "Africa proconsularis": {
+      "n": 134,
+      "accuracy": 0.731343
+     },
+     "Britannia": {
+      "n": 131,
+      "accuracy": 0.862595
+     },
+     "Gallia Narbonensis": {
+      "n": 100,
+      "accuracy": 0.59
+     },
+     "Germania superior": {
+      "n": 91,
+      "accuracy": 0.945055
+     },
+     "Noricum": {
+      "n": 88,
+      "accuracy": 0.727273
+     },
+     "Pannonia superior": {
+      "n": 77,
+      "accuracy": 0.857143
+     },
+     "Dalmatia": {
+      "n": 68,
+      "accuracy": 0.705882
+     },
+     "Germania inferior": {
+      "n": 67,
+      "accuracy": 0.940299
+     },
+     "Hispania citerior": {
+      "n": 67,
+      "accuracy": 0.656716
+     }
+    },
+    "c": {
+     "Roma": {
+      "n": 876,
+      "accuracy": 0.56621
+     },
+     "Latium et Campania / Regio I": {
+      "n": 489,
+      "accuracy": 0.501022
+     },
+     "Numidia": {
+      "n": 349,
+      "accuracy": 0.753582
+     },
+     "Africa proconsularis": {
+      "n": 253,
+      "accuracy": 0.667984
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 142,
+      "accuracy": 0.471831
+     },
+     "Etruria / Regio VII": {
+      "n": 140,
+      "accuracy": 0.342857
+     },
+     "Hispania citerior": {
+      "n": 135,
+      "accuracy": 0.437037
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 123,
+      "accuracy": 0.414634
+     },
+     "Lusitania": {
+      "n": 106,
+      "accuracy": 0.698113
+     },
+     "Samnium / Regio IV": {
+      "n": 104,
+      "accuracy": 0.625
+     },
+     "Gallia Narbonensis": {
+      "n": 101,
+      "accuracy": 0.39604
+     },
+     "Germania superior": {
+      "n": 98,
+      "accuracy": 0.55102
+     }
+    },
+    "a": {
+     "Roma": {
+      "n": 334,
+      "accuracy": 0.47006
+     },
+     "Latium et Campania / Regio I": {
+      "n": 223,
+      "accuracy": 0.44843
+     },
+     "Africa proconsularis": {
+      "n": 103,
+      "accuracy": 0.650485
+     },
+     "Numidia": {
+      "n": 60,
+      "accuracy": 0.25
+     },
+     "Provincia incerta": {
+      "n": 53,
+      "accuracy": 0.716981
+     },
+     "Etruria / Regio VII": {
+      "n": 47,
+      "accuracy": 0.702128
+     },
+     "Gallia Narbonensis": {
+      "n": 46,
+      "accuracy": 0.543478
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 45,
+      "accuracy": 0.622222
+     },
+     "Lusitania": {
+      "n": 41,
+      "accuracy": 0.878049
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 37,
+      "accuracy": 0.513514
+     },
+     "Hispania citerior": {
+      "n": 35,
+      "accuracy": 0.457143
+     },
+     "Mauretania Caesariensis": {
+      "n": 33,
+      "accuracy": 0.787879
+     }
+    },
+    "l": {
+     "Roma": {
+      "n": 1828,
+      "accuracy": 0.517505
+     },
+     "Latium et Campania / Regio I": {
+      "n": 810,
+      "accuracy": 0.418519
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 409,
+      "accuracy": 0.518337
+     },
+     "Africa proconsularis": {
+      "n": 302,
+      "accuracy": 0.811258
+     },
+     "Hispania citerior": {
+      "n": 256,
+      "accuracy": 0.671875
+     },
+     "Samnium / Regio IV": {
+      "n": 245,
+      "accuracy": 0.461224
+     },
+     "Baetica": {
+      "n": 237,
+      "accuracy": 0.843882
+     },
+     "Lusitania": {
+      "n": 223,
+      "accuracy": 0.874439
+     },
+     "Numidia": {
+      "n": 223,
+      "accuracy": 0.878924
+     },
+     "Germania superior": {
+      "n": 210,
+      "accuracy": 0.747619
+     },
+     "Gallia Narbonensis": {
+      "n": 195,
+      "accuracy": 0.569231
+     },
+     "Etruria / Regio VII": {
+      "n": 144,
+      "accuracy": 0.458333
+     }
+    },
+    "aug": {
+     "Roma": {
+      "n": 258,
+      "accuracy": 0.20155
+     },
+     "Africa proconsularis": {
+      "n": 210,
+      "accuracy": 0.6
+     },
+     "Numidia": {
+      "n": 171,
+      "accuracy": 0.684211
+     },
+     "Britannia": {
+      "n": 125,
+      "accuracy": 0.824
+     },
+     "Latium et Campania / Regio I": {
+      "n": 114,
+      "accuracy": 0.27193
+     },
+     "Hispania citerior": {
+      "n": 70,
+      "accuracy": 0.471429
+     },
+     "UNK": {
+      "n": 70,
+      "accuracy": 0.971429
+     },
+     "Gallia Narbonensis": {
+      "n": 62,
+      "accuracy": 0.322581
+     },
+     "Germania superior": {
+      "n": 58,
+      "accuracy": 0.827586
+     },
+     "Mauretania Caesariensis": {
+      "n": 54,
+      "accuracy": 0.518519
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 49,
+      "accuracy": 0.326531
+     },
+     "Provincia incerta": {
+      "n": 49,
+      "accuracy": 0.632653
+     }
+    },
+    "d": {
+     "Roma": {
+      "n": 990,
+      "accuracy": 0.656566
+     },
+     "Latium et Campania / Regio I": {
+      "n": 450,
+      "accuracy": 0.746667
+     },
+     "Africa proconsularis": {
+      "n": 296,
+      "accuracy": 0.844595
+     },
+     "Numidia": {
+      "n": 222,
+      "accuracy": 0.441441
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 121,
+      "accuracy": 0.760331
+     },
+     "Hispania citerior": {
+      "n": 90,
+      "accuracy": 0.777778
+     },
+     "Samnium / Regio IV": {
+      "n": 90,
+      "accuracy": 0.877778
+     },
+     "Germania superior": {
+      "n": 87,
+      "accuracy": 0.816092
+     },
+     "Baetica": {
+      "n": 76,
+      "accuracy": 0.671053
+     },
+     "Umbria / Regio VI": {
+      "n": 66,
+      "accuracy": 0.878788
+     },
+     "Transpadana / Regio XI": {
+      "n": 61,
+      "accuracy": 0.852459
+     },
+     "Etruria / Regio VII": {
+      "n": 61,
+      "accuracy": 0.688525
+     }
+    },
+    "f": {
+     "Roma": {
+      "n": 830,
+      "accuracy": 0.327711
+     },
+     "Latium et Campania / Regio I": {
+      "n": 519,
+      "accuracy": 0.38921
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 390,
+      "accuracy": 0.366667
+     },
+     "Germania superior": {
+      "n": 350,
+      "accuracy": 0.911429
+     },
+     "Hispania citerior": {
+      "n": 234,
+      "accuracy": 0.410256
+     },
+     "Belgica": {
+      "n": 229,
+      "accuracy": 0.956332
+     },
+     "Lusitania": {
+      "n": 214,
+      "accuracy": 0.406542
+     },
+     "Gallia Narbonensis": {
+      "n": 200,
+      "accuracy": 0.48
+     },
+     "Noricum": {
+      "n": 156,
+      "accuracy": 0.455128
+     },
+     "Africa proconsularis": {
+      "n": 155,
+      "accuracy": 0.135484
+     },
+     "Samnium / Regio IV": {
+      "n": 152,
+      "accuracy": 0.197368
+     },
+     "Numidia": {
+      "n": 145,
+      "accuracy": 0.289655
+     }
+    },
+    "p": {
+     "Roma": {
+      "n": 954,
+      "accuracy": 0.596436
+     },
+     "Africa proconsularis": {
+      "n": 691,
+      "accuracy": 0.677279
+     },
+     "Latium et Campania / Regio I": {
+      "n": 502,
+      "accuracy": 0.523904
+     },
+     "Numidia": {
+      "n": 501,
+      "accuracy": 0.51497
+     },
+     "Germania superior": {
+      "n": 287,
+      "accuracy": 0.811847
+     },
+     "Hispania citerior": {
+      "n": 234,
+      "accuracy": 0.606838
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 219,
+      "accuracy": 0.616438
+     },
+     "Dalmatia": {
+      "n": 148,
+      "accuracy": 0.689189
+     },
+     "Samnium / Regio IV": {
+      "n": 146,
+      "accuracy": 0.691781
+     },
+     "Etruria / Regio VII": {
+      "n": 142,
+      "accuracy": 0.542254
+     },
+     "Mauretania Caesariensis": {
+      "n": 134,
+      "accuracy": 0.791045
+     },
+     "Gallia Narbonensis": {
+      "n": 130,
+      "accuracy": 0.630769
+     }
+    },
+    "m": {
+     "Roma": {
+      "n": 2029,
+      "accuracy": 0.752095
+     },
+     "Latium et Campania / Regio I": {
+      "n": 866,
+      "accuracy": 0.688222
+     },
+     "Africa proconsularis": {
+      "n": 430,
+      "accuracy": 0.783721
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 377,
+      "accuracy": 0.758621
+     },
+     "Numidia": {
+      "n": 294,
+      "accuracy": 0.778912
+     },
+     "Hispania citerior": {
+      "n": 223,
+      "accuracy": 0.672646
+     },
+     "Dalmatia": {
+      "n": 215,
+      "accuracy": 0.786047
+     },
+     "Germania superior": {
+      "n": 204,
+      "accuracy": 0.823529
+     },
+     "Gallia Narbonensis": {
+      "n": 183,
+      "accuracy": 0.781421
+     },
+     "Pannonia inferior": {
+      "n": 182,
+      "accuracy": 0.868132
+     },
+     "Pannonia superior": {
+      "n": 169,
+      "accuracy": 0.816568
+     },
+     "Germania inferior": {
+      "n": 167,
+      "accuracy": 0.844311
+     }
+    },
+    "s": {
+     "Africa proconsularis": {
+      "n": 878,
+      "accuracy": 0.6082
+     },
+     "Numidia": {
+      "n": 727,
+      "accuracy": 0.489684
+     },
+     "Lusitania": {
+      "n": 371,
+      "accuracy": 0.730458
+     },
+     "Baetica": {
+      "n": 369,
+      "accuracy": 0.791328
+     },
+     "Roma": {
+      "n": 292,
+      "accuracy": 0.681507
+     },
+     "Hispania citerior": {
+      "n": 255,
+      "accuracy": 0.741176
+     },
+     "Latium et Campania / Regio I": {
+      "n": 180,
+      "accuracy": 0.65
+     },
+     "Pannonia superior": {
+      "n": 143,
+      "accuracy": 0.783217
+     },
+     "Germania superior": {
+      "n": 118,
+      "accuracy": 0.855932
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 100,
+      "accuracy": 0.73
+     },
+     "Dalmatia": {
+      "n": 90,
+      "accuracy": 0.677778
+     },
+     "Pannonia inferior": {
+      "n": 88,
+      "accuracy": 0.761364
+     }
+    }
+   },
+   "per_form_century": {
+    "v": {
+     "UNK": {
+      "n": 1589,
+      "accuracy": 0.723096
+     },
+     "1AD": {
+      "n": 152,
+      "accuracy": 0.598684
+     },
+     "3AD": {
+      "n": 150,
+      "accuracy": 0.613333
+     },
+     "4AD": {
+      "n": 82,
+      "accuracy": 0.719512
+     },
+     "2AD": {
+      "n": 72,
+      "accuracy": 0.666667
+     },
+     "5AD": {
+      "n": 47,
+      "accuracy": 0.680851
+     },
+     "6AD": {
+      "n": 41,
+      "accuracy": 0.707317
+     },
+     "1BC": {
+      "n": 21,
+      "accuracy": 0.380952
+     },
+     "3BC": {
+      "n": 3,
+      "accuracy": 0.0
+     }
+    },
+    "c": {
+     "UNK": {
+      "n": 3121,
+      "accuracy": 0.570971
+     },
+     "1AD": {
+      "n": 347,
+      "accuracy": 0.48415
+     },
+     "2AD": {
+      "n": 217,
+      "accuracy": 0.442396
+     },
+     "3AD": {
+      "n": 213,
+      "accuracy": 0.384977
+     },
+     "1BC": {
+      "n": 111,
+      "accuracy": 0.540541
+     },
+     "4AD": {
+      "n": 65,
+      "accuracy": 0.584615
+     },
+     "6AD": {
+      "n": 55,
+      "accuracy": 0.545455
+     },
+     "5AD": {
+      "n": 43,
+      "accuracy": 0.55814
+     },
+     "2BC": {
+      "n": 11,
+      "accuracy": 0.909091
+     },
+     "3BC": {
+      "n": 5,
+      "accuracy": 0.4
+     }
+    },
+    "a": {
+     "UNK": {
+      "n": 1076,
+      "accuracy": 0.54368
+     },
+     "1AD": {
+      "n": 111,
+      "accuracy": 0.477477
+     },
+     "2AD": {
+      "n": 76,
+      "accuracy": 0.447368
+     },
+     "1BC": {
+      "n": 52,
+      "accuracy": 0.769231
+     },
+     "3AD": {
+      "n": 49,
+      "accuracy": 0.428571
+     },
+     "4AD": {
+      "n": 10,
+      "accuracy": 0.6
+     },
+     "2BC": {
+      "n": 4,
+      "accuracy": 0.75
+     },
+     "6AD": {
+      "n": 4,
+      "accuracy": 0.5
+     },
+     "5AD": {
+      "n": 2,
+      "accuracy": 1.0
+     },
+     "3BC": {
+      "n": 1,
+      "accuracy": 1.0
+     }
+    },
+    "l": {
+     "UNK": {
+      "n": 5188,
+      "accuracy": 0.607556
+     },
+     "1AD": {
+      "n": 802,
+      "accuracy": 0.478803
+     },
+     "2AD": {
+      "n": 292,
+      "accuracy": 0.565068
+     },
+     "1BC": {
+      "n": 283,
+      "accuracy": 0.572438
+     },
+     "3AD": {
+      "n": 178,
+      "accuracy": 0.719101
+     },
+     "2BC": {
+      "n": 28,
+      "accuracy": 0.607143
+     },
+     "3BC": {
+      "n": 7,
+      "accuracy": 0.857143
+     },
+     "4AD": {
+      "n": 5,
+      "accuracy": 0.2
+     },
+     "4BC": {
+      "n": 2,
+      "accuracy": 1.0
+     },
+     "5AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "aug": {
+     "UNK": {
+      "n": 1134,
+      "accuracy": 0.515873
+     },
+     "3AD": {
+      "n": 307,
+      "accuracy": 0.625407
+     },
+     "2AD": {
+      "n": 246,
+      "accuracy": 0.49187
+     },
+     "4AD": {
+      "n": 122,
+      "accuracy": 0.319672
+     },
+     "1AD": {
+      "n": 102,
+      "accuracy": 0.382353
+     },
+     "5AD": {
+      "n": 19,
+      "accuracy": 0.0
+     },
+     "6AD": {
+      "n": 6,
+      "accuracy": 0.0
+     },
+     "1BC": {
+      "n": 4,
+      "accuracy": 0.25
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.0
+     },
+     "9AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "d": {
+     "UNK": {
+      "n": 2466,
+      "accuracy": 0.683293
+     },
+     "2AD": {
+      "n": 259,
+      "accuracy": 0.810811
+     },
+     "3AD": {
+      "n": 210,
+      "accuracy": 0.814286
+     },
+     "1AD": {
+      "n": 191,
+      "accuracy": 0.82199
+     },
+     "4AD": {
+      "n": 191,
+      "accuracy": 0.827225
+     },
+     "1BC": {
+      "n": 64,
+      "accuracy": 0.640625
+     },
+     "5AD": {
+      "n": 38,
+      "accuracy": 0.763158
+     },
+     "6AD": {
+      "n": 38,
+      "accuracy": 0.842105
+     },
+     "2BC": {
+      "n": 5,
+      "accuracy": 0.2
+     },
+     "7AD": {
+      "n": 3,
+      "accuracy": 0.666667
+     }
+    },
+    "f": {
+     "UNK": {
+      "n": 4352,
+      "accuracy": 0.485754
+     },
+     "1AD": {
+      "n": 466,
+      "accuracy": 0.369099
+     },
+     "2AD": {
+      "n": 340,
+      "accuracy": 0.276471
+     },
+     "3AD": {
+      "n": 154,
+      "accuracy": 0.474026
+     },
+     "1BC": {
+      "n": 108,
+      "accuracy": 0.138889
+     },
+     "4AD": {
+      "n": 38,
+      "accuracy": 0.447368
+     },
+     "2BC": {
+      "n": 5,
+      "accuracy": 0.0
+     },
+     "5AD": {
+      "n": 5,
+      "accuracy": 0.2
+     },
+     "3BC": {
+      "n": 3,
+      "accuracy": 0.0
+     },
+     "6AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "p": {
+     "UNK": {
+      "n": 4170,
+      "accuracy": 0.602638
+     },
+     "3AD": {
+      "n": 617,
+      "accuracy": 0.737439
+     },
+     "2AD": {
+      "n": 574,
+      "accuracy": 0.681185
+     },
+     "1AD": {
+      "n": 374,
+      "accuracy": 0.671123
+     },
+     "4AD": {
+      "n": 153,
+      "accuracy": 0.666667
+     },
+     "1BC": {
+      "n": 124,
+      "accuracy": 0.677419
+     },
+     "6AD": {
+      "n": 36,
+      "accuracy": 0.833333
+     },
+     "5AD": {
+      "n": 18,
+      "accuracy": 0.777778
+     },
+     "2BC": {
+      "n": 15,
+      "accuracy": 0.866667
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.75
+     }
+    },
+    "m": {
+     "UNK": {
+      "n": 6171,
+      "accuracy": 0.767623
+     },
+     "3AD": {
+      "n": 574,
+      "accuracy": 0.827526
+     },
+     "2AD": {
+      "n": 450,
+      "accuracy": 0.715556
+     },
+     "1AD": {
+      "n": 400,
+      "accuracy": 0.6575
+     },
+     "1BC": {
+      "n": 120,
+      "accuracy": 0.75
+     },
+     "4AD": {
+      "n": 116,
+      "accuracy": 0.715517
+     },
+     "6AD": {
+      "n": 33,
+      "accuracy": 0.848485
+     },
+     "5AD": {
+      "n": 24,
+      "accuracy": 0.708333
+     },
+     "2BC": {
+      "n": 17,
+      "accuracy": 0.647059
+     },
+     "3BC": {
+      "n": 8,
+      "accuracy": 0.75
+     }
+    },
+    "s": {
+     "UNK": {
+      "n": 4079,
+      "accuracy": 0.667566
+     },
+     "1AD": {
+      "n": 198,
+      "accuracy": 0.742424
+     },
+     "2AD": {
+      "n": 159,
+      "accuracy": 0.691824
+     },
+     "3AD": {
+      "n": 126,
+      "accuracy": 0.650794
+     },
+     "1BC": {
+      "n": 65,
+      "accuracy": 0.6
+     },
+     "6AD": {
+      "n": 13,
+      "accuracy": 0.846154
+     },
+     "5AD": {
+      "n": 9,
+      "accuracy": 0.555556
+     },
+     "4AD": {
+      "n": 9,
+      "accuracy": 0.444444
+     },
+     "2BC": {
+      "n": 6,
+      "accuracy": 0.0
+     },
+     "3BC": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    }
+   },
+   "abstention": [
+    {
+     "coverage": 0.05,
+     "n": 3458,
+     "accuracy": 0.606998
+    },
+    {
+     "coverage": 0.1,
+     "n": 6915,
+     "accuracy": 0.634996
+    },
+    {
+     "coverage": 0.15,
+     "n": 10372,
+     "accuracy": 0.62553
+    },
+    {
+     "coverage": 0.2,
+     "n": 13830,
+     "accuracy": 0.627838
+    },
+    {
+     "coverage": 0.25,
+     "n": 17288,
+     "accuracy": 0.635123
+    },
+    {
+     "coverage": 0.3,
+     "n": 20745,
+     "accuracy": 0.628971
+    },
+    {
+     "coverage": 0.35,
+     "n": 24202,
+     "accuracy": 0.62437
+    },
+    {
+     "coverage": 0.4,
+     "n": 27660,
+     "accuracy": 0.621584
+    },
+    {
+     "coverage": 0.45,
+     "n": 31118,
+     "accuracy": 0.611254
+    },
+    {
+     "coverage": 0.5,
+     "n": 34575,
+     "accuracy": 0.603702
+    },
+    {
+     "coverage": 0.55,
+     "n": 38032,
+     "accuracy": 0.604649
+    },
+    {
+     "coverage": 0.6,
+     "n": 41490,
+     "accuracy": 0.606363
+    },
+    {
+     "coverage": 0.65,
+     "n": 44948,
+     "accuracy": 0.610216
+    },
+    {
+     "coverage": 0.7,
+     "n": 48405,
+     "accuracy": 0.608305
+    },
+    {
+     "coverage": 0.75,
+     "n": 51862,
+     "accuracy": 0.607497
+    },
+    {
+     "coverage": 0.8,
+     "n": 55320,
+     "accuracy": 0.610756
+    },
+    {
+     "coverage": 0.85,
+     "n": 58778,
+     "accuracy": 0.611317
+    },
+    {
+     "coverage": 0.9,
+     "n": 62235,
+     "accuracy": 0.609593
+    },
+    {
+     "coverage": 0.95,
+     "n": 65692,
+     "accuracy": 0.593603
+    },
+    {
+     "coverage": 1.0,
+     "n": 69150,
+     "accuracy": 0.576153
+    }
+   ],
+   "confidence_hist": {
+    "1.0": 67612,
+    "0.8": 340,
+    "0.9": 623,
+    "0.5": 104,
+    "0.7": 253,
+    "0.6": 210,
+    "0.4": 8
+   },
+   "ceiling": 0.957686
+  },
+  "test_rare_form": {
+   "n": 6311,
+   "accuracy": 0.418634,
+   "macro_f1": 0.31619,
+   "acc_at_k": {
+    "acc@1": 0.418634,
+    "acc@3": 0.476945,
+    "acc@5": 0.480906
+   },
+   "by_ambiguity": {
+    "lexical": {
+     "n": 434,
+     "accuracy": 0.447005
+    },
+    "inflectional_only": {
+     "n": 1201,
+     "accuracy": 0.482931
+    },
+    "unambiguous": {
+     "n": 4676,
+     "accuracy": 0.399487
+    }
+   },
+   "by_band": {
+    "rare": {
+     "n": 3959,
+     "accuracy": 0.66734
+    },
+    "unseen": {
+     "n": 2352,
+     "accuracy": 0.0
+    }
+   },
+   "by_province": {
+    "Roma": {
+     "n": 1365,
+     "accuracy": 0.462271
+    },
+    "Latium et Campania / Regio I": {
+     "n": 613,
+     "accuracy": 0.422512
+    },
+    "Africa proconsularis": {
+     "n": 415,
+     "accuracy": 0.481928
+    },
+    "Numidia": {
+     "n": 306,
+     "accuracy": 0.473856
+    },
+    "Hispania citerior": {
+     "n": 230,
+     "accuracy": 0.330435
+    },
+    "Asia": {
+     "n": 224,
+     "accuracy": 0.147321
+    },
+    "Venetia et Histria / Regio X": {
+     "n": 198,
+     "accuracy": 0.429293
+    },
+    "Gallia Narbonensis": {
+     "n": 195,
+     "accuracy": 0.323077
+    },
+    "Germania superior": {
+     "n": 164,
+     "accuracy": 0.420732
+    },
+    "Etruria / Regio VII": {
+     "n": 154,
+     "accuracy": 0.480519
+    },
+    "Lugudunensis": {
+     "n": 150,
+     "accuracy": 0.473333
+    },
+    "Dalmatia": {
+     "n": 124,
+     "accuracy": 0.387097
+    },
+    "Britannia": {
+     "n": 120,
+     "accuracy": 0.433333
+    },
+    "Pannonia superior": {
+     "n": 112,
+     "accuracy": 0.455357
+    },
+    "Samnium / Regio IV": {
+     "n": 112,
+     "accuracy": 0.348214
+    },
+    "Noricum": {
+     "n": 110,
+     "accuracy": 0.327273
+    },
+    "Provincia incerta": {
+     "n": 108,
+     "accuracy": 0.62037
+    },
+    "Aquitania / Aquitanica": {
+     "n": 106,
+     "accuracy": 0.386792
+    },
+    "Belgica": {
+     "n": 106,
+     "accuracy": 0.481132
+    },
+    "Apulia et Calabria / Regio II": {
+     "n": 102,
+     "accuracy": 0.313725
+    },
+    "Mauretania Caesariensis": {
+     "n": 97,
+     "accuracy": 0.453608
+    },
+    "Pannonia inferior": {
+     "n": 95,
+     "accuracy": 0.368421
+    },
+    "Lusitania": {
+     "n": 92,
+     "accuracy": 0.282609
+    },
+    "Dacia": {
+     "n": 90,
+     "accuracy": 0.466667
+    },
+    "Baetica": {
+     "n": 88,
+     "accuracy": 0.386364
+    }
+   },
+   "by_century": {
+    "UNK": {
+     "n": 4861,
+     "accuracy": 0.414318
+    },
+    "2AD": {
+     "n": 398,
+     "accuracy": 0.447236
+    },
+    "1AD": {
+     "n": 296,
+     "accuracy": 0.381757
+    },
+    "3AD": {
+     "n": 265,
+     "accuracy": 0.422642
+    },
+    "4AD": {
+     "n": 151,
+     "accuracy": 0.456954
+    },
+    "1BC": {
+     "n": 132,
+     "accuracy": 0.371212
+    },
+    "6AD": {
+     "n": 68,
+     "accuracy": 0.544118
+    },
+    "5AD": {
+     "n": 63,
+     "accuracy": 0.47619
+    },
+    "2BC": {
+     "n": 28,
+     "accuracy": 0.357143
+    },
+    "3BC": {
+     "n": 19,
+     "accuracy": 0.736842
+    },
+    "7AD": {
+     "n": 14,
+     "accuracy": 0.428571
+    },
+    "9AD": {
+     "n": 6,
+     "accuracy": 0.5
+    },
+    "10AD": {
+     "n": 4,
+     "accuracy": 0.5
+    },
+    "8AD": {
+     "n": 3,
+     "accuracy": 0.666667
+    }
+   },
+   "per_form_province": {},
+   "per_form_century": {},
+   "abstention": [
+    {
+     "coverage": 0.05,
+     "n": 316,
+     "accuracy": 0.670886
+    },
+    {
+     "coverage": 0.1,
+     "n": 631,
+     "accuracy": 0.676704
+    },
+    {
+     "coverage": 0.15,
+     "n": 947,
+     "accuracy": 0.667371
+    },
+    {
+     "coverage": 0.2,
+     "n": 1262,
+     "accuracy": 0.678288
+    },
+    {
+     "coverage": 0.25,
+     "n": 1578,
+     "accuracy": 0.669202
+    },
+    {
+     "coverage": 0.3,
+     "n": 1893,
+     "accuracy": 0.668251
+    },
+    {
+     "coverage": 0.35,
+     "n": 2209,
+     "accuracy": 0.671797
+    },
+    {
+     "coverage": 0.4,
+     "n": 2524,
+     "accuracy": 0.685816
+    },
+    {
+     "coverage": 0.45,
+     "n": 2840,
+     "accuracy": 0.696127
+    },
+    {
+     "coverage": 0.5,
+     "n": 3156,
+     "accuracy": 0.704689
+    },
+    {
+     "coverage": 0.55,
+     "n": 3471,
+     "accuracy": 0.708441
+    },
+    {
+     "coverage": 0.6,
+     "n": 3787,
+     "accuracy": 0.683391
+    },
+    {
+     "coverage": 0.65,
+     "n": 4102,
+     "accuracy": 0.644076
+    },
+    {
+     "coverage": 0.7,
+     "n": 4418,
+     "accuracy": 0.598008
+    },
+    {
+     "coverage": 0.75,
+     "n": 4733,
+     "accuracy": 0.558208
+    },
+    {
+     "coverage": 0.8,
+     "n": 5049,
+     "accuracy": 0.523272
+    },
+    {
+     "coverage": 0.85,
+     "n": 5364,
+     "accuracy": 0.492543
+    },
+    {
+     "coverage": 0.9,
+     "n": 5680,
+     "accuracy": 0.465141
+    },
+    {
+     "coverage": 0.95,
+     "n": 5995,
+     "accuracy": 0.440701
+    },
+    {
+     "coverage": 1.0,
+     "n": 6311,
+     "accuracy": 0.418634
+    }
+   ],
+   "confidence_hist": {
+    "0.0": 2352,
+    "1.0": 3872,
+    "0.6": 16,
+    "0.7": 15,
+    "0.9": 34,
+    "0.8": 15,
+    "0.5": 7
+   },
+   "ceiling": 0.481223
+  },
+  "test_unseen_form": {
+   "n": 2352,
+   "accuracy": 0.0,
+   "macro_f1": 0.0,
+   "acc_at_k": {
+    "acc@1": 0.0,
+    "acc@3": 0.0,
+    "acc@5": 0.0
+   },
+   "by_ambiguity": {
+    "lexical": {
+     "n": 0,
+     "accuracy": null
+    },
+    "inflectional_only": {
+     "n": 0,
+     "accuracy": null
+    },
+    "unambiguous": {
+     "n": 2352,
+     "accuracy": 0.0
+    }
+   },
+   "by_band": {
+    "unseen": {
+     "n": 2352,
+     "accuracy": 0.0
+    }
+   },
+   "by_province": {
+    "Roma": {
+     "n": 466,
+     "accuracy": 0.0
+    },
+    "Latium et Campania / Regio I": {
+     "n": 205,
+     "accuracy": 0.0
+    },
+    "Asia": {
+     "n": 156,
+     "accuracy": 0.0
+    },
+    "Africa proconsularis": {
+     "n": 151,
+     "accuracy": 0.0
+    },
+    "Hispania citerior": {
+     "n": 105,
+     "accuracy": 0.0
+    },
+    "Numidia": {
+     "n": 96,
+     "accuracy": 0.0
+    },
+    "Gallia Narbonensis": {
+     "n": 85,
+     "accuracy": 0.0
+    },
+    "Venetia et Histria / Regio X": {
+     "n": 79,
+     "accuracy": 0.0
+    },
+    "Germania superior": {
+     "n": 70,
+     "accuracy": 0.0
+    },
+    "Etruria / Regio VII": {
+     "n": 53,
+     "accuracy": 0.0
+    },
+    "Lugudunensis": {
+     "n": 50,
+     "accuracy": 0.0
+    },
+    "Lusitania": {
+     "n": 47,
+     "accuracy": 0.0
+    },
+    "Apulia et Calabria / Regio II": {
+     "n": 46,
+     "accuracy": 0.0
+    },
+    "Dalmatia": {
+     "n": 46,
+     "accuracy": 0.0
+    },
+    "Samnium / Regio IV": {
+     "n": 44,
+     "accuracy": 0.0
+    },
+    "Britannia": {
+     "n": 42,
+     "accuracy": 0.0
+    },
+    "Belgica": {
+     "n": 38,
+     "accuracy": 0.0
+    },
+    "Noricum": {
+     "n": 36,
+     "accuracy": 0.0
+    },
+    "Mauretania Caesariensis": {
+     "n": 36,
+     "accuracy": 0.0
+    },
+    "Aquitania / Aquitanica": {
+     "n": 36,
+     "accuracy": 0.0
+    },
+    "Pannonia superior": {
+     "n": 35,
+     "accuracy": 0.0
+    },
+    "Pannonia inferior": {
+     "n": 35,
+     "accuracy": 0.0
+    },
+    "Baetica": {
+     "n": 35,
+     "accuracy": 0.0
+    },
+    "Umbria / Regio VI": {
+     "n": 32,
+     "accuracy": 0.0
+    },
+    "Moesia inferior": {
+     "n": 30,
+     "accuracy": 0.0
+    }
+   },
+   "by_century": {
+    "UNK": {
+     "n": 1832,
+     "accuracy": 0.0
+    },
+    "2AD": {
+     "n": 142,
+     "accuracy": 0.0
+    },
+    "1AD": {
+     "n": 118,
+     "accuracy": 0.0
+    },
+    "3AD": {
+     "n": 87,
+     "accuracy": 0.0
+    },
+    "4AD": {
+     "n": 56,
+     "accuracy": 0.0
+    },
+    "1BC": {
+     "n": 49,
+     "accuracy": 0.0
+    },
+    "5AD": {
+     "n": 24,
+     "accuracy": 0.0
+    },
+    "6AD": {
+     "n": 17,
+     "accuracy": 0.0
+    },
+    "2BC": {
+     "n": 12,
+     "accuracy": 0.0
+    },
+    "7AD": {
+     "n": 5,
+     "accuracy": 0.0
+    },
+    "3BC": {
+     "n": 4,
+     "accuracy": 0.0
+    },
+    "9AD": {
+     "n": 3,
+     "accuracy": 0.0
+    },
+    "10AD": {
+     "n": 2,
+     "accuracy": 0.0
+    },
+    "8AD": {
+     "n": 1,
+     "accuracy": 0.0
+    }
+   },
+   "per_form_province": {},
+   "per_form_century": {},
+   "abstention": [
+    {
+     "coverage": 0.05,
+     "n": 118,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.1,
+     "n": 235,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.15,
+     "n": 353,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.2,
+     "n": 470,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.25,
+     "n": 588,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.3,
+     "n": 706,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.35,
+     "n": 823,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.4,
+     "n": 941,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.45,
+     "n": 1058,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.5,
+     "n": 1176,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.55,
+     "n": 1294,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.6,
+     "n": 1411,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.65,
+     "n": 1529,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.7,
+     "n": 1646,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.75,
+     "n": 1764,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.8,
+     "n": 1882,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.85,
+     "n": 1999,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.9,
+     "n": 2117,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 0.95,
+     "n": 2234,
+     "accuracy": 0.0
+    },
+    {
+     "coverage": 1.0,
+     "n": 2352,
+     "accuracy": 0.0
+    }
+   ],
+   "confidence_hist": {
+    "0.0": 2352
+   },
+   "ceiling": 0.0
+  },
+  "test_no_context_duplicate": {
+   "n": 121199,
+   "accuracy": 0.716277,
+   "macro_f1": 0.234148,
+   "acc_at_k": {
+    "acc@1": 0.716277,
+    "acc@3": 0.868786,
+    "acc@5": 0.900965
+   },
+   "by_ambiguity": {
+    "lexical": {
+     "n": 107703,
+     "accuracy": 0.728782
+    },
+    "inflectional_only": {
+     "n": 7086,
+     "accuracy": 0.667655
+    },
+    "unambiguous": {
+     "n": 6410,
+     "accuracy": 0.559906
+    }
+   },
+   "by_band": {
+    "common": {
+     "n": 97474,
+     "accuracy": 0.743029
+    },
+    "mid": {
+     "n": 17873,
+     "accuracy": 0.680803
+    },
+    "rare": {
+     "n": 3500,
+     "accuracy": 0.633714
+    },
+    "unseen": {
+     "n": 2352,
+     "accuracy": 0.0
+    }
+   },
+   "by_province": {
+    "Roma": {
+     "n": 25804,
+     "accuracy": 0.717796
+    },
+    "Africa proconsularis": {
+     "n": 11728,
+     "accuracy": 0.808066
+    },
+    "Latium et Campania / Regio I": {
+     "n": 11306,
+     "accuracy": 0.65222
+    },
+    "Numidia": {
+     "n": 10787,
+     "accuracy": 0.781589
+    },
+    "Venetia et Histria / Regio X": {
+     "n": 4512,
+     "accuracy": 0.691711
+    },
+    "Hispania citerior": {
+     "n": 4087,
+     "accuracy": 0.693663
+    },
+    "Gallia Narbonensis": {
+     "n": 3058,
+     "accuracy": 0.653041
+    },
+    "Lusitania": {
+     "n": 2833,
+     "accuracy": 0.789269
+    },
+    "Dalmatia": {
+     "n": 2748,
+     "accuracy": 0.713974
+    },
+    "Baetica": {
+     "n": 2518,
+     "accuracy": 0.775218
+    },
+    "Samnium / Regio IV": {
+     "n": 2475,
+     "accuracy": 0.671111
+    },
+    "Mauretania Caesariensis": {
+     "n": 2376,
+     "accuracy": 0.787037
+    },
+    "Pannonia superior": {
+     "n": 2304,
+     "accuracy": 0.721354
+    },
+    "Etruria / Regio VII": {
+     "n": 2264,
+     "accuracy": 0.621025
+    },
+    "Apulia et Calabria / Regio II": {
+     "n": 2227,
+     "accuracy": 0.682084
+    },
+    "Germania superior": {
+     "n": 2177,
+     "accuracy": 0.724391
+    },
+    "Pannonia inferior": {
+     "n": 1862,
+     "accuracy": 0.732546
+    },
+    "Dacia": {
+     "n": 1813,
+     "accuracy": 0.725317
+    },
+    "Provincia incerta": {
+     "n": 1629,
+     "accuracy": 0.763045
+    },
+    "Umbria / Regio VI": {
+     "n": 1577,
+     "accuracy": 0.682308
+    },
+    "Noricum": {
+     "n": 1541,
+     "accuracy": 0.678131
+    },
+    "Transpadana / Regio XI": {
+     "n": 1472,
+     "accuracy": 0.703804
+    },
+    "Aemilia / Regio VIII": {
+     "n": 1291,
+     "accuracy": 0.642912
+    },
+    "Britannia": {
+     "n": 1184,
+     "accuracy": 0.651182
+    },
+    "Asia": {
+     "n": 1124,
+     "accuracy": 0.481317
+    }
+   },
+   "by_century": {
+    "UNK": {
+     "n": 92109,
+     "accuracy": 0.726617
+    },
+    "2AD": {
+     "n": 8409,
+     "accuracy": 0.697705
+    },
+    "1AD": {
+     "n": 7596,
+     "accuracy": 0.671538
+    },
+    "3AD": {
+     "n": 6811,
+     "accuracy": 0.695199
+    },
+    "4AD": {
+     "n": 2390,
+     "accuracy": 0.695816
+    },
+    "1BC": {
+     "n": 2140,
+     "accuracy": 0.63972
+    },
+    "6AD": {
+     "n": 633,
+     "accuracy": 0.699842
+    },
+    "5AD": {
+     "n": 620,
+     "accuracy": 0.651613
+    },
+    "2BC": {
+     "n": 265,
+     "accuracy": 0.626415
+    },
+    "7AD": {
+     "n": 95,
+     "accuracy": 0.6
+    },
+    "3BC": {
+     "n": 85,
+     "accuracy": 0.576471
+    },
+    "9AD": {
+     "n": 20,
+     "accuracy": 0.5
+    },
+    "8AD": {
+     "n": 10,
+     "accuracy": 0.8
+    },
+    "10AD": {
+     "n": 10,
+     "accuracy": 0.7
+    }
+   },
+   "per_form_province": {
+    "v": {
+     "Numidia": {
+      "n": 825,
+      "accuracy": 0.962424
+     },
+     "Roma": {
+      "n": 535,
+      "accuracy": 0.770093
+     },
+     "Africa proconsularis": {
+      "n": 499,
+      "accuracy": 0.935872
+     },
+     "Latium et Campania / Regio I": {
+      "n": 220,
+      "accuracy": 0.722727
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 138,
+      "accuracy": 0.702899
+     },
+     "Gallia Narbonensis": {
+      "n": 95,
+      "accuracy": 0.621053
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 93,
+      "accuracy": 0.849462
+     },
+     "Noricum": {
+      "n": 91,
+      "accuracy": 0.747253
+     },
+     "Mauretania Caesariensis": {
+      "n": 78,
+      "accuracy": 0.923077
+     },
+     "Germania superior": {
+      "n": 76,
+      "accuracy": 0.934211
+     },
+     "Dalmatia": {
+      "n": 75,
+      "accuracy": 0.733333
+     },
+     "Hispania citerior": {
+      "n": 71,
+      "accuracy": 0.676056
+     }
+    },
+    "c": {
+     "Roma": {
+      "n": 1208,
+      "accuracy": 0.65894
+     },
+     "Latium et Campania / Regio I": {
+      "n": 701,
+      "accuracy": 0.613409
+     },
+     "Numidia": {
+      "n": 401,
+      "accuracy": 0.753117
+     },
+     "Africa proconsularis": {
+      "n": 288,
+      "accuracy": 0.697917
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 270,
+      "accuracy": 0.692593
+     },
+     "Etruria / Regio VII": {
+      "n": 199,
+      "accuracy": 0.562814
+     },
+     "Samnium / Regio IV": {
+      "n": 185,
+      "accuracy": 0.762162
+     },
+     "Hispania citerior": {
+      "n": 169,
+      "accuracy": 0.532544
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 155,
+      "accuracy": 0.490323
+     },
+     "Gallia Narbonensis": {
+      "n": 153,
+      "accuracy": 0.588235
+     },
+     "Umbria / Regio VI": {
+      "n": 150,
+      "accuracy": 0.613333
+     },
+     "Lusitania": {
+      "n": 120,
+      "accuracy": 0.716667
+     }
+    },
+    "a": {
+     "Numidia": {
+      "n": 816,
+      "accuracy": 0.949755
+     },
+     "Roma": {
+      "n": 566,
+      "accuracy": 0.745583
+     },
+     "Africa proconsularis": {
+      "n": 403,
+      "accuracy": 0.913151
+     },
+     "Latium et Campania / Regio I": {
+      "n": 245,
+      "accuracy": 0.518367
+     },
+     "Mauretania Caesariensis": {
+      "n": 106,
+      "accuracy": 0.933962
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 101,
+      "accuracy": 0.821782
+     },
+     "Etruria / Regio VII": {
+      "n": 60,
+      "accuracy": 0.783333
+     },
+     "Provincia incerta": {
+      "n": 48,
+      "accuracy": 0.75
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 44,
+      "accuracy": 0.613636
+     },
+     "Lusitania": {
+      "n": 41,
+      "accuracy": 0.878049
+     },
+     "Gallia Narbonensis": {
+      "n": 38,
+      "accuracy": 0.578947
+     },
+     "Samnium / Regio IV": {
+      "n": 37,
+      "accuracy": 0.648649
+     }
+    },
+    "l": {
+     "Roma": {
+      "n": 2163,
+      "accuracy": 0.575127
+     },
+     "Latium et Campania / Regio I": {
+      "n": 1040,
+      "accuracy": 0.516346
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 511,
+      "accuracy": 0.598826
+     },
+     "Africa proconsularis": {
+      "n": 333,
+      "accuracy": 0.756757
+     },
+     "Samnium / Regio IV": {
+      "n": 316,
+      "accuracy": 0.579114
+     },
+     "Numidia": {
+      "n": 312,
+      "accuracy": 0.839744
+     },
+     "Hispania citerior": {
+      "n": 265,
+      "accuracy": 0.713208
+     },
+     "Gallia Narbonensis": {
+      "n": 258,
+      "accuracy": 0.643411
+     },
+     "Etruria / Regio VII": {
+      "n": 224,
+      "accuracy": 0.638393
+     },
+     "Lusitania": {
+      "n": 198,
+      "accuracy": 0.848485
+     },
+     "Baetica": {
+      "n": 198,
+      "accuracy": 0.777778
+     },
+     "Germania superior": {
+      "n": 171,
+      "accuracy": 0.754386
+     }
+    },
+    "aug": {
+     "Roma": {
+      "n": 505,
+      "accuracy": 0.647525
+     },
+     "Africa proconsularis": {
+      "n": 309,
+      "accuracy": 0.702265
+     },
+     "Numidia": {
+      "n": 212,
+      "accuracy": 0.726415
+     },
+     "Latium et Campania / Regio I": {
+      "n": 180,
+      "accuracy": 0.566667
+     },
+     "Hispania citerior": {
+      "n": 77,
+      "accuracy": 0.545455
+     },
+     "Mauretania Caesariensis": {
+      "n": 69,
+      "accuracy": 0.608696
+     },
+     "Gallia Narbonensis": {
+      "n": 67,
+      "accuracy": 0.373134
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 61,
+      "accuracy": 0.42623
+     },
+     "Pannonia inferior": {
+      "n": 52,
+      "accuracy": 0.730769
+     },
+     "Provincia incerta": {
+      "n": 47,
+      "accuracy": 0.659574
+     },
+     "Samnium / Regio IV": {
+      "n": 46,
+      "accuracy": 0.5
+     },
+     "Galatia": {
+      "n": 45,
+      "accuracy": 0.755556
+     }
+    },
+    "d": {
+     "Roma": {
+      "n": 2244,
+      "accuracy": 0.862745
+     },
+     "Africa proconsularis": {
+      "n": 982,
+      "accuracy": 0.953157
+     },
+     "Numidia": {
+      "n": 871,
+      "accuracy": 0.859931
+     },
+     "Latium et Campania / Regio I": {
+      "n": 825,
+      "accuracy": 0.865455
+     },
+     "Hispania citerior": {
+      "n": 220,
+      "accuracy": 0.909091
+     },
+     "Gallia Narbonensis": {
+      "n": 216,
+      "accuracy": 0.907407
+     },
+     "Mauretania Caesariensis": {
+      "n": 209,
+      "accuracy": 0.91866
+     },
+     "Dalmatia": {
+      "n": 207,
+      "accuracy": 0.903382
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 173,
+      "accuracy": 0.843931
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 158,
+      "accuracy": 0.898734
+     },
+     "Baetica": {
+      "n": 149,
+      "accuracy": 0.838926
+     },
+     "Lusitania": {
+      "n": 148,
+      "accuracy": 0.918919
+     }
+    },
+    "f": {
+     "Roma": {
+      "n": 931,
+      "accuracy": 0.488722
+     },
+     "Latium et Campania / Regio I": {
+      "n": 628,
+      "accuracy": 0.519108
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 520,
+      "accuracy": 0.526923
+     },
+     "Lusitania": {
+      "n": 288,
+      "accuracy": 0.545139
+     },
+     "Hispania citerior": {
+      "n": 284,
+      "accuracy": 0.475352
+     },
+     "Numidia": {
+      "n": 273,
+      "accuracy": 0.615385
+     },
+     "Africa proconsularis": {
+      "n": 242,
+      "accuracy": 0.458678
+     },
+     "Samnium / Regio IV": {
+      "n": 230,
+      "accuracy": 0.478261
+     },
+     "Etruria / Regio VII": {
+      "n": 192,
+      "accuracy": 0.489583
+     },
+     "Gallia Narbonensis": {
+      "n": 191,
+      "accuracy": 0.455497
+     },
+     "Noricum": {
+      "n": 183,
+      "accuracy": 0.497268
+     },
+     "Transpadana / Regio XI": {
+      "n": 154,
+      "accuracy": 0.454545
+     }
+    },
+    "p": {
+     "Roma": {
+      "n": 1227,
+      "accuracy": 0.713936
+     },
+     "Africa proconsularis": {
+      "n": 671,
+      "accuracy": 0.670641
+     },
+     "Latium et Campania / Regio I": {
+      "n": 568,
+      "accuracy": 0.598592
+     },
+     "Numidia": {
+      "n": 478,
+      "accuracy": 0.506276
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 409,
+      "accuracy": 0.797066
+     },
+     "Hispania citerior": {
+      "n": 216,
+      "accuracy": 0.611111
+     },
+     "Gallia Narbonensis": {
+      "n": 174,
+      "accuracy": 0.712644
+     },
+     "Samnium / Regio IV": {
+      "n": 169,
+      "accuracy": 0.751479
+     },
+     "Dalmatia": {
+      "n": 166,
+      "accuracy": 0.716867
+     },
+     "Etruria / Regio VII": {
+      "n": 146,
+      "accuracy": 0.520548
+     },
+     "Mauretania Caesariensis": {
+      "n": 130,
+      "accuracy": 0.784615
+     },
+     "Umbria / Regio VI": {
+      "n": 130,
+      "accuracy": 0.7
+     }
+    },
+    "m": {
+     "Roma": {
+      "n": 3282,
+      "accuracy": 0.860756
+     },
+     "Africa proconsularis": {
+      "n": 1239,
+      "accuracy": 0.924939
+     },
+     "Latium et Campania / Regio I": {
+      "n": 1236,
+      "accuracy": 0.795307
+     },
+     "Numidia": {
+      "n": 1008,
+      "accuracy": 0.936508
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 411,
+      "accuracy": 0.783455
+     },
+     "Dalmatia": {
+      "n": 354,
+      "accuracy": 0.870056
+     },
+     "Hispania citerior": {
+      "n": 347,
+      "accuracy": 0.795389
+     },
+     "Gallia Narbonensis": {
+      "n": 327,
+      "accuracy": 0.896024
+     },
+     "Mauretania Caesariensis": {
+      "n": 297,
+      "accuracy": 0.882155
+     },
+     "Apulia et Calabria / Regio II": {
+      "n": 240,
+      "accuracy": 0.9
+     },
+     "Samnium / Regio IV": {
+      "n": 197,
+      "accuracy": 0.791878
+     },
+     "Transpadana / Regio XI": {
+      "n": 188,
+      "accuracy": 0.835106
+     }
+    },
+    "s": {
+     "Africa proconsularis": {
+      "n": 1601,
+      "accuracy": 0.796377
+     },
+     "Numidia": {
+      "n": 1165,
+      "accuracy": 0.686695
+     },
+     "Lusitania": {
+      "n": 441,
+      "accuracy": 0.777778
+     },
+     "Baetica": {
+      "n": 422,
+      "accuracy": 0.824645
+     },
+     "Hispania citerior": {
+      "n": 293,
+      "accuracy": 0.771331
+     },
+     "Roma": {
+      "n": 279,
+      "accuracy": 0.72043
+     },
+     "Latium et Campania / Regio I": {
+      "n": 201,
+      "accuracy": 0.716418
+     },
+     "Mauretania Caesariensis": {
+      "n": 200,
+      "accuracy": 0.91
+     },
+     "Pannonia superior": {
+      "n": 141,
+      "accuracy": 0.787234
+     },
+     "Dalmatia": {
+      "n": 113,
+      "accuracy": 0.725664
+     },
+     "Germania superior": {
+      "n": 111,
+      "accuracy": 0.837838
+     },
+     "Venetia et Histria / Regio X": {
+      "n": 97,
+      "accuracy": 0.701031
+     }
+    }
+   },
+   "per_form_century": {
+    "v": {
+     "UNK": {
+      "n": 3026,
+      "accuracy": 0.864838
+     },
+     "3AD": {
+      "n": 155,
+      "accuracy": 0.632258
+     },
+     "1AD": {
+      "n": 153,
+      "accuracy": 0.653595
+     },
+     "2AD": {
+      "n": 113,
+      "accuracy": 0.79646
+     },
+     "4AD": {
+      "n": 84,
+      "accuracy": 0.75
+     },
+     "5AD": {
+      "n": 46,
+      "accuracy": 0.673913
+     },
+     "6AD": {
+      "n": 40,
+      "accuracy": 0.725
+     },
+     "1BC": {
+      "n": 36,
+      "accuracy": 0.638889
+     },
+     "2BC": {
+      "n": 3,
+      "accuracy": 1.0
+     },
+     "3BC": {
+      "n": 2,
+      "accuracy": 0.0
+     }
+    },
+    "c": {
+     "UNK": {
+      "n": 4141,
+      "accuracy": 0.661193
+     },
+     "1AD": {
+      "n": 547,
+      "accuracy": 0.64351
+     },
+     "2AD": {
+      "n": 258,
+      "accuracy": 0.546512
+     },
+     "3AD": {
+      "n": 211,
+      "accuracy": 0.402844
+     },
+     "1BC": {
+      "n": 197,
+      "accuracy": 0.700508
+     },
+     "4AD": {
+      "n": 65,
+      "accuracy": 0.584615
+     },
+     "6AD": {
+      "n": 53,
+      "accuracy": 0.528302
+     },
+     "5AD": {
+      "n": 43,
+      "accuracy": 0.534884
+     },
+     "2BC": {
+      "n": 17,
+      "accuracy": 1.0
+     },
+     "3BC": {
+      "n": 7,
+      "accuracy": 0.571429
+     }
+    },
+    "a": {
+     "UNK": {
+      "n": 2453,
+      "accuracy": 0.818589
+     },
+     "1AD": {
+      "n": 152,
+      "accuracy": 0.651316
+     },
+     "2AD": {
+      "n": 95,
+      "accuracy": 0.684211
+     },
+     "1BC": {
+      "n": 67,
+      "accuracy": 0.820896
+     },
+     "3AD": {
+      "n": 59,
+      "accuracy": 0.525424
+     },
+     "4AD": {
+      "n": 13,
+      "accuracy": 0.692308
+     },
+     "2BC": {
+      "n": 7,
+      "accuracy": 0.857143
+     },
+     "6AD": {
+      "n": 4,
+      "accuracy": 0.5
+     },
+     "5AD": {
+      "n": 2,
+      "accuracy": 1.0
+     },
+     "3BC": {
+      "n": 1,
+      "accuracy": 1.0
+     }
+    },
+    "l": {
+     "UNK": {
+      "n": 6027,
+      "accuracy": 0.644931
+     },
+     "1AD": {
+      "n": 971,
+      "accuracy": 0.546859
+     },
+     "1BC": {
+      "n": 383,
+      "accuracy": 0.665796
+     },
+     "2AD": {
+      "n": 321,
+      "accuracy": 0.638629
+     },
+     "3AD": {
+      "n": 192,
+      "accuracy": 0.666667
+     },
+     "2BC": {
+      "n": 43,
+      "accuracy": 0.72093
+     },
+     "3BC": {
+      "n": 11,
+      "accuracy": 0.909091
+     },
+     "4AD": {
+      "n": 6,
+      "accuracy": 0.166667
+     },
+     "4BC": {
+      "n": 1,
+      "accuracy": 1.0
+     },
+     "5AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "aug": {
+     "UNK": {
+      "n": 1308,
+      "accuracy": 0.58945
+     },
+     "2AD": {
+      "n": 418,
+      "accuracy": 0.722488
+     },
+     "3AD": {
+      "n": 398,
+      "accuracy": 0.69598
+     },
+     "1AD": {
+      "n": 207,
+      "accuracy": 0.710145
+     },
+     "4AD": {
+      "n": 130,
+      "accuracy": 0.376923
+     },
+     "5AD": {
+      "n": 20,
+      "accuracy": 0.0
+     },
+     "6AD": {
+      "n": 7,
+      "accuracy": 0.142857
+     },
+     "1BC": {
+      "n": 5,
+      "accuracy": 0.4
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.0
+     },
+     "9AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "d": {
+     "UNK": {
+      "n": 6931,
+      "accuracy": 0.89381
+     },
+     "2AD": {
+      "n": 343,
+      "accuracy": 0.892128
+     },
+     "3AD": {
+      "n": 268,
+      "accuracy": 0.86194
+     },
+     "4AD": {
+      "n": 196,
+      "accuracy": 0.831633
+     },
+     "1AD": {
+      "n": 189,
+      "accuracy": 0.820106
+     },
+     "1BC": {
+      "n": 64,
+      "accuracy": 0.640625
+     },
+     "5AD": {
+      "n": 41,
+      "accuracy": 0.780488
+     },
+     "6AD": {
+      "n": 41,
+      "accuracy": 0.853659
+     },
+     "2BC": {
+      "n": 5,
+      "accuracy": 0.2
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.75
+     }
+    },
+    "f": {
+     "UNK": {
+      "n": 4519,
+      "accuracy": 0.526444
+     },
+     "1AD": {
+      "n": 686,
+      "accuracy": 0.565598
+     },
+     "2AD": {
+      "n": 372,
+      "accuracy": 0.432796
+     },
+     "1BC": {
+      "n": 246,
+      "accuracy": 0.621951
+     },
+     "3AD": {
+      "n": 165,
+      "accuracy": 0.551515
+     },
+     "2BC": {
+      "n": 42,
+      "accuracy": 0.833333
+     },
+     "4AD": {
+      "n": 36,
+      "accuracy": 0.416667
+     },
+     "3BC": {
+      "n": 13,
+      "accuracy": 0.538462
+     },
+     "5AD": {
+      "n": 5,
+      "accuracy": 0.2
+     },
+     "4BC": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "p": {
+     "UNK": {
+      "n": 4474,
+      "accuracy": 0.647295
+     },
+     "3AD": {
+      "n": 596,
+      "accuracy": 0.733221
+     },
+     "2AD": {
+      "n": 499,
+      "accuracy": 0.687375
+     },
+     "1AD": {
+      "n": 440,
+      "accuracy": 0.722727
+     },
+     "1BC": {
+      "n": 178,
+      "accuracy": 0.775281
+     },
+     "4AD": {
+      "n": 149,
+      "accuracy": 0.671141
+     },
+     "6AD": {
+      "n": 38,
+      "accuracy": 0.842105
+     },
+     "5AD": {
+      "n": 21,
+      "accuracy": 0.809524
+     },
+     "2BC": {
+      "n": 14,
+      "accuracy": 0.857143
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 0.75
+     }
+    },
+    "m": {
+     "UNK": {
+      "n": 10377,
+      "accuracy": 0.868845
+     },
+     "3AD": {
+      "n": 625,
+      "accuracy": 0.8432
+     },
+     "2AD": {
+      "n": 562,
+      "accuracy": 0.802491
+     },
+     "1AD": {
+      "n": 386,
+      "accuracy": 0.678756
+     },
+     "4AD": {
+      "n": 129,
+      "accuracy": 0.75969
+     },
+     "1BC": {
+      "n": 119,
+      "accuracy": 0.747899
+     },
+     "6AD": {
+      "n": 37,
+      "accuracy": 0.864865
+     },
+     "5AD": {
+      "n": 27,
+      "accuracy": 0.740741
+     },
+     "2BC": {
+      "n": 12,
+      "accuracy": 0.666667
+     },
+     "3BC": {
+      "n": 8,
+      "accuracy": 0.75
+     }
+    },
+    "s": {
+     "UNK": {
+      "n": 5540,
+      "accuracy": 0.763899
+     },
+     "1AD": {
+      "n": 189,
+      "accuracy": 0.751323
+     },
+     "2AD": {
+      "n": 173,
+      "accuracy": 0.763006
+     },
+     "3AD": {
+      "n": 138,
+      "accuracy": 0.673913
+     },
+     "1BC": {
+      "n": 64,
+      "accuracy": 0.59375
+     },
+     "6AD": {
+      "n": 17,
+      "accuracy": 0.882353
+     },
+     "4AD": {
+      "n": 14,
+      "accuracy": 0.642857
+     },
+     "5AD": {
+      "n": 11,
+      "accuracy": 0.636364
+     },
+     "2BC": {
+      "n": 7,
+      "accuracy": 0.0
+     },
+     "3BC": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    }
+   },
+   "abstention": [
+    {
+     "coverage": 0.05,
+     "n": 6060,
+     "accuracy": 0.768317
+    },
+    {
+     "coverage": 0.1,
+     "n": 12120,
+     "accuracy": 0.767327
+    },
+    {
+     "coverage": 0.15,
+     "n": 18180,
+     "accuracy": 0.760011
+    },
+    {
+     "coverage": 0.2,
+     "n": 24240,
+     "accuracy": 0.76613
+    },
+    {
+     "coverage": 0.25,
+     "n": 30300,
+     "accuracy": 0.77198
+    },
+    {
+     "coverage": 0.3,
+     "n": 36360,
+     "accuracy": 0.770875
+    },
+    {
+     "coverage": 0.35,
+     "n": 42420,
+     "accuracy": 0.775365
+    },
+    {
+     "coverage": 0.4,
+     "n": 48480,
+     "accuracy": 0.774443
+    },
+    {
+     "coverage": 0.45,
+     "n": 54540,
+     "accuracy": 0.775156
+    },
+    {
+     "coverage": 0.5,
+     "n": 60600,
+     "accuracy": 0.76967
+    },
+    {
+     "coverage": 0.55,
+     "n": 66659,
+     "accuracy": 0.764008
+    },
+    {
+     "coverage": 0.6,
+     "n": 72719,
+     "accuracy": 0.767076
+    },
+    {
+     "coverage": 0.65,
+     "n": 78779,
+     "accuracy": 0.770573
+    },
+    {
+     "coverage": 0.7,
+     "n": 84839,
+     "accuracy": 0.77106
+    },
+    {
+     "coverage": 0.75,
+     "n": 90899,
+     "accuracy": 0.770548
+    },
+    {
+     "coverage": 0.8,
+     "n": 96959,
+     "accuracy": 0.770573
+    },
+    {
+     "coverage": 0.85,
+     "n": 103019,
+     "accuracy": 0.766208
+    },
+    {
+     "coverage": 0.9,
+     "n": 109079,
+     "accuracy": 0.765968
+    },
+    {
+     "coverage": 0.95,
+     "n": 115139,
+     "accuracy": 0.745499
+    },
+    {
+     "coverage": 1.0,
+     "n": 121199,
+     "accuracy": 0.716277
+    }
+   ],
+   "confidence_hist": {
+    "1.0": 116984,
+    "0.0": 2352,
+    "0.8": 399,
+    "0.9": 756,
+    "0.7": 312,
+    "0.5": 125,
+    "0.6": 262,
+    "0.4": 9
+   },
+   "ceiling": 0.94764
+  }
+ },
+ "infer_seconds": 156.1,
+ "model": "M2",
+ "condition": "C2",
+ "seed": 1,
+ "written_utc": "2026-08-21T17:26:09Z"
+}
