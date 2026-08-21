@@ -20,6 +20,7 @@ dev = [
 ]
 ml = [
     "protobuf>=7.35.0",
+    "python-docx>=1.2.0",
     "scikit-learn>=1.9.0",
     "sentencepiece>=0.2.2",
     "tokenizers>=0.22.2",
