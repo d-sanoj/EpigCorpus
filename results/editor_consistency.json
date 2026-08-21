@@ -1,0 +1,409 @@
+{
+ "A_identical_context_different_expansion": {
+  "context_groups_with_disagreement": 1565,
+  "rows_involved": 13706,
+  "share_of_task_rows": 0.00964,
+  "examples": [
+   {
+    "abbrev": "Br",
+    "left": "Cl(assis)",
+    "right": "",
+    "expansions": {
+     "britannicae": 4,
+     "britannica": 1390
+    }
+   },
+   {
+    "abbrev": "Pr",
+    "left": "Leg(io) XXII",
+    "right": "P(ia) F(idelis)",
+    "expansions": {
+     "primigenia": 299,
+     "prrimigenia": 1
+    }
+   },
+   {
+    "abbrev": "Res",
+    "left": "C(ai) Oppi",
+    "right": "",
+    "expansions": {
+     "restituti": 256,
+     "resituti": 1,
+     "restitui": 17
+    }
+   },
+   {
+    "abbrev": "Leg",
+    "left": "",
+    "right": "XIIII",
+    "expansions": {
+     "legio": 173,
+     "legionis": 3
+    }
+   },
+   {
+    "abbrev": "G",
+    "left": "R(es) p(ublica)",
+    "right": "",
+    "expansions": {
+     "glevensis": 1,
+     "glevensium": 162
+    }
+   },
+   {
+    "abbrev": "I",
+    "left": "",
+    "right": "O(ptimo) M(aximo)",
+    "expansions": {
+     "iovi": 131,
+     "ioui": 1
+    }
+   },
+   {
+    "abbrev": "Amand",
+    "left": "",
+    "right": "",
+    "expansions": {
+     "amandus": 124,
+     "amandi": 1
+    }
+   },
+   {
+    "abbrev": "Florent",
+    "left": "",
+    "right": "",
+    "expansions": {
+     "florentinus": 2,
+     "florenti": 20,
+     "florentius": 1,
+     "florentini": 90
+    }
+   },
+   {
+    "abbrev": "q",
+    "left": "c) s(itus) e(st) / o(ssa) t(ibi) b(ene)",
+    "right": "",
+    "expansions": {
+     "quiescant": 97,
+     "quiesant": 1
+    }
+   },
+   {
+    "abbrev": "Vita",
+    "left": "Of(ficina)",
+    "right": "",
+    "expansions": {
+     "vitalis": 94,
+     "vitali": 1
+    }
+   },
+   {
+    "abbrev": "Imp",
+    "left": "",
+    "right": "",
+    "expansions": {
+     "imperatori": 3,
+     "imperatoris": 72,
+     "imperator": 17,
+     "imperatores": 1,
+     "imperati": 1
+    }
+   },
+   {
+    "abbrev": "Tot",
+    "left": "",
+    "right": "",
+    "expansions": {
+     "toutati": 74,
+     "toutatis": 7,
+     "toutates": 1
+    }
+   },
+   {
+    "abbrev": "Ger",
+    "left": "Ex(ercitus)",
+    "right": "inf(erioris)",
+    "expansions": {
+     "germanici": 79,
+     "germania": 1
+    }
+   },
+   {
+    "abbrev": "Fir",
+    "left": "",
+    "right": "",
+    "expansions": {
+     "firmus": 2,
+     "firmani": 70,
+     "firmi": 1,
+     "firmo": 3
+    }
+   },
+   {
+    "abbrev": "Ses",
+    "left": "",
+    "right": "",
+    "expansions": {
+     "sesti": 9,
+     "sestius": 67
+    }
+   }
+  ]
+ },
+ "B_same_monument_different_expansion": {
+  "monument_abbrev_groups_with_disagreement": 86268,
+  "rows_involved": 228813,
+  "examples": [
+   {
+    "monument": "EDCS-20200005",
+    "abbrev": "C",
+    "expansions": {
+     "caio": 2,
+     "caius": 448,
+     "cai": 4
+    }
+   },
+   {
+    "monument": "EDCS-20200005",
+    "abbrev": "L",
+    "expansions": {
+     "luci": 3,
+     "lucio": 1,
+     "lucius": 395
+    }
+   },
+   {
+    "monument": "EDCS-20200005",
+    "abbrev": "M",
+    "expansions": {
+     "marco": 3,
+     "marcus": 392,
+     "marci": 2,
+     "marce": 1
+    }
+   },
+   {
+    "monument": "EDCS-20200008",
+    "abbrev": "f",
+    "expansions": {
+     "filius": 322,
+     "fecerunt": 18,
+     "factus": 11
+    }
+   },
+   {
+    "monument": "EDCS-20200001",
+    "abbrev": "s",
+    "expansions": {
+     "supra": 162,
+     "scriptum": 4,
+     "scripto": 121,
+     "scriptis": 31,
+     "summis": 1,
+     "sunt": 5,
+     "scriptos": 4,
+     "scripta": 2,
+     "scriptae": 1
+    }
+   },
+   {
+    "monument": "EDCS-20200001",
+    "abbrev": "adf",
+    "expansions": {
+     "adfinibus": 252,
+     "adfini": 29
+    }
+   },
+   {
+    "monument": "EDCS-20200001",
+    "abbrev": "fund",
+    "expansions": {
+     "fundum": 225,
+     "fundos": 32,
+     "fundo": 4,
+     "fundus": 1
+    }
+   },
+   {
+    "monument": "EDCS-20200001",
+    "abbrev": "pag",
+    "expansions": {
+     "pago": 240,
+     "pagis": 5
+    }
+   },
+   {
+    "monument": "EDCS-20200005",
+    "abbrev": "Q",
+    "expansions": {
+     "quintus": 215,
+     "quinte": 1
+    }
+   },
+   {
+    "monument": "EDCS-20200001",
+    "abbrev": "n",
+    "expansions": {
+     "numero": 3,
+     "nummum": 204,
+     "nostro": 4
+    }
+   },
+   {
+    "monument": "EDCS-20200001",
+    "abbrev": "p",
+    "expansions": {
+     "pro": 80,
+     "parte": 82,
+     "publica": 26,
+     "professus": 1,
+     "partibus": 1,
+     "publicam": 1
+    }
+   },
+   {
+    "monument": "EDCS-17200127",
+    "abbrev": "C",
+    "expansions": {
+     "caio": 1,
+     "caius": 185,
+     "cai": 1
+    }
+   },
+   {
+    "monument": "EDCS-18200047",
+    "abbrev": "c",
+    "expansions": {
+     "comitialis": 182,
+     "consulto": 1,
+     "comitiavit": 2
+    }
+   },
+   {
+    "monument": "EDCS-53200227",
+    "abbrev": "f",
+    "expansions": {
+     "filius": 183,
+     "fisci": 1
+    }
+   },
+   {
+    "monument": "EDCS-20200008",
+    "abbrev": "M",
+    "expansions": {
+     "marci": 109,
+     "manius": 7,
+     "mani": 11,
+     "marcus": 55
+    }
+   }
+  ]
+ },
+ "C_boundary_is_editorial": {
+  "expansion_forms_also_printed_plain": 26199,
+  "distinct_expansion_forms": 39440,
+  "share": 0.6643,
+  "examples": {
+   "manibus": {
+    "as_expansion": 57286,
+    "as_plain_text": 3656
+   },
+   "dis": {
+    "as_expansion": 54189,
+    "as_plain_text": 6731
+   },
+   "annos": {
+    "as_expansion": 38551,
+    "as_plain_text": 4396
+   },
+   "vixit": {
+    "as_expansion": 31388,
+    "as_plain_text": 25244
+   },
+   "sacrum": {
+    "as_expansion": 21806,
+    "as_plain_text": 2264
+   },
+   "cai": {
+    "as_expansion": 21746,
+    "as_plain_text": 201
+   },
+   "luci": {
+    "as_expansion": 21472,
+    "as_plain_text": 510
+   },
+   "fecit": {
+    "as_expansion": 21036,
+    "as_plain_text": 18543
+   },
+   "filius": {
+    "as_expansion": 20819,
+    "as_plain_text": 2059
+   },
+   "hic": {
+    "as_expansion": 20504,
+    "as_plain_text": 7140
+   },
+   "caius": {
+    "as_expansion": 19512,
+    "as_plain_text": 175
+   },
+   "lucius": {
+    "as_expansion": 18284,
+    "as_plain_text": 549
+   },
+   "est": {
+    "as_expansion": 17495,
+    "as_plain_text": 8761
+   },
+   "marcus": {
+    "as_expansion": 15993,
+    "as_plain_text": 520
+   },
+   "marci": {
+    "as_expansion": 15641,
+    "as_plain_text": 785
+   },
+   "libertus": {
+    "as_expansion": 13411,
+    "as_plain_text": 327
+   },
+   "situs": {
+    "as_expansion": 12278,
+    "as_plain_text": 941
+   },
+   "filio": {
+    "as_expansion": 12234,
+    "as_plain_text": 7205
+   },
+   "officina": {
+    "as_expansion": 11682,
+    "as_plain_text": 104
+   },
+   "pedes": {
+    "as_expansion": 11463,
+    "as_plain_text": 317
+   },
+   "annorum": {
+    "as_expansion": 11076,
+    "as_plain_text": 704
+   },
+   "augusti": {
+    "as_expansion": 10789,
+    "as_plain_text": 1204
+   },
+   "bene": {
+    "as_expansion": 10639,
+    "as_plain_text": 11631
+   },
+   "merenti": {
+    "as_expansion": 9978,
+    "as_plain_text": 7531
+   },
+   "legio": {
+    "as_expansion": 9573,
+    "as_plain_text": 257
+   }
+  }
+ }
+}
