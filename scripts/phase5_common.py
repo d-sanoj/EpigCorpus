@@ -59,10 +59,18 @@ def century_of(a, b):
 
 
 class Task:
-    """Everything derived from primary_train, and nothing from any test set."""
+    """Everything derived from the TRAINING split, and nothing from any test set.
 
-    def __init__(self):
-        self.header, self.I, self.train = load_split("primary_train")
+    train_split is a parameter because the held-out province experiment needs a
+    model that has never seen Britannia, Mauretania Caesariensis or Pannonia
+    inferior. Training on primary_train and evaluating on heldout_province_test
+    measures performance on three provinces the model was trained on, which is
+    not the question 4b asks.
+    """
+
+    def __init__(self, train_split="primary_train"):
+        self.train_split = train_split
+        self.header, self.I, self.train = load_split(train_split)
         I = self.I
         self.key_exp = defaultdict(Counter)          # key -> expansion counts
         self.kp_exp = defaultdict(Counter)           # (key, province)

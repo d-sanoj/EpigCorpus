@@ -1,0 +1,674 @@
+{
+ "train_seconds": 86.7,
+ "train_split": "heldout_province_train",
+ "param_count": 1048580,
+ "alpha": 1e-07,
+ "averaged_sgd": true,
+ "sets": {
+  "heldout_province_test": {
+   "n": 71697,
+   "accuracy": 0.65396,
+   "macro_f1": 0.210163,
+   "acc_at_k": {
+    "acc@1": 0.65396,
+    "acc@3": 0.798806,
+    "acc@5": 0.855517
+   },
+   "by_ambiguity": {
+    "lexical": {
+     "n": 64324,
+     "accuracy": 0.658805
+    },
+    "inflectional_only": {
+     "n": 3909,
+     "accuracy": 0.680993
+    },
+    "unambiguous": {
+     "n": 3464,
+     "accuracy": 0.533487
+    }
+   },
+   "by_band": {
+    "common": {
+     "n": 54636,
+     "accuracy": 0.714639
+    },
+    "mid": {
+     "n": 13394,
+     "accuracy": 0.494848
+    },
+    "rare": {
+     "n": 2370,
+     "accuracy": 0.512236
+    },
+    "unseen": {
+     "n": 1297,
+     "accuracy": 0.0
+    }
+   },
+   "by_province": {
+    "Britannia": {
+     "n": 26606,
+     "accuracy": 0.508757
+    },
+    "Mauretania Caesariensis": {
+     "n": 24997,
+     "accuracy": 0.74757
+    },
+    "Pannonia inferior": {
+     "n": 20094,
+     "accuracy": 0.72977
+    }
+   },
+   "by_century": {
+    "UNK": {
+     "n": 51303,
+     "accuracy": 0.646453
+    },
+    "3AD": {
+     "n": 10094,
+     "accuracy": 0.699723
+    },
+    "2AD": {
+     "n": 6297,
+     "accuracy": 0.693187
+    },
+    "4AD": {
+     "n": 1816,
+     "accuracy": 0.561123
+    },
+    "5AD": {
+     "n": 906,
+     "accuracy": 0.539735
+    },
+    "1AD": {
+     "n": 865,
+     "accuracy": 0.642775
+    },
+    "6AD": {
+     "n": 377,
+     "accuracy": 0.549072
+    },
+    "7AD": {
+     "n": 36,
+     "accuracy": 0.638889
+    },
+    "12AD": {
+     "n": 3,
+     "accuracy": 0.0
+    }
+   },
+   "per_form_province": {
+    "v": {
+     "Britannia": {
+      "n": 1512,
+      "accuracy": 0.277778
+     },
+     "Mauretania Caesariensis": {
+      "n": 909,
+      "accuracy": 0.946095
+     },
+     "Pannonia inferior": {
+      "n": 589,
+      "accuracy": 0.920204
+     }
+    },
+    "c": {
+     "Britannia": {
+      "n": 664,
+      "accuracy": 0.361446
+     },
+     "Mauretania Caesariensis": {
+      "n": 609,
+      "accuracy": 0.7422
+     },
+     "Pannonia inferior": {
+      "n": 534,
+      "accuracy": 0.649813
+     }
+    },
+    "a": {
+     "Mauretania Caesariensis": {
+      "n": 1025,
+      "accuracy": 0.765854
+     },
+     "Britannia": {
+      "n": 252,
+      "accuracy": 0.170635
+     },
+     "Pannonia inferior": {
+      "n": 106,
+      "accuracy": 0.433962
+     }
+    },
+    "l": {
+     "Britannia": {
+      "n": 757,
+      "accuracy": 0.614267
+     },
+     "Pannonia inferior": {
+      "n": 740,
+      "accuracy": 0.827027
+     },
+     "Mauretania Caesariensis": {
+      "n": 707,
+      "accuracy": 0.758133
+     }
+    },
+    "aug": {
+     "Britannia": {
+      "n": 1493,
+      "accuracy": 0.87207
+     },
+     "Mauretania Caesariensis": {
+      "n": 592,
+      "accuracy": 0.633446
+     },
+     "Pannonia inferior": {
+      "n": 511,
+      "accuracy": 0.661448
+     }
+    },
+    "d": {
+     "Mauretania Caesariensis": {
+      "n": 2129,
+      "accuracy": 0.93706
+     },
+     "Pannonia inferior": {
+      "n": 656,
+      "accuracy": 0.868902
+     },
+     "Britannia": {
+      "n": 503,
+      "accuracy": 0.725646
+     }
+    },
+    "f": {
+     "Britannia": {
+      "n": 847,
+      "accuracy": 0.848878
+     },
+     "Pannonia inferior": {
+      "n": 721,
+      "accuracy": 0.736477
+     },
+     "Mauretania Caesariensis": {
+      "n": 544,
+      "accuracy": 0.534926
+     }
+    },
+    "p": {
+     "Mauretania Caesariensis": {
+      "n": 1489,
+      "accuracy": 0.495635
+     },
+     "Britannia": {
+      "n": 1136,
+      "accuracy": 0.446303
+     },
+     "Pannonia inferior": {
+      "n": 1016,
+      "accuracy": 0.674213
+     }
+    },
+    "m": {
+     "Mauretania Caesariensis": {
+      "n": 2896,
+      "accuracy": 0.912983
+     },
+     "Pannonia inferior": {
+      "n": 1968,
+      "accuracy": 0.878557
+     },
+     "Britannia": {
+      "n": 1554,
+      "accuracy": 0.815315
+     }
+    },
+    "s": {
+     "Mauretania Caesariensis": {
+      "n": 2148,
+      "accuracy": 0.877095
+     },
+     "Pannonia inferior": {
+      "n": 845,
+      "accuracy": 0.75858
+     },
+     "Britannia": {
+      "n": 673,
+      "accuracy": 0.69688
+     }
+    }
+   },
+   "per_form_century": {
+    "v": {
+     "UNK": {
+      "n": 2594,
+      "accuracy": 0.587124
+     },
+     "3AD": {
+      "n": 235,
+      "accuracy": 0.825532
+     },
+     "2AD": {
+      "n": 154,
+      "accuracy": 0.571429
+     },
+     "4AD": {
+      "n": 16,
+      "accuracy": 0.75
+     },
+     "5AD": {
+      "n": 6,
+      "accuracy": 0.666667
+     },
+     "1AD": {
+      "n": 4,
+      "accuracy": 0.0
+     },
+     "6AD": {
+      "n": 1,
+      "accuracy": 1.0
+     }
+    },
+    "c": {
+     "UNK": {
+      "n": 1357,
+      "accuracy": 0.57185
+     },
+     "3AD": {
+      "n": 234,
+      "accuracy": 0.534188
+     },
+     "2AD": {
+      "n": 158,
+      "accuracy": 0.664557
+     },
+     "1AD": {
+      "n": 33,
+      "accuracy": 0.727273
+     },
+     "4AD": {
+      "n": 18,
+      "accuracy": 0.333333
+     },
+     "5AD": {
+      "n": 5,
+      "accuracy": 0.6
+     },
+     "6AD": {
+      "n": 2,
+      "accuracy": 0.0
+     }
+    },
+    "a": {
+     "UNK": {
+      "n": 1111,
+      "accuracy": 0.721872
+     },
+     "3AD": {
+      "n": 109,
+      "accuracy": 0.385321
+     },
+     "4AD": {
+      "n": 81,
+      "accuracy": 0.08642
+     },
+     "2AD": {
+      "n": 40,
+      "accuracy": 0.475
+     },
+     "5AD": {
+      "n": 28,
+      "accuracy": 0.0
+     },
+     "1AD": {
+      "n": 8,
+      "accuracy": 0.5
+     },
+     "6AD": {
+      "n": 6,
+      "accuracy": 0.0
+     }
+    },
+    "l": {
+     "UNK": {
+      "n": 1702,
+      "accuracy": 0.740306
+     },
+     "3AD": {
+      "n": 236,
+      "accuracy": 0.728814
+     },
+     "2AD": {
+      "n": 224,
+      "accuracy": 0.714286
+     },
+     "1AD": {
+      "n": 29,
+      "accuracy": 0.517241
+     },
+     "4AD": {
+      "n": 11,
+      "accuracy": 0.454545
+     },
+     "6AD": {
+      "n": 1,
+      "accuracy": 1.0
+     },
+     "5AD": {
+      "n": 1,
+      "accuracy": 0.0
+     }
+    },
+    "aug": {
+     "UNK": {
+      "n": 1627,
+      "accuracy": 0.831592
+     },
+     "3AD": {
+      "n": 550,
+      "accuracy": 0.752727
+     },
+     "2AD": {
+      "n": 319,
+      "accuracy": 0.633229
+     },
+     "4AD": {
+      "n": 53,
+      "accuracy": 0.339623
+     },
+     "1AD": {
+      "n": 45,
+      "accuracy": 0.622222
+     },
+     "5AD": {
+      "n": 2,
+      "accuracy": 0.0
+     }
+    },
+    "d": {
+     "UNK": {
+      "n": 2632,
+      "accuracy": 0.903495
+     },
+     "3AD": {
+      "n": 316,
+      "accuracy": 0.822785
+     },
+     "4AD": {
+      "n": 132,
+      "accuracy": 0.856061
+     },
+     "2AD": {
+      "n": 117,
+      "accuracy": 0.820513
+     },
+     "5AD": {
+      "n": 56,
+      "accuracy": 0.982143
+     },
+     "6AD": {
+      "n": 22,
+      "accuracy": 0.818182
+     },
+     "1AD": {
+      "n": 10,
+      "accuracy": 0.7
+     },
+     "7AD": {
+      "n": 3,
+      "accuracy": 1.0
+     }
+    },
+    "f": {
+     "UNK": {
+      "n": 1640,
+      "accuracy": 0.721951
+     },
+     "3AD": {
+      "n": 206,
+      "accuracy": 0.781553
+     },
+     "2AD": {
+      "n": 184,
+      "accuracy": 0.75
+     },
+     "1AD": {
+      "n": 63,
+      "accuracy": 0.746032
+     },
+     "4AD": {
+      "n": 16,
+      "accuracy": 0.625
+     },
+     "5AD": {
+      "n": 3,
+      "accuracy": 0.333333
+     }
+    },
+    "p": {
+     "UNK": {
+      "n": 1807,
+      "accuracy": 0.464859
+     },
+     "3AD": {
+      "n": 975,
+      "accuracy": 0.694359
+     },
+     "2AD": {
+      "n": 451,
+      "accuracy": 0.700665
+     },
+     "4AD": {
+      "n": 222,
+      "accuracy": 0.225225
+     },
+     "5AD": {
+      "n": 115,
+      "accuracy": 0.104348
+     },
+     "1AD": {
+      "n": 44,
+      "accuracy": 0.681818
+     },
+     "6AD": {
+      "n": 24,
+      "accuracy": 0.166667
+     },
+     "7AD": {
+      "n": 3,
+      "accuracy": 0.333333
+     }
+    },
+    "m": {
+     "UNK": {
+      "n": 4713,
+      "accuracy": 0.881392
+     },
+     "3AD": {
+      "n": 1003,
+      "accuracy": 0.882353
+     },
+     "2AD": {
+      "n": 451,
+      "accuracy": 0.849224
+     },
+     "4AD": {
+      "n": 124,
+      "accuracy": 0.887097
+     },
+     "5AD": {
+      "n": 71,
+      "accuracy": 0.971831
+     },
+     "1AD": {
+      "n": 29,
+      "accuracy": 0.482759
+     },
+     "6AD": {
+      "n": 23,
+      "accuracy": 0.913043
+     },
+     "7AD": {
+      "n": 4,
+      "accuracy": 1.0
+     }
+    },
+    "s": {
+     "UNK": {
+      "n": 3040,
+      "accuracy": 0.820724
+     },
+     "3AD": {
+      "n": 287,
+      "accuracy": 0.707317
+     },
+     "2AD": {
+      "n": 162,
+      "accuracy": 0.839506
+     },
+     "4AD": {
+      "n": 72,
+      "accuracy": 0.944444
+     },
+     "5AD": {
+      "n": 44,
+      "accuracy": 0.954545
+     },
+     "1AD": {
+      "n": 38,
+      "accuracy": 0.736842
+     },
+     "6AD": {
+      "n": 20,
+      "accuracy": 0.95
+     },
+     "7AD": {
+      "n": 3,
+      "accuracy": 1.0
+     }
+    }
+   },
+   "abstention": [
+    {
+     "coverage": 0.05,
+     "n": 3585,
+     "accuracy": 0.794421
+    },
+    {
+     "coverage": 0.1,
+     "n": 7170,
+     "accuracy": 0.76848
+    },
+    {
+     "coverage": 0.15,
+     "n": 10755,
+     "accuracy": 0.763831
+    },
+    {
+     "coverage": 0.2,
+     "n": 14339,
+     "accuracy": 0.773276
+    },
+    {
+     "coverage": 0.25,
+     "n": 17924,
+     "accuracy": 0.772372
+    },
+    {
+     "coverage": 0.3,
+     "n": 21509,
+     "accuracy": 0.765122
+    },
+    {
+     "coverage": 0.35,
+     "n": 25094,
+     "accuracy": 0.775006
+    },
+    {
+     "coverage": 0.4,
+     "n": 28679,
+     "accuracy": 0.777886
+    },
+    {
+     "coverage": 0.45,
+     "n": 32264,
+     "accuracy": 0.782978
+    },
+    {
+     "coverage": 0.5,
+     "n": 35848,
+     "accuracy": 0.785623
+    },
+    {
+     "coverage": 0.55,
+     "n": 39433,
+     "accuracy": 0.787995
+    },
+    {
+     "coverage": 0.6,
+     "n": 43018,
+     "accuracy": 0.786926
+    },
+    {
+     "coverage": 0.65,
+     "n": 46603,
+     "accuracy": 0.785121
+    },
+    {
+     "coverage": 0.7,
+     "n": 50188,
+     "accuracy": 0.781581
+    },
+    {
+     "coverage": 0.75,
+     "n": 53773,
+     "accuracy": 0.750451
+    },
+    {
+     "coverage": 0.8,
+     "n": 57358,
+     "accuracy": 0.736811
+    },
+    {
+     "coverage": 0.85,
+     "n": 60942,
+     "accuracy": 0.738702
+    },
+    {
+     "coverage": 0.9,
+     "n": 64527,
+     "accuracy": 0.70744
+    },
+    {
+     "coverage": 0.95,
+     "n": 68112,
+     "accuracy": 0.681892
+    },
+    {
+     "coverage": 1.0,
+     "n": 71697,
+     "accuracy": 0.65396
+    }
+   ],
+   "confidence_hist": {
+    "1.0": 68480,
+    "0.0": 1297,
+    "0.9": 996,
+    "0.7": 323,
+    "0.8": 298,
+    "0.6": 180,
+    "0.5": 111,
+    "0.3": 2,
+    "0.4": 10
+   },
+   "ceiling": 0.919829
+  }
+ },
+ "infer_seconds": 15.0,
+ "model": "M2H",
+ "condition": "C1",
+ "seed": 1,
+ "written_utc": "2026-08-21T17:54:22Z"
+}

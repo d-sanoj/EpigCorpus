@@ -213,9 +213,13 @@ def main():
     ap.add_argument("--conditions", default="C1,C2,C3")
     ap.add_argument("--seeds", default="1,2,3")
     ap.add_argument("--train-subsample", type=int, default=0)
+    ap.add_argument("--smoke", type=int, default=0,
+                    help="cap every eval set to N rows; for testing the code path only")
     args = ap.parse_args()
     task = C.Task(); lexkeys = E.lexical_keys(task)
     evalsets = {s: C.load_split(s)[2] for s in C.EVAL_SETS}
+    if args.smoke:
+        evalsets = {k: v[:args.smoke] for k, v in evalsets.items()}
     for cond in args.conditions.split(","):
         for seed in [int(s) for s in args.seeds.split(",")]:
             run_cell(task, lexkeys, evalsets, args.model, args.tag, cond, seed, args)

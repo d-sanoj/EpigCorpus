@@ -1,0 +1,57 @@
+=== detached driver started 2026-08-21T19:00:22Z pid 27944 ===
+--- [1/4] finishing M2H (held-out province repair) ---
+train 1,349,016 rows from heldout_province_train
+test  71,697 rows, provinces: ['Britannia', 'Mauretania Caesariensis', 'Pannonia inferior']
+LEAK CHECK -- test provinces present in training: NONE
+ceiling on this set: 0.9198
+
+  M2H C3 seed2  0.6330  (100s train)
+  M2H C3 seed3  0.6325  (97s train)
+
+done in 234s
+--- [2/4] M3 seed 1, all three conditions ---
+Loading weights:   0%|          | 0/197 [00:00<?, ?it/s]Loading weights: 100%|██████████| 197/197 [00:00<00:00, 18508.15it/s]
+[transformers] [1mRobertaModel LOAD REPORT[0m from: bowphs/LaBerta
+Key                       | Status     | 
+--------------------------+------------+-
+lm_head.dense.weight      | UNEXPECTED | 
+lm_head.layer_norm.weight | UNEXPECTED | 
+lm_head.layer_norm.bias   | UNEXPECTED | 
+lm_head.dense.bias        | UNEXPECTED | 
+lm_head.bias              | UNEXPECTED | 
+pooler.dense.bias         | MISSING    | 
+pooler.dense.weight       | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+=== priority driver started 2026-08-21T19:05:06Z pid 28204 ===
+--- [1/2] finishing M2H (held-out province repair) ---
+train 1,349,016 rows from heldout_province_train
+test  71,697 rows, provinces: ['Britannia', 'Mauretania Caesariensis', 'Pannonia inferior']
+LEAK CHECK -- test provinces present in training: NONE
+ceiling on this set: 0.9198
+
+
+done in 4s
+--- M2H done at 2026-08-21T19:05:11Z ---
+--- [2/2] M3 seed 1, conditions C1 C2 C3 ---
+Loading weights:   0%|          | 0/197 [00:00<?, ?it/s]Loading weights: 100%|██████████| 197/197 [00:00<00:00, 4014.27it/s]
+[transformers] [1mRobertaModel LOAD REPORT[0m from: bowphs/LaBerta
+Key                       | Status     | 
+--------------------------+------------+-
+lm_head.layer_norm.bias   | UNEXPECTED | 
+lm_head.bias              | UNEXPECTED | 
+lm_head.layer_norm.weight | UNEXPECTED | 
+lm_head.dense.bias        | UNEXPECTED | 
+lm_head.dense.weight      | UNEXPECTED | 
+pooler.dense.weight       | MISSING    | 
+pooler.dense.bias         | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+/Users/sanoj/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/multiprocessing/resource_tracker.py:400: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/loky-28212-je3hxxdz'}
+  warnings.warn(
+/Users/sanoj/.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/multiprocessing/resource_tracker.py:400: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/loky-28129-sutpe2_l'}
+  warnings.warn(
