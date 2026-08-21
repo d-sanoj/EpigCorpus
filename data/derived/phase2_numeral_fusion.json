@@ -1,0 +1,211 @@
+{
+ "fused_numeral_pairs_in_kept_set": 2338,
+ "fused_numeral_pair_types": 446,
+ "fused_appended_words": {
+  "milia": 1128,
+  "milibus": 464,
+  "librae": 361,
+  "sextarii": 76,
+  "duorum": 40,
+  "vir": 31,
+  "viro": 24,
+  "modii": 24,
+  "libras": 24,
+  "virum": 20,
+  "mille": 15,
+  "ii": 14,
+  "ixit": 13,
+  "quarta": 12,
+  "tertia": 11,
+  "iugera": 9,
+  "locus": 8,
+  "iae": 6,
+  "viri": 4,
+  "asses": 4,
+  "solidi": 4,
+  "assibus": 3,
+  "aelius": 3,
+  "quinquennalium": 3,
+  "aeli": 3,
+  "pondera": 3,
+  "passus": 2,
+  "secundum": 2,
+  "attius": 1,
+  "secundus": 1,
+  "tertium": 1,
+  "hereditatium": 1,
+  "eorum": 1,
+  "tertius": 1,
+  "annos": 1,
+  "quartum": 1,
+  "singulos": 1,
+  "auli": 1,
+  "viris": 1,
+  "novem": 1
+ },
+ "thousands_family_fused_pairs": 1607,
+ "top_fused_pairs": {
+  "II -> IImilia": 124,
+  "III -> IIImilia": 122,
+  "X -> Xmilia": 107,
+  "L -> Lmilia": 84,
+  "V -> Vmilia": 66,
+  "XX -> XXmilia": 59,
+  "IIII -> IIIImilia": 59,
+  "VI -> VImilia": 58,
+  "III -> IIIlibrae": 57,
+  "C -> Cmilia": 53,
+  "II -> IIlibrae": 46,
+  "XXX -> XXXmilia": 42,
+  "V -> Vlibrae": 40,
+  "X -> Xlibrae": 40,
+  "II -> IIduorum": 40,
+  "X -> Xmilibus": 27,
+  "VIII -> VIIImilia": 25,
+  "VII -> VIImilia": 25,
+  "XII -> XIImilia": 22,
+  "XX -> XXmilibus": 22,
+  "V -> Vmilibus": 20,
+  "II -> IIvirum": 19,
+  "IIII -> IIIImilibus": 18,
+  "VI -> VImilibus": 17,
+  "LX -> LXmilia": 17,
+  "II -> IImilibus": 16,
+  "XV -> XVmilia": 16,
+  "XL -> XLmilia": 16,
+  "IV -> IVmilia": 16,
+  "IIII -> IIIIlibrae": 16
+ },
+ "numeric_abbrev_not_matching_rule": 270089,
+ "bare_numeral_milia_occurrences": 1875,
+ "bare_numeral_milia_preceded_by_HS": 1226,
+ "bare_numeral_values": {
+  "II": {
+   "n": 187,
+   "value": 2
+  },
+  "III": {
+   "n": 158,
+   "value": 3
+  },
+  "X": {
+   "n": 151,
+   "value": 10
+  },
+  "V": {
+   "n": 107,
+   "value": 5
+  },
+  "L": {
+   "n": 100,
+   "value": 50
+  },
+  "IIII": {
+   "n": 93,
+   "value": 4
+  },
+  "VI": {
+   "n": 92,
+   "value": 6
+  },
+  "XX": {
+   "n": 90,
+   "value": 20
+  },
+  "C": {
+   "n": 73,
+   "value": 100
+  },
+  "XXX": {
+   "n": 60,
+   "value": 30
+  },
+  "VIII": {
+   "n": 40,
+   "value": 8
+  },
+  "XII": {
+   "n": 40,
+   "value": 12
+  },
+  "VII": {
+   "n": 36,
+   "value": 7
+  },
+  "CC": {
+   "n": 31,
+   "value": 200
+  },
+  "XL": {
+   "n": 31,
+   "value": 40
+  },
+  "XV": {
+   "n": 27,
+   "value": 15
+  },
+  "LX": {
+   "n": 25,
+   "value": 60
+  },
+  "XXV": {
+   "n": 23,
+   "value": 25
+  },
+  "CCCC": {
+   "n": 19,
+   "value": 400
+  },
+  "I": {
+   "n": 18,
+   "value": 1
+  },
+  "IV": {
+   "n": 17,
+   "value": 4
+  },
+  "VIIII": {
+   "n": 15,
+   "value": 9
+  },
+  "XVI": {
+   "n": 14,
+   "value": 16
+  },
+  "XI": {
+   "n": 14,
+   "value": 11
+  },
+  "XXXX": {
+   "n": 12,
+   "value": 40
+  }
+ },
+ "pipe_milia_preceding_token": {
+  "HS": 136,
+  "/": 77,
+  "[": 57,
+  "|(mille)": 41,
+  "Batavor(um)": 33,
+  "coh(ortis)": 25,
+  "Batav(orum)": 23,
+  "I": 22,
+  "Fl(avia)": 19,
+  "Britt(onum)": 19,
+  "Britton(um)": 17,
+  "n(ummum)": 14,
+  "Bat(avorum)": 12,
+  "|(denarios)": 12,
+  "Brittonum": 12,
+  "Britannica": 11,
+  "Brit(annica)": 11,
+  "contar(iorum)": 11,
+  "Britan(nica)": 10,
+  "Hisp(anorum)": 10,
+  "[3]": 10,
+  "Hispanorum": 10,
+  "Flav(ia)": 9,
+  "sag(ittariorum)": 9,
+  "cont(ariorum)": 8
+ }
+}

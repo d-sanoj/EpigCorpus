@@ -18,6 +18,14 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.3",
 ]
+ml = [
+    "protobuf>=7.35.0",
+    "scikit-learn>=1.9.0",
+    "sentencepiece>=0.2.2",
+    "tokenizers>=0.22.2",
+    "torch>=2.13.0",
+    "transformers>=5.15.1",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

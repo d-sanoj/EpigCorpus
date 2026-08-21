@@ -1,0 +1,563 @@
+{
+ "seed": 20260820,
+ "bootstrap_draws": 200,
+ "hidden_empty_paren_by_subclass": {
+  "standalone (!) sic mark": 44,
+  "standalone (?) uncertainty mark": 2432,
+  "abbreviation present, reading marked uncertain": 24623,
+  "abbreviation present, editor could not resolve it": 2483,
+  "bare empty parentheses, no abbreviation": 24
+ },
+ "hidden_empty_paren_examples": {
+  "standalone (!) sic mark": [
+   [
+    "(!)",
+    "EDCS-00000006-0"
+   ],
+   [
+    "(!)]",
+    "EDCS-07100194-1"
+   ],
+   [
+    "Ἰσ[ι]δόρ[ου(!)]",
+    "EDCS-14200013-0"
+   ],
+   [
+    "(!)]",
+    "EDCS-14201042-0"
+   ],
+   [
+    "Νύ]νφαις(!)",
+    "EDCS-15900131-0"
+   ],
+   [
+    "(!)",
+    "EDCS-18200416-0"
+   ]
+  ],
+  "standalone (?) uncertainty mark": [
+   [
+    "(?)",
+    "EDCS-00000028-0"
+   ],
+   [
+    "[3(?)",
+    "EDCS-00000047-0"
+   ],
+   [
+    "(?)]",
+    "EDCS-00000047-0"
+   ],
+   [
+    "καθάπαξ(?)]",
+    "EDCS-00000257-0"
+   ],
+   [
+    "Εὔφρο[νος(?)",
+    "EDCS-00000337-0"
+   ],
+   [
+    "ὐπόσχεισιν(?)]",
+    "EDCS-00000337-0"
+   ]
+  ],
+  "abbreviation present, reading marked uncertain": [
+   [
+    "Ti(?)]neio[s",
+    "EDCS-00000039-0"
+   ],
+   [
+    "[3]ia[no(?)",
+    "EDCS-00000039-0"
+   ],
+   [
+    "V[1]LO(?)[1]NAIV(?)VO(?)",
+    "EDCS-00000574-0"
+   ],
+   [
+    "[3]M(?)",
+    "EDCS-00000574-0"
+   ],
+   [
+    "Op(?)[-]ris",
+    "EDCS-00000575-0"
+   ],
+   [
+    "O(?)[",
+    "EDCS-00000575-0"
+   ]
+  ],
+  "abbreviation present, editor could not resolve it": [
+   [
+    "[S]empr()",
+    "EDCS-00000697-0"
+   ],
+   [
+    "pr(aetore)(?)",
+    "EDCS-00000793-0"
+   ],
+   [
+    "[3]+++C()",
+    "EDCS-00000873-0"
+   ],
+   [
+    "[a]nn()",
+    "EDCS-00000873-0"
+   ],
+   [
+    "a]nn()",
+    "EDCS-00000873-0"
+   ],
+   [
+    "[fact()?]",
+    "EDCS-00000982-0"
+   ]
+  ],
+  "bare empty parentheses, no abbreviation": [
+   [
+    "[3]β()",
+    "EDCS-01000359-1"
+   ],
+   [
+    "|()[",
+    "EDCS-05800850-0"
+   ],
+   [
+    "]|()",
+    "EDCS-14805252-0"
+   ],
+   [
+    "]|()",
+    "EDCS-17700325-0"
+   ],
+   [
+    "ἀ]πρειλ()",
+    "EDCS-35800438-0"
+   ],
+   [
+    "[3]εμβρ()",
+    "EDCS-35800445-0"
+   ]
+  ]
+ },
+ "tvd_null": {
+  "inside_bracket_markup": {
+   "n": 253256,
+   "n_used_in_bootstrap": 60000,
+   "observed_tvd": 0.14107096612610748,
+   "null_median": 0.00958816925200483,
+   "null_p95": 0.01179153662745714,
+   "null_max": 0.013531277489841884
+  },
+  "editorial_marker_paren": {
+   "n": 58720,
+   "n_used_in_bootstrap": 58720,
+   "observed_tvd": 0.19713504488870648,
+   "null_median": 0.009772924065985369,
+   "null_p95": 0.01198902620816716,
+   "null_max": 0.013555133524597583
+  },
+  "unbalanced_parens": {
+   "n": 561,
+   "n_used_in_bootstrap": 561,
+   "observed_tvd": 0.19715629585243596,
+   "null_median": 0.10068123810458716,
+   "null_p95": 0.12602069807871005,
+   "null_max": 0.1450753312204633
+  },
+  "no_letters_outside_parens": {
+   "n": 469,
+   "n_used_in_bootstrap": 469,
+   "observed_tvd": 0.4972525703190199,
+   "null_median": 0.10971740219006655,
+   "null_p95": 0.13333626276012847,
+   "null_max": 0.14434285116204806
+  },
+  "greek_script": {
+   "n": 12987,
+   "n_used_in_bootstrap": 12987,
+   "observed_tvd": 0.5827145061562472,
+   "null_median": 0.02064137085347297,
+   "null_p95": 0.025754011263526725,
+   "null_max": 0.026938066511503263
+  },
+  "non_alphabetic_abbrev": {
+   "n": 16335,
+   "n_used_in_bootstrap": 16335,
+   "observed_tvd": 0.21449076473426953,
+   "null_median": 0.018610049916859547,
+   "null_p95": 0.022650291618548996,
+   "null_max": 0.025705823469084812
+  },
+  "token_carries_markup": {
+   "n": 339,
+   "n_used_in_bootstrap": 339,
+   "observed_tvd": 0.3217037447449266,
+   "null_median": 0.12509532146641475,
+   "null_p95": 0.14971389652847544,
+   "null_max": 0.18584148875759773
+  },
+  "nested_parens": {
+   "n": 1,
+   "n_used_in_bootstrap": 1,
+   "observed_tvd": 0.9834067487927521,
+   "null_median": 0.9681938111961267,
+   "null_p95": 0.9951246705431527,
+   "null_max": 0.9997970953034233
+  },
+  "non_alphabetic_expansion": {
+   "n": 27,
+   "n_used_in_bootstrap": 27,
+   "observed_tvd": 0.691098753245162,
+   "null_median": 0.42195104294262203,
+   "null_p95": 0.49956524879891495,
+   "null_max": 0.5619236894236649
+  },
+  "contains_numeral": {
+   "n": 19,
+   "n_used_in_bootstrap": 19,
+   "observed_tvd": 0.48951454598679195,
+   "null_median": 0.4938533290596847,
+   "null_p95": 0.5858254718079241,
+   "null_max": 0.6500807443184283
+  }
+ },
+ "pipe_typo_candidates": [
+  {
+   "form": "|(mulierus)",
+   "count": 1,
+   "nearest_frequent": "mulieris",
+   "nearest_count": 4019
+  },
+  {
+   "form": "|(mulierisi)",
+   "count": 1,
+   "nearest_frequent": "mulieris",
+   "nearest_count": 4019
+  },
+  {
+   "form": "|(umulieris)",
+   "count": 1,
+   "nearest_frequent": "mulieris",
+   "nearest_count": 4019
+  },
+  {
+   "form": "|(denarii?)",
+   "count": 2,
+   "nearest_frequent": "denariis",
+   "nearest_count": 1659
+  },
+  {
+   "form": "|(miliariae?)",
+   "count": 2,
+   "nearest_frequent": "miliaria",
+   "nearest_count": 793
+  },
+  {
+   "form": "|(mlliaria)",
+   "count": 1,
+   "nearest_frequent": "miliaria",
+   "nearest_count": 793
+  },
+  {
+   "form": "|(miiaria)",
+   "count": 1,
+   "nearest_frequent": "miliaria",
+   "nearest_count": 793
+  },
+  {
+   "form": "|(centvria)",
+   "count": 1,
+   "nearest_frequent": "Centuria",
+   "nearest_count": 543
+  },
+  {
+   "form": "|(centuriam)",
+   "count": 1,
+   "nearest_frequent": "Centuria",
+   "nearest_count": 543
+  },
+  {
+   "form": "|(centura)",
+   "count": 1,
+   "nearest_frequent": "Centuria",
+   "nearest_count": 543
+  },
+  {
+   "form": "|(centuroni)",
+   "count": 1,
+   "nearest_frequent": "centurioni",
+   "nearest_count": 331
+  },
+  {
+   "form": "|(Centurionis)",
+   "count": 2,
+   "nearest_frequent": "centurioni",
+   "nearest_count": 331
+  },
+  {
+   "form": "|(centurionis!)",
+   "count": 2,
+   "nearest_frequent": "centurioni",
+   "nearest_count": 331
+  },
+  {
+   "form": "|(centurione?)",
+   "count": 1,
+   "nearest_frequent": "centurioni",
+   "nearest_count": 331
+  },
+  {
+   "form": "|(denarrii)",
+   "count": 1,
+   "nearest_frequent": "denarii",
+   "nearest_count": 234
+  },
+  {
+   "form": "|(Denaria)",
+   "count": 1,
+   "nearest_frequent": "denarii",
+   "nearest_count": 234
+  },
+  {
+   "form": "|(miiariae)",
+   "count": 1,
+   "nearest_frequent": "miliariae",
+   "nearest_count": 180
+  },
+  {
+   "form": "|(milariae)",
+   "count": 1,
+   "nearest_frequent": "miliariae",
+   "nearest_count": 180
+  },
+  {
+   "form": "|(cenurionis)",
+   "count": 1,
+   "nearest_frequent": "centurionis",
+   "nearest_count": 180
+  },
+  {
+   "form": "||(centuriones?)",
+   "count": 1,
+   "nearest_frequent": "centurionis",
+   "nearest_count": 180
+  },
+  {
+   "form": "|(centuronis)",
+   "count": 1,
+   "nearest_frequent": "centurionis",
+   "nearest_count": 180
+  },
+  {
+   "form": "||(obitis)",
+   "count": 1,
+   "nearest_frequent": "obitus",
+   "nearest_count": 156
+  },
+  {
+   "form": "|(Obitis)",
+   "count": 1,
+   "nearest_frequent": "obitus",
+   "nearest_count": 156
+  },
+  {
+   "form": "|(obitis?)",
+   "count": 1,
+   "nearest_frequent": "obitus",
+   "nearest_count": 156
+  },
+  {
+   "form": "|(obitis)",
+   "count": 1,
+   "nearest_frequent": "obitus",
+   "nearest_count": 156
+  },
+  {
+   "form": "|(obita?)",
+   "count": 1,
+   "nearest_frequent": "obito",
+   "nearest_count": 114
+  },
+  {
+   "form": "|(obito!)",
+   "count": 1,
+   "nearest_frequent": "obita",
+   "nearest_count": 106
+  },
+  {
+   "form": "|(obitae?)",
+   "count": 1,
+   "nearest_frequent": "obita",
+   "nearest_count": 106
+  },
+  {
+   "form": "|(obiti?)",
+   "count": 1,
+   "nearest_frequent": "obita",
+   "nearest_count": 106
+  },
+  {
+   "form": "|(L)",
+   "count": 1,
+   "nearest_frequent": "",
+   "nearest_count": 96
+  },
+  {
+   "form": "|(triantales)",
+   "count": 2,
+   "nearest_frequent": "trientales",
+   "nearest_count": 64
+  },
+  {
+   "form": "|(semiuncia)",
+   "count": 2,
+   "nearest_frequent": "semuncia",
+   "nearest_count": 57
+  },
+  {
+   "form": "|(sesuncia)",
+   "count": 2,
+   "nearest_frequent": "semuncia",
+   "nearest_count": 57
+  },
+  {
+   "form": "|(semunsia)",
+   "count": 1,
+   "nearest_frequent": "semuncia",
+   "nearest_count": 57
+  },
+  {
+   "form": "|(pugnrum)",
+   "count": 1,
+   "nearest_frequent": "pugnarum",
+   "nearest_count": 42
+  },
+  {
+   "form": "|(sectans)",
+   "count": 1,
+   "nearest_frequent": "sextans",
+   "nearest_count": 41
+  },
+  {
+   "form": "|(Dextans)",
+   "count": 1,
+   "nearest_frequent": "sextans",
+   "nearest_count": 41
+  },
+  {
+   "form": "|(scipula)",
+   "count": 1,
+   "nearest_frequent": "scripula",
+   "nearest_count": 40
+  },
+  {
+   "form": "|(centnaria)",
+   "count": 1,
+   "nearest_frequent": "centenaria",
+   "nearest_count": 35
+  },
+  {
+   "form": "|(denarios?)",
+   "count": 2,
+   "nearest_frequent": "denarius",
+   "nearest_count": 32
+  },
+  {
+   "form": "|(denaris)",
+   "count": 1,
+   "nearest_frequent": "denarius",
+   "nearest_count": 32
+  },
+  {
+   "form": "|(Denarium)",
+   "count": 2,
+   "nearest_frequent": "denarius",
+   "nearest_count": 32
+  },
+  {
+   "form": "|(denarium?)",
+   "count": 1,
+   "nearest_frequent": "denarius",
+   "nearest_count": 32
+  },
+  {
+   "form": "|(Denariis)",
+   "count": 1,
+   "nearest_frequent": "denarius",
+   "nearest_count": 32
+  },
+  {
+   "form": "|(Sestarii)",
+   "count": 1,
+   "nearest_frequent": "sextarii",
+   "nearest_count": 31
+  },
+  {
+   "form": "|(muliorum)",
+   "count": 1,
+   "nearest_frequent": "mulierum",
+   "nearest_count": 28
+  },
+  {
+   "form": "||(centurionum)",
+   "count": 2,
+   "nearest_frequent": "centurionem",
+   "nearest_count": 27
+  },
+  {
+   "form": "|(unciae?)",
+   "count": 1,
+   "nearest_frequent": "uncia",
+   "nearest_count": 25
+  },
+  {
+   "form": "|(unciam)",
+   "count": 2,
+   "nearest_frequent": "uncia",
+   "nearest_count": 25
+  },
+  {
+   "form": "||(uncias)",
+   "count": 1,
+   "nearest_frequent": "uncia",
+   "nearest_count": 25
+  },
+  {
+   "form": "|(libram)",
+   "count": 1,
+   "nearest_frequent": "libra",
+   "nearest_count": 24
+  },
+  {
+   "form": "|(semunciae?)",
+   "count": 1,
+   "nearest_frequent": "semunciam",
+   "nearest_count": 24
+  },
+  {
+   "form": "|(semuncia?)",
+   "count": 1,
+   "nearest_frequent": "semunciam",
+   "nearest_count": 24
+  },
+  {
+   "form": "|(libras?)",
+   "count": 1,
+   "nearest_frequent": "libra",
+   "nearest_count": 24
+  },
+  {
+   "form": "|(Libram)",
+   "count": 1,
+   "nearest_frequent": "libra",
+   "nearest_count": 24
+  },
+  {
+   "form": "|(Semuncia)",
+   "count": 2,
+   "nearest_frequent": "semunciam",
+   "nearest_count": 24
+  }
+ ]
+}

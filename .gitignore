@@ -45,3 +45,13 @@ data/edcs_index_cache.json
 #   data/edcs_lookup.json           code tables for the harvest
 #   data/edcs_harvest_manifest.json completion record
 #   data/edcs_failed_ids.json       failure manifest
+
+# Derived pair tables. Same convention as the corpus snapshots above: commit
+# the COMPRESSED form, ignore the plain working copy. The plain .tsv is
+# 140-210 MB (above GitHub's 100 MB hard limit); gzipped it is 23-28 MB.
+# Both are regenerated deterministically by scripts/abbrev_probe.py and
+# scripts/phase3_build_v1.py.
+data/derived/**/*.tsv
+data/derived/*.tsv
+!data/derived/**/*.tsv.gz
+!data/derived/*.tsv.gz
