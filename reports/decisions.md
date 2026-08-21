@@ -1058,3 +1058,98 @@ share (D-0024) to suggest both measure the same structure.
 
 **Status.** SETTLED. Splits FROZEN; test sets not to be inspected again until
 Phase 6.
+
+---
+
+## D-0036 — The model host is reachable; the brief's fallback is NOT triggered
+
+**Decided.** M3 fine-tunes a pretrained Latin encoder. The from-scratch
+transformer path is **not** taken.
+
+**Evidence.** Reachability checked before anything was built around it, as the
+brief requires: `pypi.org` 200, `huggingface.co` 200, `github.com` 200.
+
+**The real blocker was not the network.** At the end of Phase 4 the venv held
+only numpy and pandas — no `torch`, `transformers`, `tokenizers`, `sklearn`,
+`scipy`. Installed on the user's explicit instruction as a **separate `ml`
+dependency group**, so the scraper and the Streamlit map keep their light
+dependency set: torch 2.13.0, transformers 5.15.1, tokenizers 0.22.2,
+scikit-learn 1.9.0, sentencepiece 0.2.2. MPS available, CUDA not.
+Recorded in `reports/env/phase0_environment.md`.
+
+**Why this is logged as its own decision.** The brief's fallback is conditioned
+on the *host* being unreachable. It is not. Taking the from-scratch path
+because a *package* was missing would have satisfied the letter of the
+fallback while violating its instruction not to silently substitute.
+
+**Status.** SETTLED.
+
+---
+
+## D-0037 — M3 is `bowphs/LaBerta`; `latincy/latin-bert` rejected on a remote-code requirement
+
+**Decided.** M3 fine-tunes **`bowphs/LaBerta`** (125,978,112 params,
+apache-2.0, Latin-only, 52k vocab). **`google-bert/bert-base-multilingual-cased`**
+(177,853,440 params, apache-2.0) is the no-Latin-pretraining control.
+
+**Evidence — every candidate retrieved from the HuggingFace API, none cited
+from memory (R1).** Verified present and loadable: PhilBERTa (~135M,
+apache-2.0), LaBerta (~126M, apache-2.0), SPhilBerta (sentence-similarity, not
+MLM), ClassCat roberta-base-latin-v2 (cc-by-sa-4.0), pstroe cased3 (**no
+licence declared**). Verified *absent*: `pstroe/roberta-base-latin-cased1`
+(HTTP 401). Verified *misidentified*: `cabrooks/LOGION-base` is Ancient
+**Greek**, not Latin. `ashleygong03/bamman-burns-latin-bert` has a
+byte-identical config to `latincy/latin-bert` — the same model under a
+different licence label.
+
+**Why latin-bert was rejected.** It was the user's first choice and the model a
+reviewer most expects. It ships **no standard tokenizer files** — only
+`tokenization_latin_bert.py` and a `latin.subword.encoder` blob — so loading it
+requires `trust_remote_code=True`, which downloads and executes third-party
+Python at import. Raised with the user rather than enabled silently or swapped
+silently; the user chose LaBerta.
+
+**Supporting evidence for LaBerta on this task specifically.** Tokenisation of
+`v(ixit) DD(ominis) XL(quadragesimae)`:
+
+| model | segmentation |
+| --- | --- |
+| LaBerta | `v ( ixit ) ĠD D ( ominis ) ĠXL ( qu ad rag esimae )` |
+| PhilBERTa | `v ( ixit ) ĠD D ( omin is ) ĠXL ( qu adr ages imae )` |
+| mBERT | `v ( i ##xit ) DD ( om ##inis ) XL ( qua ##drag …` |
+
+LaBerta keeps `ixit` and `ominis` whole — the exact morphemes this task
+predicts — where mBERT shatters them. Note this cuts against the control: some
+of any M3-over-mBERT gap will be tokenisation, not pretraining. That must be
+said in Phase 6 rather than attributed wholly to Latin pretraining.
+
+**Alternatives rejected.** ClassCat (cc-by-sa-4.0 share-alike complicates
+redistribution of a released benchmark); pstroe cased3 (no licence — a
+redistribution blocker regardless of quality); SPhilBerta (built for sentence
+similarity, not token-level fine-tuning).
+
+**Status.** SETTLED.
+
+---
+
+## D-0038 — Phase 5 is a candidate-ranking task, not a flat classification
+
+**Decided.** All three models score the **same candidate set**: for a given
+key, the expansions observed for it in `primary_train`. M1 picks the most
+frequent, M2 scores with features, M3 with the encoder.
+
+**Evidence.** The corpus has ~37k keys and ~72k (key, expansion) types
+(D-0024, Phase 4). A flat softmax over every expansion is impractical, and
+worse, it would make the three models incomparable — M1 is a lookup and cannot
+emit a distribution over unseen labels at all.
+
+**Consequences that must be reported, not buried.**
+- The candidate set is derived from `primary_train` only, so it cannot peek at
+  test (Phase 4, D-0032).
+- **3.4% of test rows have a (key, expansion) type absent from training**
+  (D-0035). Those are unreachable by construction under candidate ranking and
+  cap accuracy below 100%. `test_unseen_form` isolates them.
+- The C1→C2→C3 delta is measured identically across all three models, which is
+  the point: the experiment is about the context conditions, not the label space.
+
+**Status.** SETTLED as a design. Its accuracy ceiling must appear in Phase 6.

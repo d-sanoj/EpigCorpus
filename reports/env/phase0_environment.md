@@ -74,3 +74,48 @@ exe: /Users/sanoj/Documents/Projects/EpigCorpus/.venv/bin/python
     websockets==16.0
     xyzservices==2026.3.0
 
+
+---
+
+## Phase 5 environment addition — recorded 2026-08-20T20:59:54Z
+
+The ML stack was absent at the end of Phase 4 (numpy and pandas only) and
+was installed as a separate `ml` dependency group so the scraper and the
+Streamlit map keep their light dependency set.
+
+```
+ml = [
+    "protobuf>=7.35.0",
+    "scikit-learn>=1.9.0",
+    "sentencepiece>=0.2.2",
+    "tokenizers>=0.22.2",
+    "torch>=2.13.0",
+    "transformers>=5.15.1",
+]
+```
+
+Resolved versions:
+
+    torch==2.13.0
+    transformers==5.15.1
+    tokenizers==0.22.2
+    scikit-learn==1.9.0
+    sentencepiece==0.2.2
+    protobuf==7.35.0
+    numpy==2.4.3
+    pandas==3.0.1
+
+    accelerator: MPS available=True  CUDA available=False  torch threads=4
+    platform: macOS-26.6.2-arm64-arm-64bit-Mach-O  arm
+
+Model host reachability, checked before building around it as the brief
+requires: pypi.org 200, huggingface.co 200, github.com 200. **The brief's
+fallback condition (host unreachable) is NOT triggered**, so the
+from-scratch transformer path is not taken.
+
+| model | role | params | licence | loads without remote code |
+| --- | --- | --- | --- | --- |
+| `bowphs/LaBerta` | M3 | 125,978,112 | apache-2.0 | yes, verified |
+| `google-bert/bert-base-multilingual-cased` | M3 control | 177,853,440 | apache-2.0 | yes, verified |
+| `latincy/latin-bert` | rejected | ~110M | apache-2.0 | **no** — needs `trust_remote_code=True` |
+
