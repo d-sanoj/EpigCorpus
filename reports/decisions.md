@@ -1153,3 +1153,69 @@ emit a distribution over unseen labels at all.
   the point: the experiment is about the context conditions, not the label space.
 
 **Status.** SETTLED as a design. Its accuracy ceiling must appear in Phase 6.
+
+---
+
+## D-0039 — Editorial label noise is 0.96%, measured by holding context fixed
+
+**Decided.** The dataset's demonstrable editorial disagreement rate is **0.96%
+of task rows (13,706 rows across 1,565 context groups)**.
+
+**Evidence.** `scripts/phase7_editor_consistency.py`. The same abbreviation
+with the *same 40 characters either side* expanded differently elsewhere in the
+corpus: `Pr → primigenia` 299 vs `prrimigenia` 1; `Res → restituti` 256 vs
+`resituti` 1; `I → iovi` 131 vs `ioui` 1; `Br → britannica` 1,390 vs
+`britannicae` 4. Same evidence, different call. A mixture of keying errors and
+genuine orthographic variation, which cannot be separated mechanically.
+**[VERIFY — LATINIST]**
+
+**Why context must be held fixed.** See D-0040.
+
+**Status.** SETTLED as a floor. The true rate is higher — this rule only
+catches disagreements where the surrounding 80 characters are byte-identical.
+
+---
+
+## D-0040 — The same-monument inconsistency probe is confounded and is DISCARDED
+
+**Decided.** The "same monument, different expansion" measure (86,268 groups,
+228,813 rows) is **withdrawn and must not be quoted**.
+
+**Evidence that it is confounded.** `EDCS-20200005` yields `C → caius` 448,
+`caio` 2, `cai` 4. That is not an editor being inconsistent — it is a long
+list-type inscription in which the same praenomen genuinely appears in
+different grammatical cases. The measure counts legitimate Latin inflection as
+editorial disagreement.
+
+**Why it is logged rather than deleted.** 228,813 rows is 16% of the dataset
+and would have been the largest "finding" in the circularity section. It is
+wrong. Recording the failure stops it being rebuilt by a later phase or by a
+reader who has the same idea.
+
+**Alternatives rejected.** Restricting the monument probe to similar contexts.
+Rejected: that is exactly D-0039, which already does it correctly.
+
+**Status.** WITHDRAWN.
+
+---
+
+## D-0041 — 66.4% of expansion forms also occur as plain text; the claim this supports is narrower than it first appears
+
+**Decided.** **26,199 of 39,440 distinct expansion forms (66.4%)** also appear
+in EDCS as uncontracted plain text — `vixit` 31,388 as expansion against
+25,244 plain; `fecit` 21,036 against 18,543.
+
+**What this does NOT show.** I first labelled this "the abbreviation boundary is
+editorial." That overclaims. Some stones carve `VIXIT` in full and others carve
+`V`; both transcriptions are correct and the variation lies in the stones.
+
+**What it does show, and it belongs in the limitations.** The dataset is
+**conditioned entirely on the editor having judged that an abbreviation is
+present.** For the commonest words it is close to an even split whether a given
+stone abbreviates, and the task only ever sees the abbreviated half. A model
+therefore learns *"given that an editor marked this abbreviated, what did they
+expand it to"* — a narrower and more editor-dependent question than "expand
+Latin epigraphic abbreviations". The paper must state the task in those terms.
+
+**Status.** SETTLED as a measurement. The stronger interpretation is
+WITHDRAWN.
