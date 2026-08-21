@@ -1,5 +1,66 @@
 # EpigCorpus
 
+**A benchmark for expanding Latin epigraphic abbreviations — and an audit of the
+transcription conventions that distort any dataset derived from EDCS.**
+
+> **How is this different from LatEpig?**
+> LatEpig is a *retrieval* tool — it reproducibly executes a search against EDCS
+> and exports the matching records. EpigCorpus is a *derived labelled dataset and
+> benchmark* — it mines EDCS's editorial parentheses as ground-truth labels for
+> abbreviation expansion, and measures the conventions that silently distort any
+> such derivation. One retrieves what EDCS holds; the other measures what EDCS's
+> conventions do to anything built from it.
+
+EDCS marks the editorial expansion of ancient abbreviations in round
+parentheses: the stone reads `D M`, the edition prints `D(is) M(anibus)`. Those
+parentheses are free ground-truth labels. From 588,509 records we extract
+**1,424,314 (abbreviation, expansion) pairs**.
+
+## Findings
+
+| | |
+| --- | --- |
+| **The vinculum is not preserved.** A full census of 39,470,885 characters finds U+0305 **twice** and U+0304 **not at all**. EDCS renders the overline as a supplied word — `HS X(milia)` — 65.4% of the time preceded by `HS`. | [vinculum_check.md](reports/vinculum_check.md) |
+| **One `\|` stands for ≥8 unrelated signs.** 376 distinct `\|(...)` forms, 16,194 occurrences, with plurality marked by repetition and its own unresolvable class. | [exclusion_audit_supplement.md](reports/exclusion_audit_supplement.md) |
+| **Geminatio doubles the FINAL letter**, not the first — `Aug→Augg`, `Imp→Impp`. A leading-letter rule undercounts by 41%. 8,986 pairs corrected. | [phase3_corrections.md](reports/phase3_corrections.md) |
+| **Line-break fragmentation.** EDCS breaks words across lines, so `v/` + `ix(it)` yields the spurious pair `ix → ixit`. 9,506 rows. | [phase3_corrections.md](reports/phase3_corrections.md) |
+| **The exclusion filter reshapes the corpus**, it does not merely filter it: province TVD 10.9× and century 16× a bootstrap null. | [exclusion_audit_supplement.md](reports/exclusion_audit_supplement.md) |
+| **Province conditioning is memorisation.** Worth **+8.3 points** on provinces seen in training and **exactly +0.0000** on provinces withheld. | [phase4_splits.md](reports/phase4_splits.md) |
+| **Editorial label noise ≥0.96%**, measured by holding 80 characters of context byte-identical. | `results/editor_consistency.json` |
+
+## Reproduce everything
+
+```bash
+./reproduce.sh --fast
+```
+
+Regenerates every number and figure from the committed corpus, skipping model
+training and using the committed result cells. Drop `--fast` to retrain.
+The script verifies the corpus sha256 before doing anything and refuses to run
+against a different snapshot.
+
+Outputs: `results/all_results.json` (every number in the paper) and `figures/`.
+
+## Licensing — code and data are separate
+
+- **Code** (`scripts/`, `src/`, `tests/`): MIT, see [LICENSE](LICENSE).
+- **Derived data** (`data/derived/`): see [LICENSE-DATA.md](LICENSE-DATA.md).
+  **Not released.** Redistribution permission from EDCS has not been granted;
+  this blocks release. See [reports/edcs_permission_request.md](reports/edcs_permission_request.md).
+
+## Documentation
+
+- [reports/decisions.md](reports/decisions.md) — 41 logged decisions, each with
+  evidence, rejected alternatives, and what would overturn it
+- [reports/datasheet.md](reports/datasheet.md) — datasheet, including ten
+  stated limitations
+- [reports/related_work.md](reports/related_work.md) — verified citations, DOIs
+  retrieved not recalled
+
+---
+
+## The underlying pipeline
+
 EpigCorpus is a reproducible Latin epigraphy pipeline for extracting inscriptions from the Epigraphik-Datenbank Clauss / Slaby (EDCS), cleaning inscription text into research-ready variants, and exploring results on an interactive Roman Empire map.
 
 The repository is designed as a practical, end-to-end workflow:
