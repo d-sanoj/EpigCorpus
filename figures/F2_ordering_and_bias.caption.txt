@@ -1,0 +1,6 @@
+F2. Two corrections to the exclusion audit. (a) The filter chain is first-match, so
+published counts understate categories tested late: editorial_marker_paren by 50%,
+greek_script by 22%. (b) Total variation distance against a bootstrap null at each
+category's own n. Values near 1.0 are indistinguishable from sampling noise; an absolute
+threshold would have called several of them skewed. Does not show whether excluding a
+category is correct, only whether the excluded set differs distributionally.

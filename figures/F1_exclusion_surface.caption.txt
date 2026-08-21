@@ -1,0 +1,4 @@
+F1. The exclusion surface. (a) Of 1,767,028 whitespace tokens containing an opening
+parenthesis, 1,424,314 became pairs and 342,714 were dropped; the accounting closes with
+zero residual. (b) First-match counts by reason, log scale. Shows what the filter
+removed, NOT whether removal was correct — that is F2.

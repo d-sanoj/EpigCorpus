@@ -1,0 +1,5 @@
+F6. The C1→C2→C3 experiment, mean ± SD over seeds. M1 gains 8.3 points from province and
+century because it has no other information. M2 and M3 both lose 0.70 points — a linear
+re-ranker and a 137M-parameter Latin transformer agree to four decimals. M3 is one seed
+and trained on 100k rows (9% of the training split), so its error bar is absent and its
+level understates what full training would give.

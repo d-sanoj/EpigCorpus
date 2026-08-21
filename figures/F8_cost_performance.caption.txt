@@ -1,0 +1,4 @@
+F8. Accuracy against training cost at C1. M2 reaches 97.3% of M3's accuracy with 1/130th
+the parameters and 1/14th the training time. M3 was trained on 100k rows against M2's
+1.14M, which understates M3 — the comparison favours the cheap model and should be read
+with that caveat.

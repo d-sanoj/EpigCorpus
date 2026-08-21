@@ -1,0 +1,5 @@
+F10. M2 accuracy per test set against the ceiling imposed by candidate ranking, which
+can only propose expansions seen for that key in training. test_unseen_form has a
+ceiling of exactly zero and is unanswerable by construction; test_rare_form caps at
+0.481. Reporting accuracy without the ceiling would misrepresent every set below the
+first two.

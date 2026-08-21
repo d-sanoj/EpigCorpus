@@ -1,0 +1,6 @@
+F7. M1 with and without the withheld provinces in training. On provinces seen in
+training the province conditioning is worth 8.3 points. On Britannia, Mauretania
+Caesariensis and Pannonia inferior, withheld entirely, it is worth exactly zero to four
+decimal places: the conditional lookup table is empty for an unseen province, so C2 and
+C3 back off to C1. The gain is memorisation of local distributions, not a transferable
+property of Latin.

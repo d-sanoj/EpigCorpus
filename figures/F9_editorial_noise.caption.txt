@@ -1,0 +1,5 @@
+F9. (a) 13,706 rows (0.96%) carry an expansion that differs from another row with a
+byte-identical 80-character context — same evidence, different editorial call. A floor,
+not the true rate. (b) 66.4% of expansion forms also occur as uncontracted plain text.
+This is variation between stones, not editorial inconsistency; it shows the task is
+conditioned on the editor having judged an abbreviation present.

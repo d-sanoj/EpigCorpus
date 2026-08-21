@@ -1,0 +1,4 @@
+F3. The |(...) inventory. EDCS renders non-typeable epigraphic signs as a single ASCII
+pipe, collapsing at least eight unrelated glyphs onto one character. Grouping into
+families is a rule-based pass over surface strings and needs philological confirmation;
+the 376-form enumeration with counts does not depend on it.

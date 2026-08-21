@@ -1,0 +1,5 @@
+F4. Full character census of all 588,509 records. The multiplicative vinculum has zero
+attestations; U+0305 occurs twice and U+0304 not at all, in 39,470,885 characters.
+Unicode provides dedicated code points for the reversed C and the Roman denarius signs
+(Number Forms, Ancient Symbols) and EDCS uses neither. Bars at 0 are drawn at a nominal
+height for visibility on a log axis.
