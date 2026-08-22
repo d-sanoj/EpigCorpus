@@ -14,10 +14,10 @@ OUT = REPO/"paper"/"EpigCorpus_paper_v1.docx"
 
 # figures inserted after the section they belong to
 PLACE = {
-    "4 What the plain text does and does not encode": ["F4_vinculum_census", "F3_symbol_inventory"],
-    "5 Dataset construction":                         ["F1_exclusion_surface", "F10_testset_ceilings"],
-    "6 Artifacts and bias":                           ["F2_ordering_and_bias", "F5_circularity", "F9_editorial_noise"],
-    "8 Results":                                      ["F6_context_conditions", "F7_memorisation_vs_transfer", "F8_cost_performance"],
+    "4. What the plain text encodes": ["F4_vinculum_census", "F3_symbol_inventory"],
+    "5. Dataset construction":                         ["F1_exclusion_surface", "F10_testset_ceilings"],
+    "6. Artifacts and bias":                           ["F2_ordering_and_bias", "F5_circularity", "F9_editorial_noise"],
+    "8. Results":                                      ["F6_context_conditions", "F7_memorisation_vs_transfer", "F8_cost_performance"],
 }
 
 doc = Document()
