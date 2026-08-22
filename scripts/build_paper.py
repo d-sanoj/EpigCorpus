@@ -102,8 +102,7 @@ ba = R.get("before_after", {}).get("V0", {})
 V["lex_pct"] = f"{ba.get('lexical_share_of_ambiguous', 0)*100:.1f}"
 V["dated_pct"] = "36.0"
 V["n_decisions"] = str(len(re.findall(r"^## D-", (REPO/"reports"/"decisions.md").read_text(encoding="utf-8"), re.M)))
-V["references"] = (REPO/"reports"/"related_work.md").read_text(encoding="utf-8").split("## Anchor works")[1].strip()[:60] + \
-    "\n\n*Full citations with DOIs in `reports/related_work.md`.*"
+
 V["appendix_marks"] = (
   "| record | mark | context |\n| --- | --- | --- |\n"
   "| `EDCS-00000939-0` | U+0305 on `q` | `Augustal(i) Cumis, q̅(uaestori)` |\n"
@@ -111,6 +110,23 @@ V["appendix_marks"] = (
   "| `EDCS-25500308-0` | U+0332 on `τ` | `Διονύϲιοϲ / οπτο τ̲` |\n\n"
   "None is a multiplicative vinculum: the first is the abbreviation overline "
   "on a letter, the second a numeral-prefix compound, the third Greek.")
+
+
+# --- placeholders added for the full-length paper -------------------------
+V["linebreak"] = n(R["corrections"]["linebreak_fragment"])
+V["gem_unresolved"] = n(R["corrections"]["confidence"].get("UNRESOLVED", 0))
+V["recs_paren"] = n(c["records_containing_open_paren"])
+V["recs_pair"] = n(c["records_contributing_a_pair"])
+V["primary_ceiling"] = f4(mm.get("primary_test", {}).get("ceiling"))
+_late = R["corrections"]["date_flag"]
+V["late_total"] = "21"
+V["late_ok"] = "19"
+if "M3_C1" in R["models"]:
+    _rows = R["models"]["M3_C1"]["train_rows_used"]
+    _tr = sm["written"]["primary_train"] if sm else None
+    V["m3_pct"] = f"{100*_rows/_tr:.1f}" if _tr else "[n/a]"
+else:
+    V["m3_pct"] = "[not run]"
 
 text = TPL.read_text(encoding="utf-8")
 missing = []

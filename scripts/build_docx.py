@@ -14,10 +14,10 @@ OUT = REPO/"paper"/"EpigCorpus_paper_v1.docx"
 
 # figures inserted after the section they belong to
 PLACE = {
-    "3 The EDCS corpus and its conventions": ["F4_vinculum_census", "F3_symbol_inventory"],
-    "4 Dataset construction":                ["F1_exclusion_surface", "F10_testset_ceilings"],
-    "5 Artifacts and bias":                  ["F2_ordering_and_bias", "F5_circularity", "F9_editorial_noise"],
-    "7 Results":                             ["F6_context_conditions", "F7_memorisation_vs_transfer", "F8_cost_performance"],
+    "4 What the plain text does and does not encode": ["F4_vinculum_census", "F3_symbol_inventory"],
+    "5 Dataset construction":                         ["F1_exclusion_surface", "F10_testset_ceilings"],
+    "6 Artifacts and bias":                           ["F2_ordering_and_bias", "F5_circularity", "F9_editorial_noise"],
+    "8 Results":                                      ["F6_context_conditions", "F7_memorisation_vs_transfer", "F8_cost_performance"],
 }
 
 doc = Document()
@@ -51,7 +51,12 @@ def emit_table(rows):
                     if i == 0: r.bold = True
     doc.add_paragraph()
 
-lines = MD.read_text(encoding="utf-8").split("\n")
+_md = MD.read_text(encoding="utf-8")
+_heads = {l[3:].strip() for l in _md.split("\n") if l.startswith("## ")}
+_bad = [k for k in PLACE if k not in _heads]
+if _bad:
+    raise SystemExit(f"figure placement keys match no heading: {_bad}\navailable: {sorted(_heads)}")
+lines = _md.split("\n")
 i = 0; pending = None; buf = []
 while i < len(lines):
     L = lines[i]
