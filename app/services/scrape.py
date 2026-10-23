@@ -70,19 +70,6 @@ from app.config.settings import CHUNK_SIZE, MONUMENT_URL
 from app.core.edcs_parsing import parse_monument
 from app.services.ports import EdcsClient, HarvestStore, Log
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # ─── HARVEST ──────────────────────────────────────────────────────────────────
 
 

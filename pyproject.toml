@@ -56,13 +56,18 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 #   SIM105 suppressible except  -> T19 / T30
 #   I001   unsorted imports      -> cleared whenever each module is next touched
 # Each entry must be deleted as its task lands. Do not add files to this list.
+#
+# 2026-10-23, app/ restructure: the four modules were split into layers and
+# each finding moved with its line, so the entries now name the module the
+# line lives in. Entries were then cut to the codes that still fire; nothing
+# new was suppressed. Remaining: E501 (T38/T40) in ui/streamlit_app.py,
+# core/search.py, services/search.py, adapters/map_layers.py, cli/main.py;
+# SIM115 (T19) in adapters/harvest_store.py, where scrape()'s file handles
+# now live in CorpusWriter.
 [tool.ruff.lint.per-file-ignores]
-"app/services/scrape.py"  = ["E501", "UP015", "F541", "SIM115", "SIM105", "I001"]
+"app/ui/streamlit_app.py"       = ["E501"]
+"app/core/search.py"            = ["E501"]
+"app/services/search.py"        = ["E501"]
+"app/adapters/map_layers.py"    = ["E501"]
 "app/adapters/harvest_store.py" = ["SIM115"]
-"app/ui/streamlit_app.py" = ["E501", "SIM115", "SIM105", "I001"]
-"app/core/cleaning.py"    = ["E501", "I001"]
-"app/core/search.py"      = ["E501"]
-"app/services/search.py"  = ["E501"]
-"app/adapters/map_layers.py" = ["E501"]
-"app/main.py"             = ["E501", "F541", "I001"]
-"app/cli/main.py"         = ["E501", "F541", "I001"]
+"app/cli/main.py"               = ["E501"]
