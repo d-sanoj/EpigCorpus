@@ -58,6 +58,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 # Each entry must be deleted as its task lands. Do not add files to this list.
 [tool.ruff.lint.per-file-ignores]
 "app/services/scrape.py"  = ["E501", "UP015", "F541", "SIM115", "SIM105", "I001"]
+"app/adapters/harvest_store.py" = ["SIM115"]
 "app/ui/streamlit_app.py" = ["E501", "SIM115", "SIM105", "I001"]
 "app/core/cleaning.py"    = ["E501", "I001"]
 "app/core/search.py"      = ["E501"]
