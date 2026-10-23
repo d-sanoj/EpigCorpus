@@ -203,7 +203,6 @@ footer a { color: var(--muted); }
 .overview-map-layer-swatch.provinces { background: #f9c784; border-radius: 2px; }
 .overview-map-layer-swatch.roads { background: #cbd5e1; border-radius: 2px; height: 3px; flex-basis: 12px; }
 .overview-map-layer-swatch.cities { background: transparent; border: 2px solid #ffce00; }
-.overview-map-layer-letter { width: 12px; flex: 0 0 12px; display: flex; align-items: center; font-size: 0.68rem; line-height: 0.68rem; color: #94a3b8; }
 .overview-map-reset button { width: 30px; height: 30px; min-height: 0; display: flex; align-items: center; justify-content: center; background: #111827; border: 0; border-radius: 0; cursor: pointer; color: #e5e7eb; }
 .overview-map-legend { padding: 0.65rem 0.75rem; line-height: 1.35; }
 .overview-map-legend-title { margin-bottom: 0.4rem; font-weight: 600; }
@@ -211,6 +210,17 @@ footer a { color: var(--muted); }
 .overview-map-legend-row { display: flex; align-items: center; gap: 0.5rem; height: 26px; }
 .overview-map-legend-dot { border-radius: 50%; background: rgba(10, 138, 159, 0.45); border: 1px solid #0a8a9f; display: block; flex: none; margin: 0 auto; }
 .overview-map-legend-slot { width: 26px; display: flex; justify-content: center; }
+/* Province names, coloured like the shading beneath them (set inline). */
+.province-label { overflow: visible; }
+.province-label span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 3px #000, 0 0 2px #000, 0 0 1px #000;
+}
 .overview-popup h4 { margin: 0 0 0.3rem; font-size: 0.85rem; color: #e37222; }
 .overview-popup ul { margin: 0; padding-left: 1rem; font-size: 0.75rem; line-height: 1.45; }
 .overview-popup .more { margin-top: 0.3rem; color: #94a3b8; font-size: 0.72rem; }

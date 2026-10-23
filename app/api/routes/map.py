@@ -44,6 +44,12 @@ def roads(request: Request, deps: Deps):
     return _layer(request, deps, "roads", deps.catalog.roads_geojson, "application/geo+json")
 
 
+@router.get("/province-labels", operation_id="getProvinceLabels")
+def province_labels(request: Request, deps: Deps):
+    produce = deps.catalog.province_labels
+    return _layer(request, deps, "province-labels", produce, "application/json")
+
+
 @router.get("/cities", operation_id="getCitiesLayer")
 def cities(request: Request, deps: Deps):
     def points():

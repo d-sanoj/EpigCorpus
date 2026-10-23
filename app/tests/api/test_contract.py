@@ -222,7 +222,7 @@ def test_known_places(client, catalog, validate):
     assert response.json()["summary"]["inscriptions"] == int(known["count"].sum())
 
 
-@pytest.mark.parametrize("layer", ["provinces", "roads", "cities"])
+@pytest.mark.parametrize("layer", ["provinces", "province-labels", "roads", "cities"])
 def test_map_layers_with_etags(client, validate, layer):
     path = f"/v1/map/layers/{layer}"
     response = client.get(path)
@@ -231,6 +231,15 @@ def test_map_layers_with_etags(client, validate, layer):
     etag = response.headers["etag"]
     cached = client.get(path, headers={"If-None-Match": etag})
     assert cached.status_code == 304
+
+
+def test_province_labels_name_every_province_in_the_frame(client, catalog):
+    labels = client.get("/v1/map/layers/province-labels").json()
+    frame = catalog.inscriptions()
+    assert {label["name"] for label in labels} == set(frame["province"].dropna())
+    counts = [label["inscriptions"] for label in labels]
+    assert counts == sorted(counts, reverse=True)
+    assert sum(counts) == len(frame.dropna(subset=["province"]))
 
 
 # ─── exports ──────────────────────────────────────────────────────────────────

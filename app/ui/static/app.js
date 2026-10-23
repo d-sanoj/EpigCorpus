@@ -278,6 +278,7 @@
     if (!map) return;
     [
       ["provinces", "/map/layers/provinces"],
+      ["provinceLabels", "/map/layers/province-labels"],
       ["roads", "/map/layers/roads"],
       ["cities", "/map/layers/cities"],
     ].forEach(function (pair) {

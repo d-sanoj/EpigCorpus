@@ -46,6 +46,7 @@ app/api/
 | `GET /v1/places` | `Catalog.run_query(q, mode, selections)` → places, example items, `describe_query` title and subtitle |
 | `GET /v1/places/known` | `Catalog.known_places()` → `search.load_known_places` |
 | `GET /v1/map/layers/{provinces,roads,cities}` | `Catalog.provinces_geojson()`, `roads_geojson()`, `cities_points()` → `services.map_data`. Serialised once, with an ETag |
+| `GET /v1/map/layers/province-labels` | `Catalog.province_labels()` → `map_data.province_labels`: each EDCS province at the median of its places, coloured like the shading beneath |
 | `GET /v1/exports/{corpus.jsonl,corpus.tsv,cleaned.jsonl}` | `corpus_files.export_file(name)`. The stored `.gz` is sent as is when the client accepts gzip, otherwise decompressed on the fly |
 | `GET /v1/exports/search.tsv` | `Catalog.rows` → `Catalog.results_table` → `search.results_tsv` (the old map's "Download TSV") |
 | `GET /v1/exports/map.png` | `Catalog.export_png` → `services.map_png.build_png_bytes` (the old map's "Download as PNG", byte-identical) |
@@ -100,9 +101,14 @@ design-stage draft lacked. Each addition is in `openapi.yaml`:
 - **A harvest does not refresh what is served.** A scrape job writes the raw
   corpus. Cleaning (`python -m app.main --skip-scrape --skip-map`) and a
   server restart are still needed before search sees new data, as before.
-- **The map needs the internet** for Leaflet (unpkg) and the CARTO basemap
-  tiles, as the Streamlit map did. Search, results and downloads work without
-  them.
+- **The map needs the internet** for Leaflet (unpkg) and the basemap tiles
+  (Esri's World Dark Gray Base, no labels and no API key; CARTO's basemaps
+  now require a key). Search, results and downloads work without them.
+- **Province names are placed from the corpus, not drawn from the province
+  layer.** The AWMC polygons carry no names and do not map one-to-one onto
+  EDCS provinces (one shape covers Syria, Galatia and Pontus). Each name sits
+  at the median of its province's places instead; where names would collide
+  the province with more inscriptions keeps its name.
 
 ## Tests
 

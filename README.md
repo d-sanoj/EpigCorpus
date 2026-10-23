@@ -35,7 +35,8 @@ Doddapaneni, S. (n.d.). EpigCorpus: A reproducible Latin epigraphy pipeline for 
   - Interpretive Cleaned Inscriptions
 - Interactive dark-basemap map: one circle per place sized by its inscription
   count, a teal "known places" layer with tangerine search results drawn above
-  it, and optional Roman provinces, roads and cities overlays.
+  it, and optional Roman provinces (with their names), roads and cities
+  overlays. The basemap carries no place names.
 - Search across raw and cleaned text.
 - TSV download and publication-style PNG map export.
 - A versioned HTTP API (`/v1`, OpenAPI 3.1) for search, records, cleaned

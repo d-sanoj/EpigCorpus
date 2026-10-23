@@ -1,8 +1,10 @@
 /* The interactive map: one circle per place, sized by inscription count.
  *
- * Ported from the Streamlit app's Leaflet template: same CARTO dark basemap,
- * colours, log-scaled radius, zoom scaling, shared marker canvas, layer
- * control, reset control, legend and popups. The difference is where the
+ * Ported from the Streamlit app's Leaflet template: same colours,
+ * log-scaled radius, zoom scaling, shared marker canvas, layer control, reset
+ * control, legend and popups. The basemap carries no labels at all; the only
+ * names on the map are the EDCS province names, drawn with the "Roman
+ * provinces" layer in the colour of the shading beneath them. The difference is where the
  * data comes from: the API, loaded once for the overlays and the known places
  * and again for each query's results, instead of being inlined per rerun.
  */
@@ -20,11 +22,13 @@
   var LEGEND_STOPS = [1, 10, 100, 1000];
   var CENTER = [41.9028, 12.4964];  // Rome, as EDCS
   var ZOOM = 4;
-  var TILE_LABELLED = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-  var TILE_PLAIN = "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
-  var ATTRIBUTION =
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
-    '&copy; <a href="https://carto.com/attributions">CARTO</a>';
+  // Esri's dark grey canvas, base layer only: no place names, no API key.
+  // (CARTO's basemaps, used before, now answer without a key with an
+  // "API KEY REQUIRED" tile.)
+  var TILES = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/" +
+    "World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+  var ATTRIBUTION = "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ";
+  var LABEL_FALLBACK_COLOR = "#cbd5e1";
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, function (ch) {
@@ -61,11 +65,12 @@
     roadsPane.style.zIndex = "415";
     roadsPane.style.pointerEvents = "none";
 
-    var baseLayer = L.tileLayer(TILE_LABELLED, {
-      maxZoom: 19,
-      subdomains: "abcd",
-      attribution: ATTRIBUTION,
-    }).addTo(map);
+    // Province names: above everything drawn, never in the way of the mouse.
+    var labelsPane = map.createPane("labelsPane");
+    labelsPane.style.zIndex = "450";
+    labelsPane.style.pointerEvents = "none";
+
+    L.tileLayer(TILES, { maxZoom: 16, attribution: ATTRIBUTION }).addTo(map);
 
     // Radii are calibrated for the default zoom and scale with the zoom level.
     var scaled = [];
@@ -87,7 +92,9 @@
       provinces: L.layerGroup(),
       roads: L.layerGroup(),
       cities: L.layerGroup(),
+      provinceLabels: L.layerGroup(),
     };
+    var labelMarkers = [];
     var available = { all: false, search: false, provinces: false, roads: false, cities: false };
     var wanted = { all: true, search: true, provinces: false, roads: false, cities: false };
 
@@ -101,7 +108,34 @@
       var on = available[key] && wanted[key];
       if (on && !map.hasLayer(layer)) layer.addTo(map);
       if (!on && map.hasLayer(layer)) map.removeLayer(layer);
+      // The province names come and go with the province shading.
+      if (key === "provinces") {
+        var labels = layers.provinceLabels;
+        if (on && labelMarkers.length && !map.hasLayer(labels)) labels.addTo(map);
+        if (!on && map.hasLayer(labels)) map.removeLayer(labels);
+        declutter();
+      }
     }
+
+    // Hide any name that would overlap one already shown. Labels arrive
+    // ordered by inscription count, so the larger province keeps its name.
+    function declutter() {
+      if (!map.hasLayer(layers.provinceLabels)) return;
+      var shown = [];
+      labelMarkers.forEach(function (marker) {
+        var element = marker.getElement();
+        if (!element || !element.firstChild) return;
+        element.style.visibility = "visible";
+        var box = element.firstChild.getBoundingClientRect();
+        var clash = shown.some(function (other) {
+          return !(box.right < other.left || box.left > other.right ||
+                   box.bottom < other.top || box.top > other.bottom);
+        });
+        if (clash) element.style.visibility = "hidden";
+        else shown.push(box);
+      });
+    }
+    map.on("zoomend moveend", declutter);
 
     // Order matters inside the shared canvas: later layers draw on top and win
     // the hover, so places sit under cities, which sit under search results.
@@ -126,7 +160,6 @@
       node.innerHTML =
         '<label><input type="checkbox" data-map-layer="all"> <span class="overview-map-layer-swatch all"></span>Known places</label>' +
         '<label><input type="checkbox" data-map-layer="search"> <span class="overview-map-layer-swatch search"></span>Search results</label>' +
-        '<label><input type="checkbox" data-map-label-toggle checked> <span class="overview-map-layer-letter">Aa</span>Place names</label>' +
         "<hr>" +
         '<label><input type="checkbox" data-map-layer="provinces"> <span class="overview-map-layer-swatch provinces"></span>Roman provinces</label>' +
         '<label><input type="checkbox" data-map-layer="roads"> <span class="overview-map-layer-swatch roads"></span>Roads</label>' +
@@ -141,10 +174,6 @@
           setLayerVisible(key);
           if (input.checked) restackAbove(key);
         });
-      });
-      var labelToggle = node.querySelector("input[data-map-label-toggle]");
-      labelToggle.addEventListener("change", function () {
-        baseLayer.setUrl(labelToggle.checked ? TILE_LABELLED : TILE_PLAIN);
       });
       return node;
     };
@@ -288,8 +317,28 @@
       }
     }
 
+    function setProvinceLabels(data) {
+      labelMarkers = data.map(function (label) {
+        var text = document.createElement("span");
+        text.textContent = label.name;
+        text.style.color = label.color || LABEL_FALLBACK_COLOR;
+        return L.marker([label.latitude, label.longitude], {
+          pane: "labelsPane",
+          interactive: false,
+          keyboard: false,
+          icon: L.divIcon({ className: "province-label", html: text, iconSize: [0, 0] }),
+        });
+      });
+      labelMarkers.forEach(function (marker) { layers.provinceLabels.addLayer(marker); });
+      setLayerVisible("provinces");
+    }
+
     // The historical overlays arrive once, in the background, switched off.
     function setOverlay(key, data) {
+      if (key === "provinceLabels") {
+        setProvinceLabels(data);
+        return;
+      }
       var layer;
       if (key === "provinces") {
         layer = L.geoJSON(data, {

@@ -8,6 +8,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — basemap without labels, province names in province colours (2026-10-23)
+
+- CARTO's basemaps now answer without an API key with an "API KEY REQUIRED"
+  tile. The web map uses Esri's World Dark Gray Base instead: no key, and no
+  place names at all. The "Place names" toggle is gone.
+- The "Roman provinces" layer now writes each EDCS province's name, in the
+  colour of the shading beneath it (`/v1/map/layers/province-labels`).
+  Overlapping names are hidden, larger provinces first; more appear as you
+  zoom in.
+- Unused CARTO and Leaflet constants left in `app/config/settings.py` by the
+  Streamlit app are removed.
+
 ### Added — the HTTP API (2026-10-23)
 
 - `app/api` implements the v1 contract in `app/api/openapi.yaml`: search,

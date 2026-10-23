@@ -462,6 +462,49 @@ paths:
         '304':
           $ref: '#/components/responses/NotModified'
 
+  /v1/map/layers/province-labels:
+    get:
+      tags: [map]
+      operationId: getProvinceLabels
+      summary: Where to write each EDCS province's name, and in what colour
+      description: |
+        One label per EDCS province, ordered by inscription count (largest
+        first, so a client that hides overlapping labels keeps the largest).
+        The province layer has no names and its polygons are not one per
+        province, so the names come from the corpus: each label sits at the
+        median latitude and longitude of the province's places, coloured like
+        the shaded polygon under that point (or the nearest within 0.75°),
+        and `null` when there is none. Static: send `If-None-Match`.
+      responses:
+        '200':
+          description: All labels.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProvinceLabel'
+              examples:
+                largest:
+                  value:
+                    - name: Roma
+                      latitude: 41.92516
+                      longitude: 12.44663
+                      inscriptions: 132109
+                      places: 9
+                      color: '#f6d55c'
+                    - name: Armenia
+                      latitude: 39.92157
+                      longitude: 44.29306
+                      inscriptions: 5
+                      places: 3
+                      color: null
+        '304':
+          $ref: '#/components/responses/NotModified'
+
   /v1/map/layers/cities:
     get:
       tags: [map]
@@ -1414,6 +1457,19 @@ components:
                 type: [object, 'null']
                 description: 'null when simplification left nothing to draw (RFC 7946 allows it).'
               properties: {type: [object, 'null']}
+
+    ProvinceLabel:
+      type: object
+      required: [name, latitude, longitude, inscriptions, places, color]
+      properties:
+        name: {type: string, description: 'The EDCS province, as the province filter uses it.'}
+        latitude: {type: number}
+        longitude: {type: number}
+        inscriptions: {type: integer, description: 'Inscriptions in the search frame.'}
+        places: {type: integer, description: 'Distinct places.'}
+        color:
+          type: [string, 'null']
+          description: 'Fill colour of the province shading under the label, as #rrggbb.'
 
     CityPoint:
       type: object

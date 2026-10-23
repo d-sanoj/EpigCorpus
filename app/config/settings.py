@@ -1,7 +1,7 @@
 """Settings: the EDCS endpoints and HTTP behaviour, and fixed spatial bounds.
 
-Paths live in app.config.paths. Presentation (colours, styles, templates)
-stays with the UI.
+Paths live in app.config.paths. Presentation (colours, styles, the basemap)
+lives with the web UI in app/ui/static.
 """
 
 # ─── EDCS API ─────────────────────────────────────────────────────────────────
@@ -40,21 +40,3 @@ BACKOFF_BASE = 2.0
 # Roman Empire bounds. Wide enough for the whole empire as EDCS draws it:
 # Britannia in the north-west through Aegyptus and Mesopotamia in the south-east.
 ROMAN_BOUNDS = (20.0, 62.0, -12.0, 50.0)  # (min_lat, max_lat, min_lon, max_lon)
-
-
-# ─── Basemap tiles and Leaflet ────────────────────────────────────────────────
-# CARTO basemap. "light_all" carries place labels; "light_nolabels" is the same
-# cartography without them, which is how the "Place names" toggle works.
-# CARTO dark basemap ("dark_matter"), the backdrop used throughout the folium
-# cartography tutorial this styling follows:
-# https://nbviewer.org/github/vincentropy/python_cartography_tutorial/blob/master/part1_basic_folium_maps.ipynb
-# "dark_all" carries place labels, "dark_nolabels" is the same cartography
-# without them, which is how the "Place names" toggle works.
-CARTO_LABELLED = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-CARTO_PLAIN = "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-CARTO_ATTRIBUTION = (
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
-    '&copy; <a href="https://carto.com/attributions">CARTO</a>'
-)
-LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-LEAFLET_JS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

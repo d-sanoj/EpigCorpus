@@ -52,3 +52,7 @@ Leaflet map. It also kept the whole corpus in memory per Streamlit server.
   headless Chromium (see the commit that added it), and the API beneath it is
   covered by the contract tests.
 - `streamlit run …` no longer exists; `python -m app.cli.serve` replaces it.
+- *Later the same day:* CARTO's basemaps began requiring an API key, so the
+  map moved to Esri's label-free dark grey basemap. At the maintainer's
+  request the only names on the map are now the EDCS province names, drawn
+  with the provinces layer in its colours.
