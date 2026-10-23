@@ -424,7 +424,7 @@ paths:
                     type: FeatureCollection
                     features:
                       - type: Feature
-                        properties: {_color: '#f9c784'}
+                        properties: {_color: '#5b4b8a'}
                         geometry:
                           type: Polygon
                           # first three vertices of the first ring; truncated
@@ -530,7 +530,7 @@ paths:
                       longitude: 12.44663
                       inscriptions: 132109
                       places: 9
-                      color: '#f6d55c'
+                      color: '#8a4f4f'
                     - name: Armenia
                       latitude: 39.92157
                       longitude: 44.29306

@@ -13,11 +13,19 @@
 (function () {
   "use strict";
 
-  var KNOWN_COLOR = "#0A8A9F";   // teal
-  var SEARCH_COLOR = "#E37222";  // tangerine
-  var CITY_COLOR = "#FFCE00";    // yellow
-  var ROAD_COLOR = "#CBD5E1";
-  var EMPTY_COLOR = "#64748B";
+  // Solid markers in bright, well-separated hues over muted province fills.
+  // A thin dark outline keeps neighbouring and overlapping circles apart.
+  var KNOWN_COLOR = "#2dd4bf";   // teal: every known place
+  var EMPTY_COLOR = "#64748b";   // slate: a place with no inscription
+  var CITY_COLOR = "#facc15";    // yellow: cities (Hanson 2016)
+  var SEARCH_COLOR = "#f97316";  // orange: search results
+  var ROAD_COLOR = "#e2e8f0";
+  var MARKER_EDGE = "#0b0f17";
+  var PROVINCE_FILL_OPACITY = 0.6;
+  // Results sit on top of everything and must stay findable even where a
+  // place has a single match: they never draw smaller than this.
+  var SEARCH_MIN_RADIUS = 3.6;
+  var CITY_RADIUS = 2.1;
   var RADIUS_BASE = 1.2;
   var RADIUS_SCALE = 1.9;
   var EMPTY_RADIUS = 1.5;
@@ -36,6 +44,14 @@
     });
   }
   function formatInteger(value) { return Number(value).toLocaleString("en-US"); }
+  // Mix a #rrggbb colour towards white by `amount` (0..1).
+  function lighten(hex, amount) {
+    var n = parseInt(hex.slice(1), 16);
+    var channels = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (c) {
+      return Math.round(c + (255 - c) * amount);
+    });
+    return "rgb(" + channels.join(", ") + ")";
+  }
   // Size is continuous in the count, on a log scale, because these counts
   // span 1 to several thousand.
   function radiusFor(count) {
@@ -53,17 +69,16 @@
     var L = window.L;
     var map = L.map(element, { preferCanvas: true, worldCopyJump: true }).setView(CENTER, ZOOM);
 
+    // Stacking, bottom to top: land, provinces (the base), known places,
+    // roads, cities, search results; province names above all, as text.
     // Leaflet binds mouse events to each canvas element, so only the TOPMOST
-    // interactive canvas hit-tests. Everything hoverable therefore shares one
-    // canvas, where stacking and hit priority follow draw order, and the two
-    // non-interactive layers get panes that let events fall straight through.
+    // canvas can be hovered. Places, roads, cities and results therefore share
+    // one canvas, where stacking follows draw order (see LAYER_ORDER); roads
+    // are drawn there as non-interactive lines, so hovering passes through them.
     var provincesPane = map.createPane("provincesPane");
     provincesPane.style.zIndex = "400";
     provincesPane.style.pointerEvents = "none";
     map.createPane("markersPane").style.zIndex = "410";
-    var roadsPane = map.createPane("roadsPane");
-    roadsPane.style.zIndex = "415";
-    roadsPane.style.pointerEvents = "none";
 
     // Province names: above everything drawn, never in the way of the mouse.
     var labelsPane = map.createPane("labelsPane");
@@ -109,7 +124,8 @@
     };
     var labelMarkers = [];
     var available = { all: false, search: false, provinces: false, roads: false, cities: false };
-    var wanted = { all: true, search: true, provinces: false, roads: false, cities: false };
+    // Provinces are the base and start switched on; roads and cities are optional.
+    var wanted = { all: true, search: true, provinces: true, roads: false, cities: false };
 
     function forget(group) {
       scaled = scaled.filter(function (entry) { return !group.hasLayer(entry.marker); });
@@ -119,7 +135,10 @@
     function setLayerVisible(key) {
       var layer = layers[key];
       var on = available[key] && wanted[key];
-      if (on && !map.hasLayer(layer)) layer.addTo(map);
+      if (on && !map.hasLayer(layer)) {
+        layer.addTo(map);
+        restackAbove(key);
+      }
       if (!on && map.hasLayer(layer)) map.removeLayer(layer);
       // The province names come and go with the province shading.
       if (key === "provinces") {
@@ -150,13 +169,14 @@
     }
     map.on("zoomend moveend", declutter);
 
-    // Order matters inside the shared canvas: later layers draw on top and win
-    // the hover, so places sit under cities, which sit under search results.
-    var MARKER_ORDER = ["all", "cities", "search"];
+    // Order inside the shared canvas: later layers draw on top and win the
+    // hover. Whenever a layer appears, everything meant to be above it is
+    // re-added, so the order holds however and whenever layers load.
+    var LAYER_ORDER = ["all", "roads", "cities", "search"];
     function restackAbove(key) {
-      var from = MARKER_ORDER.indexOf(key);
+      var from = LAYER_ORDER.indexOf(key);
       if (from < 0) return;
-      MARKER_ORDER.slice(from + 1).forEach(function (above) {
+      LAYER_ORDER.slice(from + 1).forEach(function (above) {
         var layer = layers[above];
         if (map.hasLayer(layer)) {
           map.removeLayer(layer);
@@ -170,13 +190,14 @@
     var inputs = {};
     control.onAdd = function () {
       var node = L.DomUtil.create("div", "overview-map-layers");
+      // Listed in stacking order, topmost first.
       node.innerHTML =
-        '<label><input type="checkbox" data-map-layer="all"> <span class="overview-map-layer-swatch all"></span>Known places</label>' +
         '<label><input type="checkbox" data-map-layer="search"> <span class="overview-map-layer-swatch search"></span>Search results</label>' +
-        "<hr>" +
-        '<label><input type="checkbox" data-map-layer="provinces"> <span class="overview-map-layer-swatch provinces"></span>Roman provinces</label>' +
+        '<label><input type="checkbox" data-map-layer="cities"> <span class="overview-map-layer-swatch cities"></span>Cities</label>' +
         '<label><input type="checkbox" data-map-layer="roads"> <span class="overview-map-layer-swatch roads"></span>Roads</label>' +
-        '<label><input type="checkbox" data-map-layer="cities"> <span class="overview-map-layer-swatch cities"></span>Cities</label>';
+        '<label><input type="checkbox" data-map-layer="all"> <span class="overview-map-layer-swatch all"></span>Known places</label>' +
+        "<hr>" +
+        '<label><input type="checkbox" data-map-layer="provinces"> <span class="overview-map-layer-swatch provinces"></span>Roman provinces</label>';
       L.DomEvent.disableClickPropagation(node);
       L.DomEvent.disableScrollPropagation(node);
       node.querySelectorAll("input[data-map-layer]").forEach(function (input) {
@@ -185,7 +206,6 @@
           var key = input.dataset.mapLayer;
           wanted[key] = input.checked;
           setLayerVisible(key);
-          if (input.checked) restackAbove(key);
         });
       });
       return node;
@@ -231,7 +251,8 @@
         '<div class="overview-map-legend-title">Inscriptions per place</div>' +
         '<div class="overview-map-legend-series">' +
         '<span class="overview-map-layer-swatch all"></span><span>Known places</span>' +
-        '<span class="overview-map-layer-swatch search"></span><span>Search results</span></div>' + rows;
+        '<span class="overview-map-layer-swatch search"></span><span>Search results</span>' +
+        '<span class="overview-map-layer-swatch cities"></span><span>Cities</span></div>' + rows;
       L.DomEvent.disableClickPropagation(node);
       return node;
     };
@@ -245,11 +266,11 @@
       var marker = L.circleMarker([place.latitude, place.longitude], {
         renderer: markerRenderer,
         radius: base * zoomScale(),
-        color: hasInscriptions ? KNOWN_COLOR : EMPTY_COLOR,
-        weight: 0.6,
-        opacity: hasInscriptions ? 0.55 : 0.35,
+        color: MARKER_EDGE,
+        weight: 0.8,
+        opacity: 0.9,
         fillColor: hasInscriptions ? KNOWN_COLOR : EMPTY_COLOR,
-        fillOpacity: hasInscriptions ? 0.2 : 0.12,
+        fillOpacity: hasInscriptions ? 0.9 : 0.7,
         fill: true,
       });
       var name = place.place || "?";
@@ -267,15 +288,15 @@
       var count = place.count;
       var items = place.examples || [];
       var name = place.place || "?";
-      var base = radiusFor(count);
+      var base = Math.max(SEARCH_MIN_RADIUS, radiusFor(count) + 1);
       var marker = L.circleMarker([place.latitude, place.longitude], {
         renderer: markerRenderer,
         radius: base * zoomScale(),
-        color: SEARCH_COLOR,
-        weight: 1,
+        color: MARKER_EDGE,
+        weight: 1.1,
         opacity: 1,
         fillColor: SEARCH_COLOR,
-        fillOpacity: 0.55,
+        fillOpacity: 0.95,
         fill: true,
       });
       marker.bindTooltip(
@@ -334,7 +355,8 @@
       labelMarkers = data.map(function (label) {
         var text = document.createElement("span");
         text.textContent = label.name;
-        text.style.color = label.color || LABEL_FALLBACK_COLOR;
+        // The fills are muted; the name uses a lighter tint of the same hue.
+        text.style.color = label.color ? lighten(label.color, 0.55) : LABEL_FALLBACK_COLOR;
         return L.marker([label.latitude, label.longitude], {
           pane: "labelsPane",
           interactive: false,
@@ -359,30 +381,32 @@
           style: function (feature) {
             return {
               fillColor: (feature.properties && feature.properties._color) || "#f0f0f0",
-              color: "rgba(226, 232, 240, 0.35)",
-              weight: 0.6,
-              fillOpacity: 0.3,
+              color: "rgba(226, 232, 240, 0.28)",
+              weight: 0.7,
+              fillOpacity: PROVINCE_FILL_OPACITY,
             };
           },
         });
       } else if (key === "roads") {
         layer = L.geoJSON(data, {
-          pane: "roadsPane",
-          style: function () { return { color: ROAD_COLOR, weight: 1, opacity: 0.85 }; },
+          renderer: markerRenderer,
+          interactive: false,
+          style: function () { return { color: ROAD_COLOR, weight: 1.1, opacity: 0.7 }; },
         });
       } else {
         layer = L.layerGroup(data.map(function (city) {
-          var ring = L.circleMarker([city.latitude, city.longitude], {
+          var dot = L.circleMarker([city.latitude, city.longitude], {
             renderer: markerRenderer,
-            radius: 2.2 * zoomScale(),
-            color: CITY_COLOR,
-            weight: 1.1,
-            opacity: 0.95,
-            fill: false,
+            radius: CITY_RADIUS * zoomScale(),
+            color: MARKER_EDGE,
+            weight: 0.8,
+            opacity: 1,
+            fillColor: CITY_COLOR,
+            fillOpacity: 0.95,
           });
-          ring.bindTooltip(escapeHtml(city.label || "Unnamed city"), { direction: "top", sticky: true });
-          scaled.push({ marker: ring, base: 2.2 });
-          return ring;
+          dot.bindTooltip(escapeHtml(city.label || "Unnamed city"), { direction: "top", sticky: true });
+          scaled.push({ marker: dot, base: CITY_RADIUS });
+          return dot;
         }));
       }
       layers[key] = layer;

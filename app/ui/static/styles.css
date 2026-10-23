@@ -8,8 +8,9 @@
   --text: #e5e7eb;
   --muted: #9ca3af;
   --dim: #6b7688;
-  --known: #0a8a9f;
-  --search: #e37222;
+  --known: #2dd4bf;
+  --search: #f97316;
+  --city: #facc15;
   --map-bg: #0b0f17;
   --warn: #f59e0b;
   --error: #f87171;
@@ -91,8 +92,8 @@ button:disabled, .button[aria-disabled="true"] { opacity: 0.55; cursor: progress
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  background: rgba(227, 114, 34, 0.18);
-  border: 1px solid rgba(227, 114, 34, 0.55);
+  background: rgba(249, 115, 22, 0.18);
+  border: 1px solid rgba(249, 115, 22, 0.55);
   border-radius: 6px;
   padding: 0.05rem 0.2rem 0.05rem 0.45rem;
   font-size: 0.85rem;
@@ -144,8 +145,8 @@ button:disabled, .button[aria-disabled="true"] { opacity: 0.55; cursor: progress
   margin: 0.8rem 0;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  background: rgba(10, 138, 159, 0.12);
-  border: 1px solid rgba(10, 138, 159, 0.4);
+  background: rgba(45, 212, 191, 0.1);
+  border: 1px solid rgba(45, 212, 191, 0.4);
   color: #cfeff5;
 }
 .notice.warning { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.45); color: #fde7c0; }
@@ -197,18 +198,21 @@ footer a { color: var(--muted); }
 .overview-map-layers input[disabled] + .overview-map-layer-swatch { opacity: 0.4; }
 .overview-map-layers label:has(input[disabled]) { color: #6b7280; cursor: default; }
 .overview-map-layers hr { border: 0; border-top: 1px solid rgba(148, 163, 184, 0.22); margin: 0.1rem 0; }
-.overview-map-layer-swatch { width: 12px; height: 12px; border-radius: 50%; display: block; flex: 0 0 12px; }
-.overview-map-layer-swatch.all { background: #0a8a9f; }
-.overview-map-layer-swatch.search { background: #e37222; }
-.overview-map-layer-swatch.provinces { background: #f9c784; border-radius: 2px; }
-.overview-map-layer-swatch.roads { background: #cbd5e1; border-radius: 2px; height: 3px; flex-basis: 12px; }
-.overview-map-layer-swatch.cities { background: transparent; border: 2px solid #ffce00; }
+.overview-map-layer-swatch { width: 12px; height: 12px; border-radius: 50%; display: block; flex: 0 0 12px; border: 1px solid #0b0f17; }
+.overview-map-layer-swatch.all { background: var(--known); }
+.overview-map-layer-swatch.search { background: var(--search); }
+.overview-map-layer-swatch.cities { background: var(--city); width: 9px; height: 9px; flex-basis: 9px; margin: 0 1.5px; }
+.overview-map-layer-swatch.provinces {
+  border-radius: 2px;
+  background: linear-gradient(90deg, #5b4b8a 0 25%, #3f6b8f 25% 50%, #4f7a4a 50% 75%, #8a7440 75% 100%);
+}
+.overview-map-layer-swatch.roads { background: #e2e8f0; border: 0; border-radius: 2px; height: 3px; flex-basis: 12px; }
 .overview-map-reset button { width: 30px; height: 30px; min-height: 0; display: flex; align-items: center; justify-content: center; background: #111827; border: 0; border-radius: 0; cursor: pointer; color: #e5e7eb; }
 .overview-map-legend { padding: 0.65rem 0.75rem; line-height: 1.35; }
 .overview-map-legend-title { margin-bottom: 0.4rem; font-weight: 600; }
 .overview-map-legend-series { display: grid; grid-template-columns: 12px auto; gap: 0.2rem 0.4rem; align-items: center; font-size: 0.75rem; color: #cbd5e1; margin-bottom: 0.45rem; }
 .overview-map-legend-row { display: flex; align-items: center; gap: 0.5rem; height: 26px; }
-.overview-map-legend-dot { border-radius: 50%; background: rgba(10, 138, 159, 0.45); border: 1px solid #0a8a9f; display: block; flex: none; margin: 0 auto; }
+.overview-map-legend-dot { border-radius: 50%; background: var(--known); border: 1px solid #0b0f17; display: block; flex: none; margin: 0 auto; }
 .overview-map-legend-slot { width: 26px; display: flex; justify-content: center; }
 /* Province names, coloured like the shading beneath them (set inline). */
 .province-label { overflow: visible; }
@@ -221,6 +225,6 @@ footer a { color: var(--muted); }
   letter-spacing: 0.03em;
   text-shadow: 0 0 3px #000, 0 0 2px #000, 0 0 1px #000;
 }
-.overview-popup h4 { margin: 0 0 0.3rem; font-size: 0.85rem; color: #e37222; }
+.overview-popup h4 { margin: 0 0 0.3rem; font-size: 0.85rem; color: var(--search); }
 .overview-popup ul { margin: 0; padding-left: 1rem; font-size: 0.75rem; line-height: 1.45; }
 .overview-popup .more { margin-top: 0.3rem; color: #94a3b8; font-size: 0.72rem; }

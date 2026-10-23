@@ -16,16 +16,21 @@ import pandas as pd
 
 
 def _province_palette() -> list[str]:
-    """Saturated province fills that still read under a full field of markers."""
+    """Muted province fills: the map's base, kept quiet so every marker on it reads.
+
+    Eight hues spread round the wheel at low saturation and similar lightness;
+    the bright marker colours (teal places, yellow cities, orange results)
+    stay clear of them.
+    """
     return [
-        "#f9c784",
-        "#8ecae6",
-        "#a7d489",
-        "#d9a7e0",
-        "#f6d55c",
-        "#7fd1bd",
-        "#f5a3b7",
-        "#a6b1f0",
+        "#5b4b8a",  # violet
+        "#3f6b8f",  # steel blue
+        "#4f7a4a",  # moss
+        "#8a7440",  # ochre
+        "#8a4f4f",  # brick
+        "#3f7f7a",  # slate teal
+        "#7a4f73",  # plum
+        "#55608f",  # indigo
     ]
 
 

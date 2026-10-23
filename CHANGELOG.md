@@ -8,6 +8,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — map redesign: solid markers, muted provinces, fixed stacking (2026-10-23)
+
+- Known places, cities and search results are solid circles with a thin
+  dark outline (they were translucent rings), so neighbouring and
+  overlapping places stay apart when zoomed in. New colours: teal places,
+  yellow cities, orange results; roads light grey.
+- The provinces are the base layer and start switched on, in a muted
+  eight-colour palette so the markers read over them; their names use a
+  lighter tint of the same colour.
+- Fixed stacking, bottom to top: land, provinces, known places, roads,
+  cities, search results (province names as text above). The order holds
+  whichever layer loads or is switched on first; hovering still reaches
+  places under the roads. The layer control lists the layers in that
+  order.
+- Search results never draw smaller than a minimum size, so single-match
+  places stay findable among the cities.
+- The PNG export keeps its own print palette; it is unchanged.
+
 ### Changed — basemap without labels, province names in province colours (2026-10-23)
 
 - CARTO's basemaps now answer without an API key with an "API KEY REQUIRED"
