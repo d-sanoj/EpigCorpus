@@ -96,6 +96,8 @@ class CleanedCorpusReader(Protocol):
 
     def read_lookup(self) -> dict | None: ...
 
+    def fingerprint(self) -> str: ...
+
 
 class MapLayerSource(Protocol):
     """Vendored historical map layers."""

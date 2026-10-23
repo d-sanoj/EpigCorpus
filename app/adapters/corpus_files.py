@@ -4,6 +4,7 @@ pandas infers gzip from the extension, so every reader here accepts either the
 plain working copy or the committed .gz snapshot.
 """
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -95,6 +96,14 @@ def cleaned_corpus_path() -> Path:
 def read_cleaned_corpus() -> pd.DataFrame:
     """The whole cleaned corpus, every column."""
     return pd.read_json(cleaned_corpus_path(), lines=True)
+
+
+def fingerprint() -> str:
+    """Identifies the cleaned-corpus snapshot on disk (name, size, mtime)."""
+    path = cleaned_corpus_path()
+    stat = path.stat()
+    identity = f"{path.name}:{stat.st_size}:{stat.st_mtime_ns}"
+    return hashlib.sha256(identity.encode()).hexdigest()[:16]
 
 
 def read_lookup() -> dict | None:
