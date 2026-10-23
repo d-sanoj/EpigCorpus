@@ -205,6 +205,7 @@
         input.addEventListener("change", function () {
           var key = input.dataset.mapLayer;
           wanted[key] = input.checked;
+          if (key === "all") knownWanted[mode] = input.checked;
           setLayerVisible(key);
         });
       });
@@ -317,29 +318,45 @@
     }
 
     var knownPlaces = null;
+    // "known" with no query, "results" with one. The known-places layer can be
+    // switched on or off in either; each mode remembers its own choice. By
+    // default it shows with no query and steps aside for a query's results.
+    var mode = "known";
+    var knownWanted = { known: true, results: false };
 
-    // No query: the corpus-wide teal layer, every known place.
-    function showKnown(places) {
-      if (knownPlaces !== places) {
-        forget(layers.all);
-        places.forEach(function (place) { knownMarker(place).addTo(layers.all); });
-        knownPlaces = places;
-      }
-      forget(layers.search);
-      available.all = places.length > 0;
-      available.search = false;
+    function applyMode() {
+      wanted.all = knownWanted[mode];
       ["all", "search"].forEach(function (key) { setLayerVisible(key); syncControl(key); });
+    }
+
+    // Every known place, built once; usable with or without a query.
+    function setKnown(places) {
+      if (knownPlaces === places) return;
+      forget(layers.all);
+      places.forEach(function (place) { knownMarker(place).addTo(layers.all); });
+      knownPlaces = places;
+      available.all = places.length > 0;
+      applyMode();
       restackAbove("all");
     }
 
-    // A query: the corpus-wide layer comes off, the tangerine results go on,
-    // and the view fits them.
+    // No query: the corpus-wide teal layer, every known place.
+    function showKnown(places) {
+      mode = "known";
+      forget(layers.search);
+      available.search = false;
+      setKnown(places);
+      applyMode();
+    }
+
+    // A query: the orange results go on top and the view fits them. Known
+    // places stay available underneath, off unless switched on.
     function showResults(places) {
+      mode = "results";
       forget(layers.search);
       places.forEach(function (place) { resultMarker(place).addTo(layers.search); });
-      available.all = false;
       available.search = places.length > 0;
-      ["all", "search"].forEach(function (key) { setLayerVisible(key); syncControl(key); });
+      applyMode();
       if (places.length) {
         var lats = places.map(function (p) { return p.latitude; });
         var lons = places.map(function (p) { return p.longitude; });
@@ -416,6 +433,7 @@
     }
 
     return {
+      setKnown: setKnown,
       showKnown: showKnown,
       showResults: showResults,
       setOverlay: setOverlay,

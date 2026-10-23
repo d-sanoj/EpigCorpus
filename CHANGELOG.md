@@ -8,6 +8,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — known places can be shown under search results (2026-10-23)
+
+- During a search the "Known places" layer is no longer disabled: it starts
+  off, so the results stand out, and can be switched on to show every known
+  place underneath roads, cities and results. The choice is remembered for
+  later searches; with no search, known places show as before.
+- Known places load once in the background, so the layer is also available
+  when the page is opened from a search link.
+
 ### Changed — map redesign: solid markers, muted provinces, fixed stacking (2026-10-23)
 
 - Known places, cities and search results are solid circles with a thin

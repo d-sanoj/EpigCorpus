@@ -159,15 +159,21 @@
       .then(function () { if (mine === run) busy(false); });
   }
 
+  // Every known place, fetched once. It backs the no-query view and the
+  // "Known places" layer a user can switch on under a query's results.
+  function loadKnown() {
+    if (!knownPlaces) {
+      knownPlaces = getJson("/places/known?limit=" + MAX_PLACES);
+      knownPlaces
+        .then(function (body) { if (map) map.setKnown(body.data); })
+        .catch(function () { knownPlaces = null; });
+    }
+    return knownPlaces;
+  }
+
   function showEverything(mine) {
     els.results.hidden = true;
-    var places = knownPlaces
-      ? Promise.resolve(knownPlaces)
-      : getJson("/places/known?limit=" + MAX_PLACES).then(function (body) {
-          knownPlaces = body;
-          return body;
-        });
-    places
+    loadKnown()
       .then(function (body) {
         if (mine !== run) return;
         els.summary.textContent =
@@ -305,6 +311,7 @@
         var query = readAddress();
         writeControls(query);
         submit(query);
+        loadKnown();
         loadOverlays();
       })
       .catch(function (error) {
