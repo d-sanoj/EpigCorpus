@@ -31,30 +31,24 @@ _ROOT = str(Path(__file__).resolve().parents[2])
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from app.adapters.corpus_files import cleaned_corpus_path  # noqa: E402
-from app.config.paths import (  # noqa: E402
-    LOOKUP_FILE,
-    MAP_LAYERS_DIR,
-)
+# This file is the UI's composition root: it binds the file adapters to the
+# services. Everything else it uses comes from the services.
+from app.adapters import corpus_files, map_layers  # noqa: E402
 from app.config.settings import (  # noqa: E402
     CARTO_ATTRIBUTION,
     CARTO_LABELLED,
     CARTO_PLAIN,
     LEAFLET_CSS,
     LEAFLET_JS,
-    ROMAN_BOUNDS,
 )
-from app.core.search import (  # noqa: E402
+from app.models.inscription import REQUIRED_COLS  # noqa: E402
+from app.services import map_data, search  # noqa: E402
+from app.services.search import (  # noqa: E402
     FILTER_LABELS,
     SEARCH_COLUMNS,
     _normalize_search_mode,
-    _place_result_items,
-    _token_set,
-    aggregate_places,
-    apply_filters,
     describe_query,
 )
-from app.models.inscription import MULTI_VALUE_FILTERS, REQUIRED_COLS  # noqa: E402
 
 REPO_URL = "https://github.com/d-sanoj/EpigCorpus"
 REPO_NAME = "d-sanoj/EpigCorpus"
@@ -195,110 +189,90 @@ def inject_professional_styles() -> None:
     )
 
 
-def map_layer_path(*parts: str) -> Path:
-    """Resolve a vendored base-map file, failing with an actionable message."""
-    path = MAP_LAYERS_DIR.joinpath(*parts)
-    if not path.exists():
-        raise FileNotFoundError(
-            f"Missing base-map layer: {path}\n"
-            "These files are vendored in the repository under app/data/reference/map_layers/. "
-            "Restore them with: git checkout -- app/data/reference/map_layers"
-        )
-    return path
+# --------------------------------------------------------------------------
+# Cached data access
+#
+# The services do not cache. Each wrapper keeps the st.cache_data its function
+# carried when it lived in this file, and the services are handed these
+# cached loaders back, so nested loads (filter_options, load_known_places and
+# run_query reading the corpus; the GeoJSON builders and the PNG reading the
+# layers) hit the same caches as before.
+# --------------------------------------------------------------------------
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_provinces() -> gpd.GeoDataFrame:
     """Load and cache the Roman provinces shapefile (AWMC, AD 117)."""
-    provinces_shp = map_layer_path("roman_empire_ad_117", "roman_empire_ad_117.shp")
-    provinces = gpd.read_file(provinces_shp).to_crs(epsg=4326)
-    return provinces
+    return map_layers.load_provinces()
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_roads() -> gpd.GeoDataFrame:
     """Load and cache the Roman roads shapefile (AWMC, Barrington Atlas)."""
-    roads_shp = map_layer_path("ba_roads", "ba_roads.shp")
-    roads = gpd.read_file(roads_shp).to_crs(epsg=4326)
-    return roads
+    return map_layers.load_roads()
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_cities() -> gpd.GeoDataFrame:
     """Load and cache the cities dataset (Hanson 2016, OXREP)."""
-    cities_csv = map_layer_path("Hanson2016_Cities_OxREP.csv")
-    cities_df = pd.read_csv(cities_csv, encoding="iso-8859-1")
-    cities = gpd.GeoDataFrame(
-        cities_df,
-        geometry=gpd.points_from_xy(cities_df["Longitude (X)"], cities_df["Latitude (Y)"], crs="EPSG:4326"),
-    )
-    return cities
+    return map_layers.load_cities()
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_all_inscriptions(columns: tuple[str, ...] = tuple(REQUIRED_COLS)) -> pd.DataFrame:
-    """Load JSONL with only needed columns - minimal memory footprint.
+    """The search frame, cached.
 
     The column set is an argument so that it lands in the cache key: adding a
     column to REQUIRED_COLS otherwise leaves a running app serving a cached
     frame that is missing it.
     """
-    # Load JSONL and keep only required columns
-    data = pd.read_json(cleaned_corpus_path(), lines=True)
-
-    # Select only columns we need
-    cols_to_keep = [c for c in columns if c in data.columns]
-    data = data[cols_to_keep]
-
-    # Fast numeric conversion and bounds check
-    data["latitude"] = pd.to_numeric(data["latitude"], errors="coerce")
-    data["longitude"] = pd.to_numeric(data["longitude"], errors="coerce")
-
-    # Drop invalid coords
-    data = data.dropna(subset=["latitude", "longitude"])
-
-    # Quick Roman bounds filter
-    min_lat, max_lat, min_lon, max_lon = ROMAN_BOUNDS
-    data = data[
-        (data["latitude"] >= min_lat) & (data["latitude"] <= max_lat) &
-        (data["longitude"] >= min_lon) & (data["longitude"] <= max_lon)
-    ]
-
-    return data.reset_index(drop=True)
+    return search.load_inscriptions(corpus_files, columns)
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_full_cleaned_data() -> pd.DataFrame:
     """Load full cleaned dataset with all columns for detailed result table."""
-    return pd.read_json(cleaned_corpus_path(), lines=True)
+    return search.load_full_cleaned_data(corpus_files)
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def short_forms() -> dict[str, dict[str, str]]:
-    """Map each English filter value to its abbreviated form, where one exists.
+    return search.short_forms(corpus_files)
 
-    EDCS records materials and categories under a Latin token (`aes`,
-    `tituli sepulcrales`) and languages under an ISO-ish code, alongside the
-    English label the corpus columns carry. The dropdowns show both.
-    """
-    forms: dict[str, dict[str, str]] = {"material_en": {}, "category_en": {}, "language": {}}
-    if not LOOKUP_FILE.exists():
-        return forms
 
-    with LOOKUP_FILE.open(encoding="utf-8") as handle:
-        lookup = json.load(handle)
+@st.cache_data(show_spinner=False, ttl=3600)
+def filter_options() -> dict[str, list[str]]:
+    return search.filter_options(load_all_inscriptions)
 
-    for source, column, short_key in (
-        ("materials", "material_en", "token"),
-        ("categories", "category_en", "token"),
-        ("languages", "language", "code"),
-    ):
-        for entry in (lookup.get(source) or {}).values():
-            english = str(entry.get("en") or "").strip()
-            short = str(entry.get(short_key) or "").strip()
-            if english and short and short not in {english, "?"}:
-                forms[column][english] = short
-    return forms
+
+@st.cache_data(show_spinner=False, ttl=3600)
+def load_known_places() -> pd.DataFrame:
+    return search.load_known_places(load_all_inscriptions, corpus_files)
+
+
+@st.cache_data(show_spinner=False, ttl=3600)
+def run_query(
+    term: str,
+    search_mode: str,
+    selections: tuple[tuple[str, tuple[str, ...]], ...],
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Cached on the query itself, so widget reruns do not re-filter half a million rows."""
+    return search.run_query(term, search_mode, selections, load_all_inscriptions)
+
+
+@st.cache_data(show_spinner=False, ttl=3600)
+def provinces_geojson() -> dict:
+    return map_data.provinces_geojson(load_provinces)
+
+
+@st.cache_data(show_spinner=False, ttl=3600)
+def roads_geojson() -> dict:
+    return map_data.roads_geojson(load_roads)
+
+
+@st.cache_data(show_spinner=False, ttl=3600)
+def cities_points() -> list[list]:
+    return map_data.cities_points(load_cities)
 
 
 def option_formatter(column: str, forms: dict[str, dict[str, str]]):
@@ -312,82 +286,6 @@ def option_formatter(column: str, forms: dict[str, dict[str, str]]):
     return format_option
 
 
-@st.cache_data(show_spinner=False, ttl=3600)
-def filter_options() -> dict[str, list[str]]:
-    """Every value each filter can take, taken from the corpus itself."""
-    data = load_all_inscriptions()
-    options: dict[str, list[str]] = {}
-    for column in ("material_en", "province", "place"):
-        values = data[column].dropna().astype(str).str.strip()
-        options[column] = sorted({v for v in values if v and v != "?"})
-    for column in MULTI_VALUE_FILTERS:
-        collected: set[str] = set()
-        for value in data[column]:
-            collected |= _token_set(value)
-        options[column] = sorted(collected)
-    return options
-
-
-# --------------------------------------------------------------------------
-# Place aggregation
-#
-# EDCS draws one circle per place scaled by how many monuments sit there, not
-# one circle per monument. Everything below turns inscription rows into that
-# per-place view.
-# --------------------------------------------------------------------------
-
-
-@st.cache_data(show_spinner=False, ttl=3600)
-def load_known_places() -> pd.DataFrame:
-    """Every place EDCS knows, carrying this corpus' monument count.
-
-    Places that the lookup table knows but that have no inscription in the
-    corpus are kept with a count of 0, which is how EDCS renders them: a small
-    grey dot rather than a graduated purple one.
-    """
-    known = aggregate_places(load_all_inscriptions())
-
-    if not LOOKUP_FILE.exists():
-        return known
-
-    with LOOKUP_FILE.open(encoding="utf-8") as handle:
-        lookup = json.load(handle)
-
-    seen = {
-        (round(lat, 4), round(lon, 4))
-        for lat, lon in zip(known["latitude"], known["longitude"], strict=True)
-    }
-    min_lat, max_lat, min_lon, max_lon = ROMAN_BOUNDS
-    extra: list[dict[str, object]] = []
-    for entry in (lookup.get("places") or {}).values():
-        try:
-            lat = float(entry.get("lat"))
-            lon = float(entry.get("lon"))
-        except (TypeError, ValueError):
-            continue
-        if not (min_lat <= lat <= max_lat and min_lon <= lon <= max_lon):
-            continue
-        key = (round(lat, 4), round(lon, 4))
-        if key in seen:
-            continue
-        seen.add(key)
-        extra.append(
-            {
-                "place": str(entry.get("ort") or "?").strip() or "?",
-                "latitude": round(lat, 5),
-                "longitude": round(lon, 5),
-                "count": 0,
-            }
-        )
-
-    if not extra:
-        return known
-    combined = pd.concat([known, pd.DataFrame(extra)], ignore_index=True)
-    # Re-sort after the zero-count places are appended, or they would paint over
-    # every graduated circle on the map.
-    return combined.sort_values("count").reset_index(drop=True)
-
-
 def radius_for_count(count: int) -> float:
     """Circle radius at the default zoom, continuous in the inscription count."""
     if count <= 0:
@@ -398,20 +296,6 @@ def radius_for_count(count: int) -> float:
 # --------------------------------------------------------------------------
 # Optional historical overlays (off by default)
 # --------------------------------------------------------------------------
-
-
-def _province_palette() -> list[str]:
-    """Saturated province fills that still read under a full field of markers."""
-    return [
-        "#f9c784",
-        "#8ecae6",
-        "#a7d489",
-        "#d9a7e0",
-        "#f6d55c",
-        "#7fd1bd",
-        "#f5a3b7",
-        "#a6b1f0",
-    ]
 
 
 def _print_province_palette() -> list[str]:
@@ -437,47 +321,6 @@ def _print_province_palette() -> list[str]:
 # violet city rings, muted slate roads, warm markers.
 PRINT_CITY_COLOR = "#c084fc"
 PRINT_ROAD_COLOR = "#64748b"
-
-
-@st.cache_data(show_spinner=False, ttl=3600)
-def provinces_geojson() -> dict:
-    """Provinces as GeoJSON, lightly simplified and pre-coloured for the browser."""
-    provinces = load_provinces().reset_index(drop=True).copy()
-    palette = _province_palette()
-    provinces["_color"] = [palette[i % len(palette)] for i in range(len(provinces))]
-    provinces["geometry"] = provinces.geometry.simplify(0.01, preserve_topology=True)
-    return json.loads(provinces[["_color", "geometry"]].to_json())
-
-
-@st.cache_data(show_spinner=False, ttl=3600)
-def roads_geojson() -> dict:
-    """Roads as GeoJSON. Simplified hard: the raw shapefile is far too heavy to inline."""
-    roads = load_roads().copy()
-    roads["geometry"] = roads.geometry.simplify(0.02, preserve_topology=True)
-    return json.loads(roads[["geometry"]].to_json())
-
-
-@st.cache_data(show_spinner=False, ttl=3600)
-def cities_points() -> list[list]:
-    """Cities as [lat, lon, label] triples, the label used for the hover tooltip."""
-    cities = load_cities()
-
-    def label(row: pd.Series) -> str:
-        ancient = str(row.get("Ancient Toponym") or "").strip()
-        modern = str(row.get("Modern Toponym") or "").strip()
-        province = str(row.get("Province") or "").strip()
-        name = ancient or modern or "Unnamed city"
-        if ancient and modern and modern != ancient:
-            name = f"{ancient} / {modern}"
-        return f"{name}, {province}" if province else name
-
-    points = []
-    for _, row in cities.iterrows():
-        point = row.geometry
-        if point is None or point.is_empty:
-            continue
-        points.append([round(float(point.y), 5), round(float(point.x), 5), label(row)])
-    return points
 
 
 # --------------------------------------------------------------------------
@@ -1101,33 +944,6 @@ def build_png_bytes(
     return buffer.getvalue()
 
 
-@st.cache_data(show_spinner=False, ttl=3600)
-def run_query(
-    term: str,
-    search_mode: str,
-    selections: tuple[tuple[str, tuple[str, ...]], ...],
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Filtered rows and their per-place aggregate, cached on the query itself.
-
-    The search controls are no longer wrapped in `st.form` - a download button
-    cannot live inside one - so every widget change reruns the script. Caching
-    here keeps those reruns from re-filtering half a million rows.
-    """
-    filters = {column: list(values) for column, values in selections}
-    search_column = SEARCH_COLUMNS[search_mode]
-    filtered = apply_filters(load_all_inscriptions(), search_column, term, filters)
-    if filtered.empty:
-        return filtered, pd.DataFrame(columns=["place", "latitude", "longitude", "count", "items"])
-
-    places = aggregate_places(filtered)
-    examples = _place_result_items(filtered, search_column)
-    places["items"] = [
-        examples.get((round(lat, 5), round(lon, 5)), [])
-        for lat, lon in zip(places["latitude"], places["longitude"], strict=True)
-    ]
-    return filtered, places
-
-
 def _submit_search() -> None:
     """Copy the live widget values into the submitted state."""
     st.session_state["submitted_term"] = st.session_state.get("keyword_input", "").strip()
@@ -1317,16 +1133,9 @@ def main() -> None:
     # Results table with all columns from cleaned dataset for matched IDs
     st.markdown("<div class='results-title'>Results</div>", unsafe_allow_html=True)
     with st.spinner("Preparing detailed results table..."):
-        full_data = load_full_cleaned_data()
+        matched_table = search.matched_results(filtered, load_full_cleaned_data())
 
-        id_col = "edcs_id" if "edcs_id" in filtered.columns and "edcs_id" in full_data.columns else "record_id"
-        matched_ids = filtered[id_col].dropna().astype(str).unique().tolist()
-
-        full_data_keyed = full_data.copy()
-        full_data_keyed[id_col] = full_data_keyed[id_col].astype(str)
-        matched_table = full_data_keyed[full_data_keyed[id_col].isin(matched_ids)]
-
-    tsv_bytes = matched_table.to_csv(sep="\t", index=False).encode("utf-8")
+    tsv_bytes = search.results_tsv(matched_table)
     dl_col_1, dl_col_2, dl_col_3 = st.columns([3, 1, 3])
     with dl_col_2:
         st.download_button(
