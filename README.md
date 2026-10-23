@@ -41,31 +41,40 @@ Doddapaneni, S. (n.d.). EpigCorpus: A reproducible Latin epigraphy pipeline for 
 
 ## Example PNG Export (term: viator)
 
-![Example PNG Export for viator](img/Example%20export%20png%20image%20for%20term%20viator.png)
+![Example PNG Export for viator](docs/img/Example%20export%20png%20image%20for%20term%20viator.png)
 
 ## Repository Layout
 
 ```text
-EDCS-Analytics/
-├── data/
-│   ├── edcs_inscriptions.jsonl
-│   ├── edcs_inscriptions.tsv
-│   ├── edcs_lookup.json
-│   ├── edcs_inscriptions_cleaned.jsonl
-│   ├── map_layers/
-│   │   ├── Hanson2016_Cities_OxREP.csv
-│   │   ├── ba_roads/
-│   │   └── roman_empire_ad_117/
-│   └── README.md
-├── src/
-│   ├── edcs_scraper.py
-│   ├── edcs_cleaner.py
-│   └── edcs_streamlit_map.py
-├── main.py
+EpigCorpus/
+├── app/
+│   ├── main.py            # pipeline entry: python -m app.main
+│   ├── config/            # paths.py and settings.py: the only place paths are defined
+│   ├── models/            # the inscription column schema
+│   ├── core/              # pure helpers: cleaning rules, EDCS parsing, search
+│   ├── adapters/          # EDCS HTTP client, harvest and corpus files, map layers
+│   ├── services/          # use cases: scrape, cleaning, search, map data (+ ports.py)
+│   ├── api/               # HTTP API contract (OpenAPI), not implemented yet
+│   ├── ui/                # the Streamlit map (streamlit_app.py)
+│   ├── cli/               # command-line parsing and launchers
+│   ├── scripts/           # one-off research scripts (not part of the package)
+│   ├── tests/
+│   └── data/
+│       ├── raw/           # edcs_inscriptions.jsonl.gz / .tsv.gz, harvest/ state
+│       ├── processed/     # edcs_inscriptions_cleaned.jsonl.gz, derived/ datasets
+│       ├── reference/     # edcs_lookup.json, map_layers/
+│       ├── results/       # analysis outputs and model cells
+│       └── reports/       # research reports
+├── docs/                  # audits, ADRs, API notes, refactor records, img/
 ├── epigcorpus.sh
 ├── pyproject.toml
 └── README.md
 ```
+
+Dependencies point one way: the UI, CLI and (future) API call services;
+services reach adapters only through the interfaces in
+`app/services/ports.py`. See `docs/adr/0001-layered-app-layout.md`.
+`app/tests/test_layering.py` enforces it.
 
 ## Requirements
 
@@ -111,67 +120,72 @@ The launcher:
 
 ## Run Modes
 
-Full pipeline:
+Run from the repository root. Full pipeline:
 
 ```bash
-python main.py
+python -m app.main
 ```
 
 Skip scrape (use latest local JSONL):
 
 ```bash
-python main.py --skip-scrape
+python -m app.main --skip-scrape
 ```
 
 Skip map launch:
 
 ```bash
-python main.py --skip-map
+python -m app.main --skip-map
 ```
 
 Run components directly:
 
 ```bash
-python src/edcs_scraper.py
-streamlit run src/edcs_streamlit_map.py
+python -m app.cli.scrape            # same flags as before: --limit, --workers, --restart, --refresh-index
+streamlit run app/ui/streamlit_app.py
 ```
+
+`python main.py` and `python src/edcs_scraper.py` were replaced by these module
+commands when the code moved under `app/`; the flags are unchanged. A plain
+`data/edcs_inscriptions.jsonl` left from before the move is no longer read:
+move it to `app/data/raw/`.
 
 ## Data Products
 
-Generated in data/:
+Generated under app/data/ (paths are defined in app/config/paths.py):
 
-- edcs_inscriptions.jsonl
+- raw/edcs_inscriptions.jsonl
   - canonical machine-readable inscription export
   - one JSON record per line
-- edcs_inscriptions.tsv
+- raw/edcs_inscriptions.tsv
   - tabular export for spreadsheets and SQL-style workflows
-- edcs_lookup.json
+- reference/edcs_lookup.json
   - lookup dictionary used to decode controlled vocabulary fields
-- edcs_checkpoint.json
+- raw/harvest/edcs_checkpoint.json
   - temporary resume checkpoint used during scraping
-- edcs_inscriptions_cleaned.jsonl
+- processed/edcs_inscriptions_cleaned.jsonl
   - cleaned dataset used by the Streamlit app and map search
 
-For detailed data documentation and schema notes, see data/README.md.
+For detailed data documentation and schema notes, see app/data/README.md.
 
 ## Pipeline Details
 
 ### 1) Scraping
 
-Implemented in src/edcs_scraper.py:
+Implemented in app/services/scrape.py (HTTP in app/adapters/edcs_client.py):
 - Uses EDCS API endpoint queries.
 - Supports resume via checkpoint.
 - Appends only unseen records in incremental mode.
 
 ### 2) Cleaning
 
-Implemented in src/edcs_cleaner.py:
+Implemented in app/core/cleaning.py (rules) and app/services/cleaning.py:
 - Applies a staged text cleaning pipeline.
 - Produces conservative and interpretive cleaned variants.
 
 ### 3) Interactive Exploration
 
-Implemented in src/edcs_streamlit_map.py:
+Implemented in app/ui/streamlit_app.py, on app/services/search.py:
 - Search modes: Raw inscriptions, Interpretive Cleaned Inscriptions, Conservative Cleaned Inscriptions.
 - Interactive Leaflet map with layer toggles, hover tooltips and result popups.
 - TSV export for result tables.

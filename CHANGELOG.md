@@ -8,6 +8,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — code and data moved under `app/`, in layers (2026-10-23)
+
+- No change to corpus semantics, cleaning rules, CLI flags, output file
+  names or formats. The full-corpus cleaning output, a fixture harvest and
+  the map's queries and PNG exports were checked byte for byte against the
+  previous layout (`docs/refactor/verification.md`).
+- Code: `src/edcs_cleaner.py` is now `app/core/cleaning.py` (rules) and
+  `app/services/cleaning.py` (`clean_data`); `src/edcs_scraper.py` is split
+  across `app/adapters/edcs_client.py`, `app/adapters/harvest_store.py`,
+  `app/core/edcs_parsing.py`, `app/services/scrape.py` and
+  `app/cli/scrape.py`; `src/edcs_streamlit_map.py` is `app/ui/streamlit_app.py`
+  on top of `app/services/search.py`, `app/services/map_data.py` and
+  `app/adapters/map_layers.py`. See `docs/adr/0001-layered-app-layout.md`.
+- Commands: `python main.py` → `python -m app.main`;
+  `python src/edcs_scraper.py` → `python -m app.cli.scrape`;
+  `streamlit run app/ui/streamlit_app.py`. `./epigcorpus.sh` is unchanged.
+- Data: `data/`, `results/` and `reports/` moved to `app/data/{raw,processed,
+  reference,results,reports}/`, every file hash-identical; mapping in
+  `docs/refactor/path-map.tsv`. Every path is defined in
+  `app/config/paths.py`.
+- Tests moved to `app/tests/`; `tests/test_api_contract.py`, which pins the
+  upstream EDCS schema, is now `app/tests/adapters/test_edcs_upstream_contract.py`.
+  `app/tests/test_layering.py` enforces the dependency rule.
+
 ### Changed — queries described in words rather than key/value pairs (2026-08-19)
 
 - `describe_query` phrases a query as a title and a single subtitle line, used

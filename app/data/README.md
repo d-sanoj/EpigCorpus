@@ -1,11 +1,24 @@
 # Data directory
 
-Corpus exports, lookup tables, harvest metadata and base-map layers used by
-EpigCorpus.
+Corpus exports, lookup tables, harvest metadata, base-map layers, research
+datasets and their results, grouped by role:
+
+| Folder | Role |
+|---|---|
+| `raw/` | What the scraper fetched, untransformed; `raw/harvest/` holds its state |
+| `processed/` | Deterministic transforms of raw: the cleaned corpus and derived datasets |
+| `reference/` | Lookup tables and vendored third-party map layers |
+| `results/` | Analysis outputs |
+| `reports/` | Research reports |
+
+Every path is defined in `app/config/paths.py`. Files that lived in `data/`,
+`results/` and `reports/` before the `app/` restructure are mapped to their
+current location in `docs/refactor/path-map.tsv`; the reports keep their
+original wording, so use that table to follow a path they cite.
 
 **Current snapshot:** harvested 2026-08-19 against EDCS release
 `20260807-142626` — 542,854 monuments, 588,509 inscription rows, 0 failed
-fetches. See `edcs_harvest_manifest.json`.
+fetches. See `raw/harvest/edcs_harvest_manifest.json`.
 
 ---
 
@@ -15,22 +28,25 @@ fetches. See `edcs_harvest_manifest.json`.
 
 | File | Size | What it is |
 |---|---|---|
-| `edcs_inscriptions.jsonl.gz` | ~39 MB | The corpus. One inscription per line. |
-| `edcs_inscriptions.tsv.gz` | ~12 MB | Same records, tab-delimited. |
-| `edcs_lookup.json` | 3.2 MB | Flattened EDCS code tables used for the harvest: materials, categories, provinces, languages, places, citation sources. |
-| `edcs_harvest_manifest.json` | <1 KB | Completion record: counts, timestamps, index snapshot, version. |
-| `edcs_failed_ids.json` | <1 KB | Monuments that could not be fetched. Empty for a clean harvest. |
-| `map_layers/` | 6.2 MB | Base-map layers. See `map_layers/README.md`. |
+| `raw/edcs_inscriptions.jsonl.gz` | ~39 MB | The corpus. One inscription per line. |
+| `raw/edcs_inscriptions.tsv.gz` | ~12 MB | Same records, tab-delimited. |
+| `reference/edcs_lookup.json` | 3.2 MB | Flattened EDCS code tables used for the harvest: materials, categories, provinces, languages, places, citation sources. |
+| `raw/harvest/edcs_harvest_manifest.json` | <1 KB | Completion record: counts, timestamps, index snapshot, version. |
+| `raw/harvest/edcs_failed_ids.json` | <1 KB | Monuments that could not be fetched. Empty for a clean harvest. |
+| `processed/edcs_inscriptions_cleaned.jsonl.gz` | ~53 MB | Cleaned corpus with conservative and interpretive text columns. |
+| `processed/derived/` | ~93 MB | Abbreviation-study datasets and frozen splits (see `reports/phase4_splits.md`). |
+| `reference/map_layers/` | 6.2 MB | Base-map layers. See `reference/map_layers/README.md`. |
+| `results/` | 4.5 MB | Analysis outputs (`analysis/`) and model cells (`cells*/`). |
+| `reports/` | 0.6 MB | Research reports and the decision log. |
 
 ### Generated locally, not committed
 
 | File | What it is |
 |---|---|
-| `edcs_inscriptions.jsonl` / `.tsv` | Uncompressed working copies (~540 MB / ~102 MB), written during a harvest. |
-| `edcs_inscriptions_cleaned.jsonl` | Cleaned corpus with conservative and interpretive text columns. |
-| `edcs_inscriptions_cleaned.jsonl.gz` | Compressed cleaned corpus. |
-| `edcs_checkpoint.json` | Resume cursor. Present only mid-harvest; deleted on completion. |
-| `edcs_index_cache.json` | Cached corpus index (~5 MB). Regenerable with `--refresh-index`. |
+| `raw/edcs_inscriptions.jsonl` / `.tsv` | Uncompressed working copies (~540 MB / ~102 MB), written during a harvest. |
+| `processed/edcs_inscriptions_cleaned.jsonl` | Uncompressed cleaned corpus, written by the cleaning step. |
+| `raw/harvest/edcs_checkpoint.json` | Resume cursor. Present only mid-harvest; deleted on completion. |
+| `raw/harvest/edcs_index_cache.json` | Cached corpus index (~5 MB). Regenerable with `--refresh-index`. |
 
 ---
 
@@ -48,7 +64,7 @@ everyone, reviewers included.
 - The scraper writes plain `.jsonl`/`.tsv` during a harvest — appending to a
   gzip stream across a checkpointed resume is not safe — then compresses them
   automatically on completion.
-- `main.py` and the Streamlit map read either form. pandas infers gzip from the
+- `app/main.py` and the Streamlit map read either form. pandas infers gzip from the
   file extension; the loaders prefer a plain file when one exists and fall back
   to the `.gz` snapshot.
 - `.gitignore` ships only the `.gz` and ignores the plain working copies.
@@ -62,18 +78,18 @@ fresh `.gz` copies are regenerated for committing.
 ## Workflow
 
 ```bash
-python main.py                    # harvest, clean, launch the map
-python src/edcs_scraper.py        # harvest only
-python main.py --skip-scrape      # clean and launch from existing data
+python -m app.main                  # harvest, clean, launch the map
+python -m app.cli.scrape            # harvest only
+python -m app.main --skip-scrape    # clean and launch from existing data
 ```
 
 Scraper options:
 
 ```bash
-python src/edcs_scraper.py --limit 500      # smoke test on 500 monuments
-python src/edcs_scraper.py --workers 8      # gentler on the server (default 16)
-python src/edcs_scraper.py --refresh-index  # re-fetch the index; check if EDCS grew
-python src/edcs_scraper.py --restart        # DELETES existing output, re-harvests
+python -m app.cli.scrape --limit 500      # smoke test on 500 monuments
+python -m app.cli.scrape --workers 8      # gentler on the server (default 16)
+python -m app.cli.scrape --refresh-index  # re-fetch the index; check if EDCS grew
+python -m app.cli.scrape --restart        # DELETES existing output, re-harvests
 ```
 
 Running the scraper against a completed harvest is safe: it reads the manifest,
@@ -193,7 +209,7 @@ Languages: Latin 540,410 · Greek 26,968 · indistinct 12,416 · Greek and Latin
 import pandas as pd
 
 # Works on either form — pandas infers gzip from the extension
-df = pd.read_json("data/edcs_inscriptions.jsonl.gz", lines=True)
+df = pd.read_json("app/data/raw/edcs_inscriptions.jsonl.gz", lines=True)
 ```
 
 In the TSV, list-valued columns (`category`, `category_en`, `belege`, `status`,
@@ -210,7 +226,7 @@ Inscriptions come from the **Epigraphik-Datenbank Clauss / Slaby**,
 EDCS-derived text carries EDCS's own terms, and redistribution terms for this
 corpus are still to be settled (T29).
 
-Base-map layer sources and licences: `map_layers/README.md`.
+Base-map layer sources and licences: `reference/map_layers/README.md`.
 
 ## Caveats
 
