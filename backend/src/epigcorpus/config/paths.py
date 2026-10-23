@@ -46,6 +46,9 @@ LOOKUP_FILE = REFERENCE_DIR / "edcs_lookup.json"
 # ─── Cleaning outputs ─────────────────────────────────────────────────────────
 CLEANED_JSONL = PROCESSED_DIR / "edcs_inscriptions_cleaned.jsonl"
 CLEANED_JSONL_GZ = PROCESSED_DIR / "edcs_inscriptions_cleaned.jsonl.gz"
+# A Parquet copy of the cleaned corpus, rebuilt from the JSONL whenever that
+# changes. It loads in about a second where the JSONL takes most of a minute.
+CLEANED_PARQUET = PROCESSED_DIR / "edcs_inscriptions_cleaned.parquet"
 
 # ─── Reference layers ─────────────────────────────────────────────────────────
 # Vendored rather than fetched at runtime; provenance and licence terms are in

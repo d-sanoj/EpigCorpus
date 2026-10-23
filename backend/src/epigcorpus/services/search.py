@@ -38,9 +38,13 @@ def load_inscriptions(
     Rows without coordinates, or outside ROMAN_BOUNDS, are dropped: this is
     the frame every search runs on.
     """
-    # Load JSONL and keep only required columns
-    data = reader.read_cleaned_corpus()
+    return search_frame(reader.read_cleaned_corpus(), columns)
 
+
+def search_frame(
+    data: pd.DataFrame, columns: tuple[str, ...] = tuple(REQUIRED_COLS)
+) -> pd.DataFrame:
+    """The search frame cut from an already loaded cleaned corpus; see load_inscriptions."""
     # Select only columns we need
     cols_to_keep = [c for c in columns if c in data.columns]
     data = data[cols_to_keep]

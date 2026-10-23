@@ -124,7 +124,8 @@ class Catalog:
 
     def inscriptions(self) -> pd.DataFrame:
         """The search frame: REQUIRED_COLS, rows with coordinates inside ROMAN_BOUNDS."""
-        return self._once("inscriptions", lambda: search.load_inscriptions(self._reader))
+        # Cut from the full corpus, so the corpus is read from disk only once.
+        return self._once("inscriptions", lambda: search.search_frame(self.full()))
 
     def full(self) -> pd.DataFrame:
         """Every row and column of the cleaned corpus."""
