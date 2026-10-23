@@ -45,6 +45,7 @@ from app.config.settings import (  # noqa: E402
     LEAFLET_JS,
     ROMAN_BOUNDS,
 )
+from app.models.inscription import MULTI_VALUE_FILTERS, REQUIRED_COLS  # noqa: E402
 
 REPO_URL = "https://github.com/d-sanoj/EpigCorpus"
 REPO_NAME = "d-sanoj/EpigCorpus"
@@ -53,28 +54,6 @@ PNG_CITATION = (
     "[Computer software]. GitHub. https://github.com/d-sanoj/EpigCorpus"
 )
 
-# Required columns - everything else is dropped to reduce memory load
-REQUIRED_COLS = [
-    "latitude",
-    "longitude",
-    "inscription_text",
-    "inscription_text_interpretive",
-    "inscription_text_conservative",
-    "record_id",
-    "edcs_id",
-    "place",
-    "province",
-    "not_before",
-    "not_after",
-    "language",
-    "material_en",
-    "category_en",
-]
-
-# Fields whose cells hold several values at once: category_en is a list, and
-# language arrives comma-joined ("Greek, Latin"). Selecting "Latin" has to match
-# those rows too, so both are filtered on token overlap rather than equality.
-MULTI_VALUE_FILTERS = ("category_en", "language")
 
 # Map view shared by the initial load and the reset control (EDCS uses Rome).
 MAP_CENTER = (41.9028, 12.4964)
