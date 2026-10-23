@@ -17,8 +17,8 @@ from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
-from app.services import search
-from app.services.catalog import selections_from
+from epigcorpus.services import search
+from epigcorpus.services.catalog import selections_from
 
 RAW = "Raw inscriptions"
 NO_FILTERS = selections_from({})

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request, Response
 
-from app.api import serialize
-from app.api.deps import (
+from epigcorpus.api import serialize
+from epigcorpus.api.deps import (
     SEARCH_MODES,
     Cursor,
     Deps,
@@ -15,7 +15,7 @@ from app.api.deps import (
     SearchIn,
     SearchInParam,
 )
-from app.api.pagination import paginate
+from epigcorpus.api.pagination import paginate
 
 router = APIRouter(prefix="/v1/places", tags=["places"])
 

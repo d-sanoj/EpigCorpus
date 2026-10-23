@@ -7,21 +7,12 @@ Rewritten 2026-08-19 for the EDCS release of 2026-08-07, which withdrew the
 DataTables endpoint `/api/query` (now 403) and replaced it with a static-file
 architecture. See docs/EDCS_API.md for the full contract.
 
-FOLDER STRUCTURE (paths are defined in app/config/paths.py):
-    EpigCorpus/app/
-    ├── data/
-    │   ├── raw/
-    │   │   ├── edcs_inscriptions.jsonl     ← one record per line
-    │   │   ├── edcs_inscriptions.tsv
-    │   │   └── harvest/
-    │   │       ├── edcs_checkpoint.json    ← resume cursor
-    │   │       └── edcs_failed_ids.json    ← monuments that could not be fetched
-    │   └── reference/
-    │       └── edcs_lookup.json            ← materials / provinces / categories / languages
-    ├── services/scrape.py                  ← this file: the harvest use case
-    ├── adapters/edcs_client.py             ← HTTP
-    ├── adapters/harvest_store.py           ← output, checkpoint, failures, manifest
-    └── cli/scrape.py                       ← command line
+FOLDER STRUCTURE (paths are defined in epigcorpus/config/paths.py):
+    data/raw/edcs_inscriptions.jsonl          ← one record per line
+    data/raw/edcs_inscriptions.tsv
+    data/raw/harvest/edcs_checkpoint.json     ← resume cursor
+    data/raw/harvest/edcs_failed_ids.json     ← monuments that could not be fetched
+    data/reference/edcs_lookup.json           ← materials / provinces / categories / languages
 
 HOW THE CURRENT API WORKS:
     1. /data/indexes/searchable.json  — the whole corpus index in one file
@@ -53,22 +44,22 @@ FIELD COVERAGE:
 
 READING IN PYTHON:
     import pandas as pd
-    df = pd.read_json("app/data/raw/edcs_inscriptions.jsonl.gz", lines=True)
+    df = pd.read_json("data/raw/edcs_inscriptions.jsonl.gz", lines=True)
 
-RUN (from project root):
-    python -m app.cli.scrape                   # full harvest, resumes if interrupted
-    python -m app.cli.scrape --limit 500       # first 500 monuments (smoke test)
-    python -m app.cli.scrape --restart         # discard existing output and start over
-    python -m app.cli.scrape --workers 8       # gentler on the server
+RUN:
+    Through the API only: POST /api/v1/pipeline-runs starts the pipeline
+    (harvest, clean, index) in the background; run_harvest is its first step.
+    Arguments mirror the old command line: limit, workers, restart,
+    refresh_index.
 """
 
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 
-from app.config.settings import CHUNK_SIZE, MONUMENT_URL
-from app.core.edcs_parsing import parse_monument
-from app.services.ports import EdcsClient, HarvestStore, Log
+from epigcorpus.config.settings import CHUNK_SIZE, MONUMENT_URL
+from epigcorpus.core.edcs_parsing import parse_monument
+from epigcorpus.services.ports import EdcsClient, HarvestStore, Log
 
 # Called after every chunk with cursor, total, monuments_done, rows_written,
 # failed and rate_per_second. Optional; the command line passes none.

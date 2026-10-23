@@ -2,7 +2,7 @@
 
 Moved verbatim from the former Streamlit app. The PNG uses the web map's dark
 palette and symbology; the colours below are mirrored in the web UI's
-app/ui/static/map.js.
+frontend/src/map/.
 """
 
 from __future__ import annotations

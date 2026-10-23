@@ -1,6 +1,6 @@
 """Build the FastAPI application from already-wired dependencies.
 
-The contract is the hand-written app/api/openapi.yaml, served at
+The contract is the hand-written backend/src/epigcorpus/api/openapi.yaml, served at
 /v1/openapi.yaml. FastAPI's generated schema is switched off so there is
 only one description of the API.
 """
@@ -10,9 +10,9 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.api import problems
-from app.api.deps import ApiDeps
-from app.api.routes import exports, inscriptions, jobs, lookups, map, meta, places
+from epigcorpus.api import problems
+from epigcorpus.api.deps import ApiDeps
+from epigcorpus.api.routes import exports, inscriptions, jobs, lookups, map, meta, places
 
 
 def create_app(deps: ApiDeps, lifespan=None) -> FastAPI:

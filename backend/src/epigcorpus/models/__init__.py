@@ -1,1 +1,1 @@
-"""Domain shapes. Imports nothing internal except app.config."""
+"""Domain shapes. Imports nothing internal except epigcorpus.config."""

@@ -1,7 +1,7 @@
 """Settings: the EDCS endpoints and HTTP behaviour, and fixed spatial bounds.
 
-Paths live in app.config.paths. Presentation (colours, styles, the basemap)
-lives with the web UI in app/ui/static.
+Paths live in epigcorpus.config.paths. Presentation (colours, styles, the basemap)
+lives with the web UI in frontend/.
 """
 
 # ─── EDCS API ─────────────────────────────────────────────────────────────────

@@ -1,12 +1,12 @@
 """The cleaning use case: raw corpus in, conservative and interpretive variants out.
 
-The rule sets themselves are pure and live in app.core.cleaning.
+The rule sets themselves are pure and live in epigcorpus.core.cleaning.
 """
 
 import pandas as pd
 
-from app.core.cleaning import clean_conservative, clean_interpretive
-from app.services.ports import RawCorpusStore
+from epigcorpus.core.cleaning import clean_conservative, clean_interpretive
+from epigcorpus.services.ports import RawCorpusStore
 
 
 def clean_data(data: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:

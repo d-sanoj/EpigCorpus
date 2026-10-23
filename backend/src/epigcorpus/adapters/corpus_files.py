@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from app.config.paths import (
+from epigcorpus.config.paths import (
     CLEANED_JSONL,
     CLEANED_JSONL_GZ,
     LOOKUP_FILE,

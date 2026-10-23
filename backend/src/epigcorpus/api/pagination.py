@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 from fastapi import Request, Response
 
-from app.api.problems import Problem
+from epigcorpus.api.problems import Problem
 
 DEFAULT_LIMIT = 50
 MAX_LIMIT = 500

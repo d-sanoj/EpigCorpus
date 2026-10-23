@@ -1,13 +1,13 @@
-"""Enforce the dependency rule between the layers under app/.
+"""Enforce the dependency rule between the layers of the epigcorpus package.
 
-    api, ui, cli  ->  services  ->  core, models  (and adapters, only through ports)
+    api           ->  services  ->  core, models  (and adapters, only through ports)
     adapters      ->  core, models
     every layer   ->  config
 
 Services never import adapters: they receive them, typed by the Protocols in
-app/services/ports.py, from a composition root. The composition roots are the
-entry points that wire real adapters into services; they alone may import
-adapters from outside the adapter layer. See docs/adr/0001-layered-app-layout.md.
+epigcorpus/services/ports.py, from the composition root, epigcorpus/api/server.py,
+which wires real adapters into services; it alone may import adapters from
+outside the adapter layer. See docs/adr/0001-layered-app-layout.md.
 """
 
 import ast
@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-APP = Path(__file__).resolve().parents[1]
+APP = Path(__file__).resolve().parents[1] / "src" / "epigcorpus"
 
 ALLOWED = {
     "config": {"config"},
@@ -24,13 +24,9 @@ ALLOWED = {
     "adapters": {"config", "models", "core", "adapters"},
     "services": {"config", "models", "core", "services"},
     "api": {"config", "models", "services", "api"},
-    "ui": {"config", "models", "services", "ui"},
-    "cli": {"config", "models", "services", "cli"},
 }
 
 COMPOSITION_ROOTS = {
-    "main.py": {"config", "models", "services", "cli", "adapters"},
-    "cli/scrape.py": ALLOWED["cli"] | {"adapters"},
     "api/server.py": ALLOWED["api"] | {"adapters"},
 }
 
@@ -40,10 +36,10 @@ FRAMEWORK_ONLY = {
     "fastapi": {"api"},
     "starlette": {"api"},
     "pydantic": {"api"},
-    "uvicorn": {"cli"},
+    "uvicorn": set(),  # started from outside: uvicorn epigcorpus.api.server:app
 }
 
-NOT_CHECKED = {"scripts", "tests", "data"}
+NOT_CHECKED = {"ui"}  # static files only
 
 
 def _modules():
@@ -61,9 +57,9 @@ def _imports(path: Path):
             for alias in node.names:
                 yield alias.name
         elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
-            if node.module == "app":
+            if node.module == "epigcorpus":
                 for alias in node.names:
-                    yield f"app.{alias.name}"
+                    yield f"epigcorpus.{alias.name}"
             else:
                 yield node.module
 
@@ -90,7 +86,7 @@ def test_module_respects_the_dependency_rule(rel, path):
     violations = []
     for name in _imports(path):
         parts = name.split(".")
-        if parts[0] == "app":
+        if parts[0] == "epigcorpus":
             if len(parts) < 2:
                 violations.append(name)
                 continue
@@ -104,5 +100,5 @@ def test_module_respects_the_dependency_rule(rel, path):
 
 def test_every_layer_is_present():
     present = {rel.parts[0] for rel, _ in _modules() if len(rel.parts) > 1}
-    for layer in ("config", "models", "core", "adapters", "services", "api", "cli"):
+    for layer in ("config", "models", "core", "adapters", "services", "api"):
         assert layer in present

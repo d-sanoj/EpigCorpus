@@ -9,7 +9,7 @@ from pathlib import Path
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import FileResponse, StreamingResponse
 
-from app.api.deps import (
+from epigcorpus.api.deps import (
     SEARCH_MODES,
     Deps,
     FilterParams,
@@ -17,8 +17,8 @@ from app.api.deps import (
     SearchIn,
     SearchInParam,
 )
-from app.api.problems import Problem, invalid
-from app.services import search
+from epigcorpus.api.problems import Problem, invalid
+from epigcorpus.services import search
 
 router = APIRouter(prefix="/v1/exports", tags=["exports"])
 

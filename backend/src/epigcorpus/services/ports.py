@@ -1,8 +1,8 @@
 """Interfaces the services depend on.
 
 Services never import adapters. They receive objects that satisfy these
-Protocols from a composition root (app/main.py, app/cli/*, app/ui/*). The
-adapter modules in app/adapters satisfy them structurally: a module whose
+Protocols from a composition root (epigcorpus.api.server). The adapter
+modules in epigcorpus/adapters satisfy them structurally: a module whose
 functions match the Protocol's methods is a valid implementation.
 """
 
@@ -14,7 +14,7 @@ from typing import Any, Protocol
 
 import pandas as pd
 
-# One line to stdout. The scraper's is thread-safe (app.adapters.console.log).
+# One line to stdout. The scraper's is thread-safe (epigcorpus.adapters.console.log).
 Log = Callable[[str], None]
 
 

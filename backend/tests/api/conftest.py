@@ -18,15 +18,15 @@ import pytest
 import yaml
 from fastapi.testclient import TestClient
 
-from app.adapters import edcs_client, map_layers
-from app.api.app import create_app
-from app.api.deps import ApiDeps
-from app.config.paths import API_SPEC
-from app.core.edcs_parsing import parse_monument
-from app.services.catalog import Catalog
-from app.services.cleaning import clean_data
-from app.services.jobs import ScrapeJobs
-from app.services.scrape import COMPLETE, INTERRUPTED
+from epigcorpus.adapters import edcs_client, map_layers
+from epigcorpus.api.app import create_app
+from epigcorpus.api.deps import ApiDeps
+from epigcorpus.config.paths import API_SPEC
+from epigcorpus.core.edcs_parsing import parse_monument
+from epigcorpus.services.catalog import Catalog
+from epigcorpus.services.cleaning import clean_data
+from epigcorpus.services.jobs import ScrapeJobs
+from epigcorpus.services.scrape import COMPLETE, INTERRUPTED
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 

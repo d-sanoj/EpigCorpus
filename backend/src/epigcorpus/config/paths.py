@@ -1,29 +1,38 @@
 """Every filesystem path EpigCorpus reads or writes.
 
-This is the only module that defines paths. The data layout, by role:
+This is the only module that defines paths. The repository layout:
 
-    app/data/raw/          what the scraper fetched, untransformed
-    app/data/raw/harvest/  harvest state: checkpoint, failures, manifest, index cache
-    app/data/processed/    deterministic transforms of raw (cleaned corpus, derived datasets)
-    app/data/reference/    lookup tables and vendored third-party map layers
-    app/data/results/      analysis outputs
-    app/data/reports/      research reports
+    backend/                 this package (backend/src/epigcorpus) and its tests
+    frontend/                the web app; its production build is frontend/dist
+    data/raw/                what the harvest fetched, untransformed
+    data/raw/harvest/        harvest state: checkpoint, failures, manifest, index cache
+    data/processed/          deterministic transforms of raw: cleaned corpus,
+                             its Parquet search index, derived datasets
+    data/reference/          lookup tables and vendored map layers
+    research/                the abbreviation study: scripts, reports, results
 
-See docs/refactor/path-map.tsv for where each file used to live.
+Three environment variables relocate things for a container or a server:
+EPIGCORPUS_DATA_DIR (default <repo>/data), EPIGCORPUS_RESEARCH_DIR
+(default <repo>/research) and EPIGCORPUS_STATIC_DIR (default
+<repo>/frontend/dist). See docs/refactor/path-map-backend.tsv for where each
+file lived before.
 """
 
+import os
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
-APP_DIR = ROOT_DIR / "app"
-DATA_DIR = APP_DIR / "data"
+# backend/src/epigcorpus/config/paths.py -> the repository root
+ROOT_DIR = Path(__file__).resolve().parents[4]
+PACKAGE_DIR = Path(__file__).resolve().parents[1]
+DATA_DIR = Path(os.environ.get("EPIGCORPUS_DATA_DIR", ROOT_DIR / "data"))
+RESEARCH_DIR = Path(os.environ.get("EPIGCORPUS_RESEARCH_DIR", ROOT_DIR / "research"))
 
 RAW_DIR = DATA_DIR / "raw"
 HARVEST_DIR = RAW_DIR / "harvest"
 PROCESSED_DIR = DATA_DIR / "processed"
 REFERENCE_DIR = DATA_DIR / "reference"
-RESULTS_DIR = DATA_DIR / "results"
-REPORTS_DIR = DATA_DIR / "reports"
+RESULTS_DIR = RESEARCH_DIR / "results"
+REPORTS_DIR = RESEARCH_DIR / "reports"
 
 # ─── Scraper outputs ──────────────────────────────────────────────────────────
 RAW_JSONL = RAW_DIR / "edcs_inscriptions.jsonl"
@@ -40,24 +49,18 @@ CLEANED_JSONL_GZ = PROCESSED_DIR / "edcs_inscriptions_cleaned.jsonl.gz"
 
 # ─── Reference layers ─────────────────────────────────────────────────────────
 # Vendored rather than fetched at runtime; provenance and licence terms are in
-# app/data/reference/map_layers/README.md.
+# data/reference/map_layers/README.md.
 MAP_LAYERS_DIR = REFERENCE_DIR / "map_layers"
 
-# ─── Research datasets and outputs (app/scripts) ──────────────────────────────
+# ─── Research datasets and outputs (research/scripts) ─────────────────────────
 DERIVED_DIR = PROCESSED_DIR / "derived"
 DERIVED_V1_DIR = DERIVED_DIR / "v1"
 SPLITS_DIR = DERIVED_V1_DIR / "splits"
 ANALYSIS_DIR = RESULTS_DIR / "analysis"
 ANALYSIS_V1_DIR = ANALYSIS_DIR / "v1"
 CELLS_DIR = RESULTS_DIR / "cells"
-SCRIPTS_DIR = APP_DIR / "scripts"
+SCRIPTS_DIR = RESEARCH_DIR / "scripts"
 
 # ─── API and web UI ───────────────────────────────────────────────────────────
-API_SPEC = APP_DIR / "api" / "openapi.yaml"
-UI_STATIC_DIR = APP_DIR / "ui" / "static"
-
-# ─── Entry points launched as subprocesses by app/main.py ─────────────────────
-SCRAPER_MODULE = "app.cli.scrape"
-SCRAPER_SCRIPT = APP_DIR / "cli" / "scrape.py"
-SERVER_MODULE = "app.cli.serve"
-SERVER_SCRIPT = APP_DIR / "cli" / "serve.py"
+API_SPEC = PACKAGE_DIR / "api" / "openapi.yaml"
+UI_STATIC_DIR = Path(os.environ.get("EPIGCORPUS_STATIC_DIR", PACKAGE_DIR / "ui" / "static"))

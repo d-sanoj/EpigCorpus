@@ -1,6 +1,6 @@
 """The API's composition root: real adapters into services, services into the app.
 
-Run it with ``python -m app.cli.serve`` (or ``uvicorn app.api.server:app``).
+Run it with ``uvicorn epigcorpus.api.server:app`` from backend/ (see backend/README.md).
 The corpus is loaded in a background thread at startup; requests that need it
 wait until it is in memory, and /v1/health reports when it is.
 """
@@ -11,14 +11,14 @@ import threading
 from contextlib import asynccontextmanager
 from functools import partial
 
-from app.adapters import corpus_files, edcs_client, harvest_store, map_layers
-from app.adapters.console import log
-from app.api.app import create_app
-from app.api.deps import ApiDeps
-from app.config.paths import API_SPEC, UI_STATIC_DIR
-from app.services.catalog import Catalog
-from app.services.jobs import ScrapeJobs
-from app.services.scrape import run_harvest
+from epigcorpus.adapters import corpus_files, edcs_client, harvest_store, map_layers
+from epigcorpus.adapters.console import log
+from epigcorpus.api.app import create_app
+from epigcorpus.api.deps import ApiDeps
+from epigcorpus.config.paths import API_SPEC, UI_STATIC_DIR
+from epigcorpus.services.catalog import Catalog
+from epigcorpus.services.jobs import ScrapeJobs
+from epigcorpus.services.scrape import run_harvest
 
 
 def build_deps() -> ApiDeps:

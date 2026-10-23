@@ -27,35 +27,45 @@ venv/
 .DS_Store
 
 # Scraper runtime artifacts
-app/data/raw/harvest/edcs_checkpoint.json
+data/raw/harvest/edcs_checkpoint.json
 
 # Corpus snapshots: commit the COMPRESSED form, ignore the working copies.
 # The scraper writes plain .jsonl/.tsv and compresses them on completion; the
 # loaders read either, so a fresh clone works from the .gz with no manual step.
-app/data/raw/*.jsonl
-app/data/raw/*.tsv
-app/data/processed/*.jsonl
-app/data/processed/*.tsv
-app/data/processed/edcs_inscriptions_cleaned.csv
-!app/data/raw/*.jsonl.gz
-!app/data/raw/*.tsv.gz
-!app/data/processed/*.jsonl.gz
-!app/data/processed/*.tsv.gz
+data/raw/*.jsonl
+data/raw/*.tsv
+data/processed/*.jsonl
+data/processed/*.tsv
+data/processed/edcs_inscriptions_cleaned.csv
+!data/raw/*.jsonl.gz
+!data/raw/*.tsv.gz
+!data/processed/*.jsonl.gz
+!data/processed/*.tsv.gz
 
 # Derived caches — regenerated on demand, not worth versioning
-app/data/raw/harvest/edcs_index_cache.json
+data/raw/harvest/edcs_index_cache.json
 
 # Small metadata files below are committed deliberately:
-#   app/data/reference/edcs_lookup.json           code tables for the harvest
-#   app/data/raw/harvest/edcs_harvest_manifest.json completion record
-#   app/data/raw/harvest/edcs_failed_ids.json       failure manifest
+#   data/reference/edcs_lookup.json           code tables for the harvest
+#   data/raw/harvest/edcs_harvest_manifest.json completion record
+#   data/raw/harvest/edcs_failed_ids.json       failure manifest
 
 # Derived pair tables. Same convention as the corpus snapshots above: commit
 # the COMPRESSED form, ignore the plain working copy. The plain .tsv is
 # 140-210 MB (above GitHub's 100 MB hard limit); gzipped it is 23-28 MB.
 # Both are regenerated deterministically by scripts/abbrev_probe.py and
 # scripts/phase3_build_v1.py.
-app/data/processed/derived/**/*.tsv
-app/data/processed/derived/*.tsv
-!app/data/processed/derived/**/*.tsv.gz
-!app/data/processed/derived/*.tsv.gz
+data/processed/derived/**/*.tsv
+data/processed/derived/*.tsv
+!data/processed/derived/**/*.tsv.gz
+!data/processed/derived/*.tsv.gz
+
+# Search index: built from the cleaned corpus by the pipeline (or at server
+# start when missing or older than the corpus). Regenerable, so not versioned.
+data/processed/*.parquet
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/

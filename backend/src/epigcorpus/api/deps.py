@@ -9,9 +9,9 @@ from typing import Annotated
 
 from fastapi import Depends, Query, Request
 
-from app.services.catalog import Catalog, Selections, selections_from
-from app.services.jobs import ScrapeJobs
-from app.services.ports import ExportSource
+from epigcorpus.services.catalog import Catalog, Selections, selections_from
+from epigcorpus.services.jobs import ScrapeJobs
+from epigcorpus.services.ports import ExportSource
 
 
 @dataclass(frozen=True)

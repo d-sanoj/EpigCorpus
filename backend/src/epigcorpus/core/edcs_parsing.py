@@ -6,7 +6,7 @@ See docs/EDCS_API.md for the payload shapes.
 
 import time
 
-from app.config.settings import IMAGE_URL, MONUMENT_URL
+from epigcorpus.config.settings import IMAGE_URL, MONUMENT_URL
 
 
 def now_iso():

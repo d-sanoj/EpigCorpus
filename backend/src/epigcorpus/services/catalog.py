@@ -20,8 +20,8 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from app.services import map_data, map_png, search
-from app.services.ports import CleanedCorpusReader, MapLayerSource
+from epigcorpus.services import map_data, map_png, search
+from epigcorpus.services.ports import CleanedCorpusReader, MapLayerSource
 
 Selections = tuple[tuple[str, tuple[str, ...]], ...]
 

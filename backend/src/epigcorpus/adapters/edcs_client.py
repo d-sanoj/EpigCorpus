@@ -6,9 +6,9 @@ import time
 
 import requests
 
-from app.adapters.console import log
-from app.config import paths
-from app.config.settings import (
+from epigcorpus.adapters.console import log
+from epigcorpus.config import paths
+from epigcorpus.config.settings import (
     BACKOFF_BASE,
     EPIGCORPUS_VERSION,
     HEADERS,
@@ -19,9 +19,9 @@ from app.config.settings import (
     PLACES_URL,
     SOURCES_URL,
 )
-from app.core.edcs_parsing import now_iso
+from epigcorpus.core.edcs_parsing import now_iso
 
-# Defined in app.config.paths; the client works on os.path strings.
+# Defined in epigcorpus.config.paths; the client works on os.path strings.
 INDEX_CACHE = os.fspath(paths.INDEX_CACHE_FILE)
 
 

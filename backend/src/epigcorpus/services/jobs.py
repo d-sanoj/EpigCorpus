@@ -13,7 +13,7 @@ from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 
-from app.services.scrape import INTERRUPTED, HarvestError
+from epigcorpus.services.scrape import INTERRUPTED, HarvestError
 
 # run(limit, workers, restart, refresh_index, should_stop, on_progress) -> outcome.
 # The composition root binds run_harvest to the real client, store and log.

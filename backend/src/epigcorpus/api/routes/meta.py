@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
-from app.api.deps import Deps
+from epigcorpus.api.deps import Deps
 
 router = APIRouter(tags=["meta"])
 

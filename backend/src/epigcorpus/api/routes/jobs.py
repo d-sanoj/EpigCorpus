@@ -5,10 +5,10 @@ from __future__ import annotations
 from fastapi import APIRouter, Response
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.api.deps import Deps
-from app.api.problems import Problem, not_found
-from app.config.settings import DEFAULT_WORKERS
-from app.services.jobs import ACTIVE, JobConflict, JobFinished
+from epigcorpus.api.deps import Deps
+from epigcorpus.api.problems import Problem, not_found
+from epigcorpus.config.settings import DEFAULT_WORKERS
+from epigcorpus.services.jobs import ACTIVE, JobConflict, JobFinished
 
 router = APIRouter(prefix="/v1/scrape-jobs", tags=["scrape-jobs"])
 

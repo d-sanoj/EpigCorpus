@@ -6,8 +6,8 @@ from enum import StrEnum
 
 from fastapi import APIRouter
 
-from app.api.deps import Deps
-from app.api.problems import Problem
+from epigcorpus.api.deps import Deps
+from epigcorpus.api.problems import Problem
 
 router = APIRouter(tags=["lookups"])
 
@@ -38,7 +38,7 @@ def _lookup(deps) -> dict:
             503,
             "lookup-unavailable",
             "Lookup table not available",
-            "app/data/reference/edcs_lookup.json does not exist; run a harvest.",
+            "data/reference/edcs_lookup.json does not exist; run a harvest.",
         )
     return lookup
 

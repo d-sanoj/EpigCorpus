@@ -8,7 +8,7 @@ import threading
 
 from fastapi import APIRouter, Request, Response
 
-from app.api.deps import Deps
+from epigcorpus.api.deps import Deps
 
 router = APIRouter(prefix="/v1/map/layers", tags=["map"])
 

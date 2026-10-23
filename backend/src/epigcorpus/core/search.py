@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from app.models.inscription import MULTI_VALUE_FILTERS
+from epigcorpus.models.inscription import MULTI_VALUE_FILTERS
 
 
 def _token_set(value: object) -> set[str]:

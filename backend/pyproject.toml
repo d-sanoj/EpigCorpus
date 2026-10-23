@@ -1,18 +1,27 @@
 [project]
-name = "edcs-analytics"
-version = "0.1.0"
-description = "Incremental EDCS scraper with checkpoint resume and JSON/TSV exports"
+name = "epigcorpus"
+version = "1.0.0"
+description = "EpigCorpus backend: EDCS harvest, cleaning, search index and HTTP API"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.13"
 dependencies = [
+    "duckdb>=1.4.0",
     "fastapi>=0.162.0",
     "geopandas>=1.1.1",
     "matplotlib>=3.10.7",
     "pandas>=3.0.1",
+    "pyarrow>=21.0.0",
     "requests>=2.33.0",
     "uvicorn>=0.48.0",
 ]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/epigcorpus"]
 
 [dependency-groups]
 dev = [
@@ -32,18 +41,16 @@ ml = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["app/tests"]
-pythonpath = ["."]
+testpaths = ["tests"]
 addopts = "-q --strict-markers"
 
 [tool.ruff]
 line-length = 100
 target-version = "py313"
-# app/scripts holds one-off research scripts moved unchanged from scripts/ in
-# the app/ restructure. They carried 532 findings at the time (see
-# docs/refactor/baseline.md) and are not part of the package, so they are not
-# linted rather than rewritten.
-exclude = ["app/data", "app/scripts", "docs/img"]
+src = ["src", "tests"]
+# The research scripts live outside backend/ (research/scripts) and are not
+# linted; they carried 532 findings at the time of the app/ restructure (see
+# docs/refactor/baseline.md).
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
@@ -68,9 +75,11 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 # services/search.py, adapters/map_layers.py, cli/main.py; SIM115 (T19) in
 # adapters/harvest_store.py, where scrape()'s file handles now live in
 # CorpusWriter. The Streamlit module and its entry went with Streamlit.
+#
+# 2026-10-24, backend/ layout: keys re-rooted to backend/; cli/main.py went
+# with the command line.
 [tool.ruff.lint.per-file-ignores]
-"app/core/search.py"            = ["E501"]
-"app/services/search.py"        = ["E501"]
-"app/adapters/map_layers.py"    = ["E501"]
-"app/adapters/harvest_store.py" = ["SIM115"]
-"app/cli/main.py"               = ["E501"]
+"src/epigcorpus/core/search.py"            = ["E501"]
+"src/epigcorpus/services/search.py"        = ["E501"]
+"src/epigcorpus/adapters/map_layers.py"    = ["E501"]
+"src/epigcorpus/adapters/harvest_store.py" = ["SIM115"]

@@ -1,6 +1,6 @@
 """Search use cases over the cleaned corpus: load, filter options, query, known places.
 
-Nothing here caches. app.services.catalog.Catalog memoises these functions
+Nothing here caches. epigcorpus.services.catalog.Catalog memoises these functions
 and passes its memoised loader back in as `load_all`, so nested loads (filter
 options, known places and queries all reading the search frame) share one copy.
 """
@@ -11,8 +11,8 @@ from collections.abc import Callable
 
 import pandas as pd
 
-from app.config.settings import ROMAN_BOUNDS
-from app.core.search import (  # noqa: F401  (re-exported for the UI and a future API)
+from epigcorpus.config.settings import ROMAN_BOUNDS
+from epigcorpus.core.search import (  # noqa: F401  (re-exported for the UI and a future API)
     FILTER_LABELS,
     SEARCH_COLUMNS,
     _normalize_search_mode,
@@ -22,8 +22,8 @@ from app.core.search import (  # noqa: F401  (re-exported for the UI and a futur
     apply_filters,
     describe_query,
 )
-from app.models.inscription import MULTI_VALUE_FILTERS, REQUIRED_COLS
-from app.services.ports import CleanedCorpusReader
+from epigcorpus.models.inscription import MULTI_VALUE_FILTERS, REQUIRED_COLS
+from epigcorpus.services.ports import CleanedCorpusReader
 
 # The (possibly cached) loader of the search frame, i.e. load_inscriptions
 # with its reader already bound.

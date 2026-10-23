@@ -5,14 +5,14 @@ import gzip
 import json
 import os
 
-from app.adapters.console import log
-from app.config import paths
-from app.config.settings import EPIGCORPUS_VERSION
-from app.core.edcs_parsing import now_iso
-from app.models.inscription import LIST_COLUMNS, TSV_FIELDS
+from epigcorpus.adapters.console import log
+from epigcorpus.config import paths
+from epigcorpus.config.settings import EPIGCORPUS_VERSION
+from epigcorpus.core.edcs_parsing import now_iso
+from epigcorpus.models.inscription import LIST_COLUMNS, TSV_FIELDS
 
 # ─── PATHS ────────────────────────────────────────────────────────────────────
-# Defined in app.config.paths; the scraper works on os.path strings.
+# Defined in epigcorpus.config.paths; the scraper works on os.path strings.
 RAW_DIR = os.fspath(paths.RAW_DIR)
 HARVEST_DIR = os.fspath(paths.HARVEST_DIR)
 REFERENCE_DIR = os.fspath(paths.REFERENCE_DIR)

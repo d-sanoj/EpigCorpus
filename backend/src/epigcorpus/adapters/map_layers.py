@@ -1,6 +1,6 @@
 """Vendored historical map layers: Roman provinces, roads and cities.
 
-Provenance and licence terms: app/data/reference/map_layers/README.md.
+Provenance and licence terms: data/reference/map_layers/README.md.
 """
 
 from pathlib import Path
@@ -8,7 +8,7 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 
-from app.config.paths import MAP_LAYERS_DIR
+from epigcorpus.config.paths import MAP_LAYERS_DIR
 
 
 def map_layer_path(*parts: str) -> Path:
@@ -17,8 +17,8 @@ def map_layer_path(*parts: str) -> Path:
     if not path.exists():
         raise FileNotFoundError(
             f"Missing base-map layer: {path}\n"
-            "These files are vendored in the repository under app/data/reference/map_layers/. "
-            "Restore them with: git checkout -- app/data/reference/map_layers"
+            "These files are vendored in the repository under data/reference/map_layers/. "
+            "Restore them with: git checkout -- data/reference/map_layers"
         )
     return path
 

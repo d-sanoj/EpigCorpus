@@ -10,13 +10,13 @@ removed in the same commit.
 import pandas as pd
 import pytest
 
-from app.core.cleaning import (
+from epigcorpus.core.cleaning import (
     CONSERVATIVE_RULES,
     INTERPRETIVE_RULES,
     clean_conservative,
     clean_interpretive,
 )
-from app.services.cleaning import clean_data
+from epigcorpus.services.cleaning import clean_data
 
 
 class TestRuleSets:
