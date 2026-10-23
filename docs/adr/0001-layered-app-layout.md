@@ -36,6 +36,10 @@ dependency rule:
 | `services/` | use cases (scrape, cleaning, search, map data) and `ports.py` | config, models, core |
 | `api/`, `ui/`, `cli/` | entry points | config, models, services |
 
+*Update (ADR 0004):* `ui/` is now static files with no Python, a client of
+`api/`. `app/api/server.py` replaced `app/ui/streamlit_app.py` as a
+composition root, and streamlit is no longer a dependency.
+
 Services never import adapters. They receive them, typed by the
 `typing.Protocol`s in `app/services/ports.py`, from a **composition root**:
 `app/main.py`, `app/cli/scrape.py` and `app/ui/streamlit_app.py`. Only these

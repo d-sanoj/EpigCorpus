@@ -5,7 +5,7 @@ EpigCorpus is a reproducible Latin epigraphy pipeline for extracting inscription
 The repository is designed as a practical, end-to-end workflow:
 1. Scrape EDCS data incrementally with checkpoint resume.
 2. Generate conservative and interpretive cleaned text.
-3. Explore and export results through a Streamlit map interface.
+3. Explore and export results through an HTTP API and the web map built on it.
 
 ## One-Command Launch
 
@@ -38,6 +38,8 @@ Doddapaneni, S. (n.d.). EpigCorpus: A reproducible Latin epigraphy pipeline for 
   it, and optional Roman provinces, roads and cities overlays.
 - Search across raw and cleaned text.
 - TSV download and publication-style PNG map export.
+- A versioned HTTP API (`/v1`, OpenAPI 3.1) for search, records, cleaned
+  variants, places, downloads, lookups and background harvests.
 
 ## Example PNG Export (term: viator)
 
@@ -54,8 +56,8 @@ EpigCorpus/
 │   ├── core/              # pure helpers: cleaning rules, EDCS parsing, search
 │   ├── adapters/          # EDCS HTTP client, harvest and corpus files, map layers
 │   ├── services/          # use cases: scrape, cleaning, search, map data (+ ports.py)
-│   ├── api/               # HTTP API contract (OpenAPI), not implemented yet
-│   ├── ui/                # the Streamlit map (streamlit_app.py)
+│   ├── api/               # HTTP API (FastAPI) and its contract, openapi.yaml
+│   ├── ui/static/         # the web map: HTML/CSS/JS, a client of the API
 │   ├── cli/               # command-line parsing and launchers
 │   ├── scripts/           # one-off research scripts (not part of the package)
 │   ├── tests/
@@ -71,7 +73,7 @@ EpigCorpus/
 └── README.md
 ```
 
-Dependencies point one way: the UI, CLI and (future) API call services;
+Dependencies point one way: the API and CLI call services, the web UI calls the API;
 services reach adapters only through the interfaces in
 `app/services/ports.py`. See `docs/adr/0001-layered-app-layout.md`.
 `app/tests/test_layering.py` enforces it.
@@ -82,11 +84,11 @@ services reach adapters only through the interfaces in
 - Dependencies managed in pyproject.toml
 
 Core packages:
+- fastapi and uvicorn (the API and web server)
 - geopandas
 - matplotlib
 - pandas
 - requests
-- streamlit
 
 ## Installation
 
@@ -99,7 +101,7 @@ uv sync
 Using pip:
 
 ```bash
-pip install geopandas matplotlib pandas requests streamlit
+pip install fastapi uvicorn geopandas matplotlib pandas requests
 ```
 
 ## Quick Start
@@ -132,7 +134,7 @@ Skip scrape (use latest local JSONL):
 python -m app.main --skip-scrape
 ```
 
-Skip map launch:
+Skip launching the web app:
 
 ```bash
 python -m app.main --skip-map
@@ -142,8 +144,13 @@ Run components directly:
 
 ```bash
 python -m app.cli.scrape            # same flags as before: --limit, --workers, --restart, --refresh-index
-streamlit run app/ui/streamlit_app.py
+python -m app.cli.serve             # API + web map on http://127.0.0.1:8000/ (--host, --port)
 ```
+
+The server loads the corpus in the background at startup (about 20 seconds)
+and the page waits for it. The API is under `/v1`; its contract is
+`app/api/openapi.yaml`, also served at `/v1/openapi.yaml`. See
+`app/api/README.md`.
 
 `python main.py` and `python src/edcs_scraper.py` were replaced by these module
 commands when the code moved under `app/`; the flags are unchanged. A plain
@@ -164,7 +171,7 @@ Generated under app/data/ (paths are defined in app/config/paths.py):
 - raw/harvest/edcs_checkpoint.json
   - temporary resume checkpoint used during scraping
 - processed/edcs_inscriptions_cleaned.jsonl
-  - cleaned dataset used by the Streamlit app and map search
+  - cleaned dataset served by the API and searched by the web map
 
 For detailed data documentation and schema notes, see app/data/README.md.
 
@@ -183,9 +190,12 @@ Implemented in app/core/cleaning.py (rules) and app/services/cleaning.py:
 - Applies a staged text cleaning pipeline.
 - Produces conservative and interpretive cleaned variants.
 
-### 3) Interactive Exploration
+### 3) API and interactive exploration
 
-Implemented in app/ui/streamlit_app.py, on app/services/search.py:
+The API (app/api, on app/services/catalog.py and app/services/search.py)
+serves search, records, cleaned variants, places, map layers, downloads,
+lookups and asynchronous scrape jobs. The web map (app/ui/static) is a
+client of it:
 - Search modes: Raw inscriptions, Interpretive Cleaned Inscriptions, Conservative Cleaned Inscriptions.
 - Interactive Leaflet map with layer toggles, hover tooltips and result popups.
 - TSV export for result tables.
@@ -194,6 +204,8 @@ Implemented in app/ui/streamlit_app.py, on app/services/search.py:
 - PNG export in the map's own dark palette, always available: it carries the
   title, the search term, every active filter, the result count, search mode,
   data source and the attribution footer.
+- The submitted search is kept in the address bar, so a search can be shared
+  as a link.
 
 ## Data and Software References
 
@@ -221,7 +233,7 @@ Implemented in app/ui/streamlit_app.py, on app/services/search.py:
 4. Matplotlib. https://matplotlib.org/
 5. Leaflet. https://leafletjs.com/
 6. Requests. https://requests.readthedocs.io/
-7. Streamlit. https://streamlit.io/
+7. FastAPI. https://fastapi.tiangolo.com/
 
 ## Reproducibility Notes
 

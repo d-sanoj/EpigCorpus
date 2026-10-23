@@ -8,6 +8,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added — the HTTP API (2026-10-23)
+
+- `app/api` implements the v1 contract in `app/api/openapi.yaml`: search,
+  records, cleaned variants, places, map layers, JSONL/TSV/PNG downloads,
+  lookups, facets, health, and asynchronous scrape jobs (start, progress,
+  cancel). Run it with `python -m app.cli.serve`.
+- The harvest gained optional stop and progress hooks and returns its
+  outcome; the command line behaves exactly as before.
+- New dependencies: fastapi, uvicorn (dev: httpx, pyyaml, jsonschema).
+
+### Changed — Streamlit replaced by a web UI on the API (2026-10-23)
+
+- The Streamlit app and the `streamlit` dependency are gone. The map is now
+  `app/ui/static`, served by the API at `/`, with the same controls, map,
+  summary, results and downloads; see
+  `docs/adr/0004-replace-streamlit-with-an-api-client-ui.md`.
+- `python -m app.main` step 3 launches the web app; `--skip-map` skips it.
+- The PNG export is byte-identical; it now renders in
+  `app/services/map_png.py`.
+- The results table pages 100 rows at a time; Download TSV is unchanged.
+
 ### Changed — code and data moved under `app/`, in layers (2026-10-23)
 
 - No change to corpus semantics, cleaning rules, CLI flags, output file

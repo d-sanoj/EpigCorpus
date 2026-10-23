@@ -1,121 +1,120 @@
-# EpigCorpus HTTP API: contract
+# EpigCorpus HTTP API
 
-`openapi.yaml` (OpenAPI 3.1) is the contract. **No endpoint is implemented**,
-and no web framework is installed. The contract came first on purpose (see
-`docs/adr/0002-api-first-design.md`). This file maps the contract onto the
-services that already exist, and lists the gaps an implementation will have
-to close.
+`openapi.yaml` (OpenAPI 3.1) is the contract. It was written before the code
+(`docs/adr/0002-api-first-design.md`). The code is tested against it, and the
+server returns it at `/v1/openapi.yaml`. FastAPI's own generated schema is
+switched off, so there is one description of the API, not two.
 
-## Where the API sits
-
-```
-HTTP request ─▶ app/api (routing, validation, pagination, problem+json)
-                    │  calls only services (enforced by app/tests/test_layering.py)
-                    ▼
-              app/services ──▶ app/core, app/models
-                    │ ports.py
-                    ▼
-              app/adapters (files, EDCS HTTP, map layers), bound by the API's
-              composition root, as app/main.py, app/cli/scrape.py and
-              app/ui/streamlit_app.py do today
+```bash
+python -m app.cli.serve                 # http://127.0.0.1:8000/  (--host, --port)
+curl -s 'http://127.0.0.1:8000/v1/places?q=viator&limit=1' | python -m json.tool
 ```
 
-The API layer may import `config`, `models` and `services`. Like the UI, its
-entry module will be a composition root that binds `app.adapters.corpus_files`,
-`map_layers`, `edcs_client` and `harvest_store` into the services. The
-search frame is loaded once per process and reused, as the UI's
-`st.cache_data` does today.
+The server loads the corpus in a background thread at startup, which takes
+about 20 seconds for the full snapshot. `/v1/health` reports `ready`, and
+requests that need the corpus wait for it. The web map at `/`
+(`app/ui/static`) is a client of these routes, and nothing else.
+
+## Layout
+
+```
+app/api/
+├── openapi.yaml       the contract
+├── server.py          composition root: real adapters → services → app
+├── app.py             create_app(deps): routes, problem handlers, the static UI at /
+├── deps.py            ApiDeps (catalog, exports, jobs), shared query parameters
+├── problems.py        RFC 9457 problem+json for every error, FastAPI's own included
+├── pagination.py      opaque cursors bound to the query and the corpus snapshot
+├── serialize.py       pandas rows → the contract's JSON (null, int years, ISO times)
+└── routes/            one module per resource: meta, inscriptions, places, map,
+                       exports, lookups, jobs
+```
+
+`app/api` imports only `config`, `models` and `services`, plus FastAPI.
+`server.py` is the one module that also imports adapters, and
+`app/tests/test_layering.py` enforces both rules.
 
 ## Operation → service
 
-| Operation | Service call | Notes |
-|---|---|---|
-| `GET /v1/inscriptions` | `services.search.run_query("", mode, selections, load_all)` → rows | Filters only. `load_all` = `load_inscriptions(corpus_files)` bound and memoised. |
-| `GET /v1/inscriptions/search` | `services.search.run_query(q, mode, selections, load_all)` → rows | `search_in` → mode label via `SEARCH_COLUMNS` (`raw` → "Raw inscriptions", `interpretive` → "Interpretive Cleaned Inscriptions", `conservative` → "Conservative Cleaned Inscriptions"). |
-| `GET /v1/inscriptions/{record_id}` | `services.search.load_full_cleaned_data(corpus_files)` → row by `record_id` | Full corpus, not the bounded frame. Needs an index by `record_id` for speed (new code, no new behaviour). |
-| `GET /v1/inscriptions/{record_id}/variants[/{variant}]` | same row; columns `inscription_text`, `inscription_text_conservative`, `inscription_text_interpretive`, `is_unreadable`, `is_forged` | Produced by `services.cleaning.clean_data` / `core.cleaning`. Nothing is re-cleaned per request. |
-| `GET /v1/places` | `services.search.run_query(...)` → places (`aggregate_places` + example items) | Response field `examples` = the service's `items`. |
-| `GET /v1/places/known` | `services.search.load_known_places(load_all, corpus_files)` | |
-| `GET /v1/map/layers/provinces` | `services.map_data.provinces_geojson(map_layers.load_provinces)` | Static; ETag = hash of the vendored files. |
-| `GET /v1/map/layers/roads` | `services.map_data.roads_geojson(map_layers.load_roads)` | |
-| `GET /v1/map/layers/cities` | `services.map_data.cities_points(map_layers.load_cities)` | `[lat, lon, label]` triples become `{latitude, longitude, label}`. |
-| `GET /v1/exports/corpus.jsonl`, `corpus.tsv` | stream the scraper's output: `config.paths.RAW_JSONL` / `RAW_TSV`, or the committed `.gz` | Needs a small export service that resolves the plain-or-gz file the way `adapters.corpus_files.cleaned_corpus_path` does. |
-| `GET /v1/exports/cleaned.jsonl` | `adapters.corpus_files.cleaned_corpus_path()` through the same export service | |
-| `GET /v1/exports/search.tsv` | `run_query` → `services.search.matched_results(rows, full)` → `services.search.results_tsv(table)` | Same bytes as the map's "Download TSV". |
-| `GET /v1/lookups`, `/v1/lookups/{table}` | `adapters.corpus_files.read_lookup()` through a lookup service | `None` (no harvest yet) → `503`. |
-| `GET /v1/facets` | `services.search.filter_options(load_all)` and `services.search.short_forms(corpus_files)` | API names drop the `_en` suffix: `material`, `category`. |
-| `POST /v1/scrape-jobs` | `services.scrape.run_harvest(limit, workers, restart, refresh_index, client=edcs_client, store=harvest_store, log=…)` in a background worker | One job at a time → `409`. |
-| `GET /v1/scrape-jobs/{id}` | the job registry (new) | Progress needs a hook, see gaps. |
-| `POST /v1/scrape-jobs/{id}/cancel` | signal the running `harvest()` | Needs a hook, see gaps. |
+| Operation | Service call |
+|---|---|
+| `GET /v1/health` | `Catalog.is_loaded()` |
+| `GET /v1/inscriptions` | `Catalog.rows("", "Raw inscriptions", selections)`, i.e. `search.apply_filters` over the search frame |
+| `GET /v1/inscriptions/search` | `Catalog.rows(q, mode, selections)` |
+| `GET /v1/inscriptions/{record_id}` | `Catalog.inscription(record_id)`, from the full cleaned corpus indexed by `record_id` |
+| `GET /v1/inscriptions/{record_id}/variants[/{variant}]` | same row: `inscription_text`, `inscription_text_conservative`, `inscription_text_interpretive`, `is_unreadable`, `is_forged` |
+| `GET /v1/places` | `Catalog.run_query(q, mode, selections)` → places, example items, `describe_query` title and subtitle |
+| `GET /v1/places/known` | `Catalog.known_places()` → `search.load_known_places` |
+| `GET /v1/map/layers/{provinces,roads,cities}` | `Catalog.provinces_geojson()`, `roads_geojson()`, `cities_points()` → `services.map_data`. Serialised once, with an ETag |
+| `GET /v1/exports/{corpus.jsonl,corpus.tsv,cleaned.jsonl}` | `corpus_files.export_file(name)`. The stored `.gz` is sent as is when the client accepts gzip, otherwise decompressed on the fly |
+| `GET /v1/exports/search.tsv` | `Catalog.rows` → `Catalog.results_table` → `search.results_tsv` (the old map's "Download TSV") |
+| `GET /v1/exports/map.png` | `Catalog.export_png` → `services.map_png.build_png_bytes` (the old map's "Download as PNG", byte-identical) |
+| `GET /v1/lookups`, `/v1/lookups/{table}` | `Catalog.lookup()` → `corpus_files.read_lookup()` |
+| `GET /v1/facets` | `Catalog.filter_options()` and `Catalog.short_forms()` |
+| `POST /v1/scrape-jobs` | `ScrapeJobs.start` → `services.scrape.run_harvest` in a thread |
+| `GET /v1/scrape-jobs/{job_id}` | `ScrapeJobs.get` |
+| `POST /v1/scrape-jobs/{job_id}/cancel` | `ScrapeJobs.cancel` → the harvest's `should_stop` hook |
 
-Filter parameters map onto the service's `selections` tuple:
-`material` → `material_en`, `category` → `category_en`, `language` →
-`language`, `province` → `province`, `place` → `place`.
+`search_in` maps to the services' mode labels (`raw` → "Raw inscriptions",
+`interpretive` → "Interpretive Cleaned Inscriptions", `conservative` →
+"Conservative Cleaned Inscriptions"). The filters map onto corpus columns:
+`material` → `material_en`, `category` → `category_en`; `language`,
+`province` and `place` keep their names.
 
-## Gaps an implementation must close
+`Catalog` (`app/services/catalog.py`) is the process-wide read model that
+replaced the Streamlit app's `st.cache_data`. It loads the search frame, the
+full corpus, filter options, short forms, known places and the map layers
+once, and keeps the last 64 queries and 16 PNGs.
 
-These are listed so the contract is not mistaken for a promise the services
-already keep. Each needs a decision or a small, deliberate change when the
-endpoints are built. **None was made in this restructure**, because each
-would change behaviour.
+## How the open questions from the design were settled
 
-1. **Scrape-job cancellation.** `harvest()` stops cleanly only on
-   `KeyboardInterrupt` (Ctrl+C or SIGTERM). A worker thread cannot receive
-   either, so cancellation needs a stop hook, for example a `should_stop`
-   callable checked between chunks that takes the same flush-and-checkpoint
-   path.
-2. **Scrape-job progress.** Progress exists only as `log()` lines. The
-   `ScrapeJobProgress` fields need either a progress port, called where the
-   per-chunk log line is written, or parsing of those lines.
-3. **Scrape-job failure.** `run_harvest` calls `sys.exit(1)` when the index or
-   lookup fetch fails. The worker must catch `SystemExit` and map it to
-   status `failed`, or the service should raise a domain error, which would
-   change the CLI's code path.
-4. **Outcome.** `run_harvest` returns `None` and reports the outcome only in
-   log lines. `complete`, `incomplete`, `partial` and `already_complete` need
-   it to return a result.
-5. **The bounding box.** Search, list and places inherit the map's
-   search frame, which keeps 568,560 of 588,509 rows. It drops the 19,938
-   rows with no coordinates, then the 11 rows outside `ROMAN_BOUNDS`
-   (latitude 20–62, longitude −12–50; widened since `docs/AUDIT.md` D1, so
-   Britannia is now inside). Dropping rows without coordinates is right for a
-   map and questionable for a search API. **Decide** before
-   implementing whether the API searches the bounded frame (as documented
-   now) or the full corpus.
-6. **`retrieved_at` in the cleaned corpus is epoch milliseconds**, not ISO 8601.
-   pandas parsed the scraper's ISO strings as dates and wrote them back as
-   integers (the `Pandas4Warning` about the `'epoch'` date format). The
-   contract says `date-time`, so the API must convert, or the cleaning step's
-   `to_json` call should get `date_format="iso"`. That would change the
-   committed cleaned corpus, so it needs its own decision.
-7. **Search TSV granularity.** `matched_results` selects by monument
-   (`edcs_id`), so the export holds every inscription on a matching
-   monument (927 rows for 515 `viator` matches). The contract documents this
-   as current behaviour; whether it is intended is a question for you.
-8. **Cursor stability.** Cursors encode an offset plus a fingerprint of the
-   query and of the corpus snapshot. Rows come back in corpus order and
-   places in ascending count order, so pages are stable for a given snapshot.
-   A new harvest or cleaning run invalidates outstanding cursors (`400`).
-9. **Authentication** is declared, not enforced. Flows and scopes are open in
-   `docs/adr/0003-api-authentication.md`.
+| Question (design-stage README) | What the implementation does |
+|---|---|
+| Cancelling a scrape job | `harvest()` gained an optional `should_stop` hook, polled between chunks. It stops through the same flush-checkpoint path as Ctrl+C, so a cancelled harvest resumes. |
+| Scrape-job progress | An optional `on_progress` hook, called after every chunk. |
+| Failure without `sys.exit` | `run_harvest` raises `HarvestError`. The CLI catches it and still exits 1, after the same log lines (checked against the original). |
+| Outcome | `run_harvest` returns `complete`, `partial`, `incomplete`, `interrupted` or `already_complete`. |
+| The bounding box | **Kept as documented.** Search, list and places use the map's search frame, 568,560 of 588,509 rows: rows without coordinates are left out. Reading one record by id uses the full corpus. Still yours to revisit. |
+| `retrieved_at` as epoch milliseconds | **Converted in the API** to ISO 8601. The cleaned corpus on disk is unchanged. |
+| Search TSV per monument | **Kept** (927 rows for 515 `viator` matches) and documented. |
+| Cursor stability | Cursors carry an offset and a fingerprint of the query and the corpus snapshot (`fingerprint()`: name, size and mtime of the cleaned file). A stale cursor is a `400`. |
+| Authentication | Declared, **not enforced**. See `docs/adr/0003-api-authentication.md`. |
 
-## Examples
+## Additions made while implementing
 
-Every example in `openapi.yaml` uses real data from the committed snapshot:
-EDCS-00000001-0 and EDCS-00000144-0, the 515 `viator` matches (131 in Roma),
-4,606 Latin inscriptions from Noricum, 21,999 known places, 1,388 cities, and
-the first vertices of the first province and road. The exceptions are the
-scrape-job examples, which describe a job that has never run. Their counts are
-plausible, not observed. Cursor strings and ETags are illustrative.
+The contract was extended where the web map needed something the
+design-stage draft lacked. Each addition is in `openapi.yaml`:
 
-## Validating the contract
+- `GET /v1/health`, so the page can tell "loading" from "broken".
+- `GET /v1/exports/map.png`, the PNG export.
+- `summary` on both place pages (match and place counts; the query in words).
+- `limit` up to 25,000 on the place pages, so the map takes every place in one
+  request.
+- GeoJSON features may have a `null` geometry; one simplified road does.
 
-No project dependency was added. Validation runs in throwaway environments:
+## Known limits
+
+- **One process.** The scrape-job registry lives in memory. A restart forgets
+  finished jobs, though a harvest that was running resumes from its
+  checkpoint at the next start. Run one server process, not several workers.
+- **A harvest does not refresh what is served.** A scrape job writes the raw
+  corpus. Cleaning (`python -m app.main --skip-scrape --skip-map`) and a
+  server restart are still needed before search sees new data, as before.
+- **The map needs the internet** for Leaflet (unpkg) and the CARTO basemap
+  tiles, as the Streamlit map did. Search, results and downloads work without
+  them.
+
+## Tests
+
+`app/tests/api/test_contract.py` runs against a real cleaned corpus built
+offline from the 50 EDCS monument fixtures. It checks:
+
+- the routed operations equal the contract's;
+- every response validates against its declared schema;
+- search and places match the services exactly, and pages join up;
+- problem types, gzip negotiation, and the TSV and PNG bytes;
+- the scrape-job lifecycle (start, conflict, progress, cancel, finished).
 
 ```bash
-uvx openapi-spec-validator app/api/openapi.yaml        # OpenAPI 3.1 structure
+uv run pytest app/tests/api
 ```
-
-Each request and response example was also checked against its own schema
-with `jsonschema` (Draft 2020-12), 109 examples in all, in a `uvx`
-environment.

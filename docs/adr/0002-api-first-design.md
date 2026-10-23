@@ -1,8 +1,8 @@
 # ADR 0002 — Design the HTTP API contract before implementing it
 
-- **Status:** Proposed, awaiting maintainer review
+- **Status:** Accepted, implemented (see the Implementation note at the end)
 - **Date:** 2026-10-23
-- **Relates to:** ADR 0001 (layered `app/` layout), ADR 0003 (authentication, proposed)
+- **Relates to:** ADR 0001 (layered `app/` layout), ADR 0003 (authentication, proposed), ADR 0004 (Streamlit replaced)
 - **Artifacts:** `app/api/openapi.yaml`, `app/api/README.md`
 
 ## Context
@@ -97,3 +97,18 @@ exists because of that.
   be settled by whatever the first implementation happens to do.
 - **Expose the services through the Streamlit app.** Streamlit is not an
   HTTP API server, and this would tie every client to the UI process.
+
+## Implementation note (2026-10-23)
+
+The maintainer asked for the API to be implemented and for Streamlit to be
+replaced by a UI with the same features. Both are done:
+
+- `app/api` implements every operation in the contract, and
+  `app/tests/api/test_contract.py` checks each response against it.
+- The open questions above were settled conservatively, keeping today's
+  behaviour, and the choices are recorded in `app/api/README.md`.
+- Four additions the UI needed went into the contract first: health, the PNG
+  export, place-page summaries, and a larger page size for places.
+- The UI became a client of `/v1` straight away rather than later; see
+  ADR 0004.
+
