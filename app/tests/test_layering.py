@@ -32,10 +32,17 @@ COMPOSITION_ROOTS = {
     "main.py": {"config", "models", "services", "cli", "adapters"},
     "cli/scrape.py": ALLOWED["cli"] | {"adapters"},
     "ui/streamlit_app.py": ALLOWED["ui"] | {"adapters"},
+    "api/server.py": ALLOWED["api"] | {"adapters"},
 }
 
 # Third-party packages that belong to one layer only.
-FRAMEWORK_ONLY = {"streamlit": {"ui"}}
+FRAMEWORK_ONLY = {
+    "streamlit": {"ui"},
+    "fastapi": {"api"},
+    "starlette": {"api"},
+    "pydantic": {"api"},
+    "uvicorn": {"cli"},
+}
 
 NOT_CHECKED = {"scripts", "tests", "data"}
 

@@ -89,6 +89,7 @@ class Catalog:
         self._locks: dict[str, threading.Lock] = {}
         self._locks_guard = threading.Lock()
         self._queries = _Lru(query_cache_size)
+        self._rows = _Lru(query_cache_size)
         self._pngs = _Lru(16)
 
     # ─── memoisation ───────────────────────────────────────────────────────────
@@ -165,6 +166,21 @@ class Catalog:
             return QueryResult(rows, places, title, subtitle)
 
         return self._queries.get((term, search_mode, selections), compute)
+
+    def rows(self, term: str, search_mode: str, selections: Selections) -> pd.DataFrame:
+        """Only the matching rows, without the per-place aggregate. Cached.
+
+        The same rows, in the same order, as run_query returns: both are
+        apply_filters over the search frame.
+        """
+        column = search.SEARCH_COLUMNS[search_mode]
+        return self._rows.get(
+            (term, search_mode, selections),
+            lambda: search.apply_filters(
+                self.inscriptions(), column, term,
+                {name: list(values) for name, values in selections},
+            ),
+        )
 
     def results_table(self, rows: pd.DataFrame) -> pd.DataFrame:
         """Every column for the monuments a query matched (the TSV download)."""

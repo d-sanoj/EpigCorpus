@@ -1,13 +1,16 @@
 openapi: 3.1.0
 info:
   title: EpigCorpus API
-  version: 0.1.0-draft
+  version: 1.0.0
   summary: Search, read, export and harvest Latin inscriptions from the EDCS.
   description: |
-    Contract-first design of the EpigCorpus HTTP API. **No endpoint is
-    implemented yet.** Every operation maps onto a use case that already exists
-    in `app/services`; `app/api/README.md` lists which one, and
-    `docs/adr/0002-api-first-design.md` explains why the contract comes first.
+    The EpigCorpus HTTP API. This document is the contract: it was written
+    before the implementation (`docs/adr/0002-api-first-design.md`), the
+    implementation in `app/api` is tested against it
+    (`app/tests/api/test_contract.py`), and the server returns it at
+    `/v1/openapi.yaml`. Every operation maps onto a use case in
+    `app/services`; `app/api/README.md` lists which one. The web UI served at
+    `/` is a client of this API.
 
     ## Conventions
 
@@ -59,10 +62,12 @@ info:
     url: https://github.com/d-sanoj/EpigCorpus
 
 servers:
-  - url: http://localhost:8000
-    description: Local development (placeholder; nothing listens here yet)
+  - url: http://127.0.0.1:8000
+    description: Local server (python -m app.cli.serve)
 
 tags:
+  - name: meta
+    description: Health.
   - name: inscriptions
     description: Search, list and read inscription records.
   - name: variants
@@ -79,6 +84,28 @@ tags:
     description: Asynchronous harvests from the EDCS.
 
 paths:
+  /v1/health:
+    get:
+      tags: [meta]
+      operationId: getHealth
+      summary: Liveness, and whether the corpus is loaded
+      description: |
+        The server loads the corpus in the background at startup (about a
+        minute for the full snapshot). Until `ready` is true, read operations
+        wait for the load to finish rather than failing.
+      responses:
+        '200':
+          description: The server is up.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+              examples:
+                loading:
+                  value: {status: ok, ready: false}
+                ready:
+                  value: {status: ok, ready: true}
+
   /v1/inscriptions:
     get:
       tags: [inscriptions]
@@ -310,6 +337,11 @@ paths:
                 viatorLargest:
                   summary: "q=viator: the place with the most matches"
                   value:
+                    summary:
+                      inscriptions: 515
+                      places: 257
+                      title: Inscriptions matching "viator"
+                      subtitle: Searched in raw inscription text
                     data:
                       - place: Roma
                         latitude: 41.89332
@@ -353,6 +385,9 @@ paths:
               examples:
                 firstPage:
                   value:
+                    summary:
+                      places: 21999
+                      inscriptions: 568560
                     data:
                       - place: Crastes / Ausci / Eliumberrum
                         latitude: 43.72347
@@ -530,6 +565,42 @@ paths:
               examples:
                 viator:
                   value: "edcs_id\tprovince\tplace\tlatitude\tlongitude\t…\tis_unreadable\tis_forged\nEDCS-00000144\tGermania superior\tAvenches / Aventicum\t46.87961\t7.04087\t…\tFalse\tFalse\n"
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /v1/exports/map.png:
+    get:
+      tags: [exports]
+      operationId: exportMapPng
+      summary: Download the map as a publication-style PNG
+      description: |
+        The map's "Download as PNG". With a keyword or any filter it plots the
+        query's places in tangerine, titled with the query in words; with
+        neither it plots every known place in teal. Dark palette, provinces,
+        roads, cities, size legend, footer and citation, as the old map's
+        export. The file name follows the query: `edcs_map_<term>.png`,
+        `edcs_map_filtered.png` or `edcs_map_all_known_places.png`.
+      parameters:
+        - $ref: '#/components/parameters/QOptional'
+        - $ref: '#/components/parameters/SearchIn'
+        - $ref: '#/components/parameters/Material'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Province'
+        - $ref: '#/components/parameters/Place'
+      responses:
+        '200':
+          description: The PNG (11.8 x 8.6 in at 180 dpi).
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: attachment; filename="edcs_map_viator.png"
+          content:
+            image/png:
+              schema:
+                type: string
+                contentMediaType: image/png
         '422':
           $ref: '#/components/responses/ValidationFailed'
 
@@ -1136,6 +1207,13 @@ components:
       type: string
       enum: [raw, conservative, interpretive]
 
+    Health:
+      type: object
+      required: [status, ready]
+      properties:
+        status: {const: ok}
+        ready: {type: boolean, description: 'True once the corpus is in memory.'}
+
     PageInfo:
       type: object
       required: [limit, total, next_cursor]
@@ -1275,21 +1353,36 @@ components:
 
     PlacePage:
       type: object
-      required: [data, page]
+      required: [data, page, summary]
       properties:
         data:
           type: array
           items: {$ref: '#/components/schemas/Place'}
         page: {$ref: '#/components/schemas/PageInfo'}
+        summary:
+          type: object
+          required: [places, inscriptions]
+          properties:
+            places: {type: integer, description: 'Known places, including those with no inscription.'}
+            inscriptions: {type: integer, description: 'Inscriptions plotted across them.'}
 
     ResultPlacePage:
       type: object
-      required: [data, page]
+      required: [data, page, summary]
       properties:
         data:
           type: array
           items: {$ref: '#/components/schemas/ResultPlace'}
         page: {$ref: '#/components/schemas/PageInfo'}
+        summary:
+          description: The whole query, not just this page, as the map's match summary.
+          type: object
+          required: [inscriptions, places, title, subtitle]
+          properties:
+            inscriptions: {type: integer, description: 'Matching inscriptions.'}
+            places: {type: integer, description: 'Places they are at.'}
+            title: {type: string, description: 'The query in words, e.g. Inscriptions matching "viator".'}
+            subtitle: {type: string, description: 'Filters and search mode in one line.'}
 
     FeatureCollection:
       description: A GeoJSON FeatureCollection (RFC 7946), WGS 84.
@@ -1304,7 +1397,9 @@ components:
             required: [type, geometry, properties]
             properties:
               type: {const: Feature}
-              geometry: {type: object}
+              geometry:
+                type: [object, 'null']
+                description: 'null when simplification left nothing to draw (RFC 7946 allows it).'
               properties: {type: [object, 'null']}
 
     CityPoint:

@@ -52,7 +52,12 @@ ANALYSIS_V1_DIR = ANALYSIS_DIR / "v1"
 CELLS_DIR = RESULTS_DIR / "cells"
 SCRIPTS_DIR = APP_DIR / "scripts"
 
+# ─── API and web UI ───────────────────────────────────────────────────────────
+API_SPEC = APP_DIR / "api" / "openapi.yaml"
+UI_STATIC_DIR = APP_DIR / "ui" / "static"
+
 # ─── Entry points launched as subprocesses by app/main.py ─────────────────────
 SCRAPER_MODULE = "app.cli.scrape"
 SCRAPER_SCRIPT = APP_DIR / "cli" / "scrape.py"
-STREAMLIT_APP = APP_DIR / "ui" / "streamlit_app.py"
+SERVER_MODULE = "app.cli.serve"
+SERVER_SCRIPT = APP_DIR / "cli" / "serve.py"

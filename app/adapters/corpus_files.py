@@ -10,7 +10,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from app.config.paths import CLEANED_JSONL, CLEANED_JSONL_GZ, LOOKUP_FILE, RAW_DIR
+from app.config.paths import (
+    CLEANED_JSONL,
+    CLEANED_JSONL_GZ,
+    LOOKUP_FILE,
+    RAW_DIR,
+    RAW_JSONL,
+    RAW_TSV,
+)
 
 # ─── Scraped input and cleaned output (the pipeline's cleaning step) ──────────
 
@@ -96,6 +103,24 @@ def cleaned_corpus_path() -> Path:
 def read_cleaned_corpus() -> pd.DataFrame:
     """The whole cleaned corpus, every column."""
     return pd.read_json(cleaned_corpus_path(), lines=True)
+
+
+# The downloadable files, by export name. Each prefers the plain working copy
+# and falls back to the committed .gz snapshot, like cleaned_corpus_path.
+EXPORT_FILES = {
+    "corpus.jsonl": RAW_JSONL,
+    "corpus.tsv": RAW_TSV,
+    "cleaned.jsonl": CLEANED_JSONL,
+}
+
+
+def export_file(name: str) -> Path | None:
+    """The file behind an export: plain if present, else its .gz, else None."""
+    plain = EXPORT_FILES[name]
+    if plain.exists():
+        return plain
+    packed = plain.with_name(plain.name + ".gz")
+    return packed if packed.exists() else None
 
 
 def fingerprint() -> str:

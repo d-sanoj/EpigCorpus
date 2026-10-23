@@ -99,6 +99,12 @@ class CleanedCorpusReader(Protocol):
     def fingerprint(self) -> str: ...
 
 
+class ExportSource(Protocol):
+    """The corpus files offered for download."""
+
+    def export_file(self, name: str) -> Path | None: ...
+
+
 class MapLayerSource(Protocol):
     """Vendored historical map layers."""
 

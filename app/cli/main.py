@@ -8,7 +8,13 @@ import sys
 
 import pandas as pd
 
-from app.config.paths import ROOT_DIR, SCRAPER_MODULE, SCRAPER_SCRIPT, STREAMLIT_APP
+from app.config.paths import (
+    ROOT_DIR,
+    SCRAPER_MODULE,
+    SCRAPER_SCRIPT,
+    SERVER_MODULE,
+    SERVER_SCRIPT,
+)
 
 
 def print_table(title: str, df: pd.DataFrame, index: bool = True, max_rows: int | None = None) -> None:
@@ -86,54 +92,36 @@ def run_scraper() -> None:
         raise RuntimeError(f"Scraper failed with exit code {result.returncode}")
 
 
-def launch_streamlit_map() -> None:
-    """Launch the Streamlit map application."""
-    map_script = STREAMLIT_APP
-    
-    if not map_script.exists():
-        raise FileNotFoundError(f"Streamlit map script not found: {map_script}")
-    
+def launch_web_app() -> None:
+    """Serve the API and the web UI (python -m app.cli.serve) until interrupted."""
+    server_script = SERVER_SCRIPT
+
+    if not server_script.exists():
+        raise FileNotFoundError(f"Server script not found: {server_script}")
+
     print(f"\n{'='*70}")
-    print("STEP 3: LAUNCHING STREAMLIT MAP")
+    print("STEP 3: LAUNCHING THE WEB APP")
     print(f"{'='*70}")
-    print("\nStarting Streamlit server...")
-    print("The map will open in your browser shortly...")
-    print("If it doesn't, navigate to: http://localhost:8501\n")
-
-    streamlit_probe = subprocess.run(
-        [sys.executable, "-c", "import streamlit"],
-        capture_output=True,
-        text=True,
-        cwd=str(ROOT_DIR),
-    )
-
-    if streamlit_probe.returncode == 0:
-        run_cmd = [sys.executable, "-m", "streamlit", "run", str(map_script)]
-        print(f"Using interpreter: {sys.executable}")
-    else:
-        run_cmd = ["uv", "run", "streamlit", "run", str(map_script)]
-        print("Current Python environment does not include streamlit.")
-        print("Falling back to: uv run streamlit ...")
+    print("\nStarting the EpigCorpus server...")
+    print("Open http://127.0.0.1:8000/ in your browser once it is up.")
+    print("The corpus loads in the background; the page waits for it.\n")
 
     try:
-        subprocess.run(run_cmd, cwd=str(ROOT_DIR), check=True)
-    except FileNotFoundError as exc:
-        raise RuntimeError(
-            "Unable to launch Streamlit. Ensure 'uv' is installed, or run with the project venv:\n"
-            "  source .venv/bin/activate && python main.py"
-        ) from exc
+        subprocess.run([sys.executable, "-m", SERVER_MODULE], cwd=str(ROOT_DIR), check=True)
+    except KeyboardInterrupt:
+        print("\nServer stopped.")
     except subprocess.CalledProcessError as exc:
         raise RuntimeError(
-            f"Streamlit launch failed (exit code {exc.returncode}). Try:\n"
+            f"Server exited with code {exc.returncode}. Try:\n"
             "  uv sync\n"
-            "  source .venv/bin/activate && python main.py"
+            "  uv run python -m app.cli.serve"
         ) from exc
 
 
 def build_parser() -> argparse.ArgumentParser:
     """Build command-line argument parser."""
     parser = argparse.ArgumentParser(
-        description="EDCS Analytics: Scrape → Clean → Launch Interactive Map"
+        description="EDCS Analytics: Scrape → Clean → Launch the web app"
     )
     parser.add_argument(
         "--skip-scrape",
@@ -143,6 +131,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--skip-map",
         action="store_true",
-        help="Skip launching the Streamlit map after cleaning.",
+        help="Skip launching the web app (API and map UI) after cleaning.",
     )
     return parser
