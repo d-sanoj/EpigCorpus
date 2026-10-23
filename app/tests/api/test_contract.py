@@ -222,7 +222,7 @@ def test_known_places(client, catalog, validate):
     assert response.json()["summary"]["inscriptions"] == int(known["count"].sum())
 
 
-@pytest.mark.parametrize("layer", ["provinces", "province-labels", "roads", "cities"])
+@pytest.mark.parametrize("layer", ["land", "provinces", "province-labels", "roads", "cities"])
 def test_map_layers_with_etags(client, validate, layer):
     path = f"/v1/map/layers/{layer}"
     response = client.get(path)

@@ -46,3 +46,8 @@ def load_cities() -> gpd.GeoDataFrame:
         geometry=gpd.points_from_xy(cities_df["Longitude (X)"], cities_df["Latitude (Y)"], crs="EPSG:4326"),
     )
     return cities
+
+
+def load_land() -> gpd.GeoDataFrame:
+    """Land outlines for the map's background (Natural Earth 1:50m, clipped to the region)."""
+    return gpd.read_file(map_layer_path("natural_earth_land_50m.geojson")).to_crs(epsg=4326)

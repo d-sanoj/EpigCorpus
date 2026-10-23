@@ -462,6 +462,41 @@ paths:
         '304':
           $ref: '#/components/responses/NotModified'
 
+  /v1/map/layers/land:
+    get:
+      tags: [map]
+      operationId: getLandLayer
+      summary: Land outlines, the map's background
+      description: |
+        Natural Earth 1:50m land, clipped to the Roman world (longitude
+        −35 to 80, latitude 0 to 75) and simplified (tolerance 0.02°). The
+        web map draws it instead of a tile basemap, so the background needs no
+        tile service, no API key and no network, and carries no labels.
+        Static: send `If-None-Match`.
+      responses:
+        '200':
+          description: A GeoJSON FeatureCollection of polygons.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/FeatureCollection'
+              examples:
+                oneIsland:
+                  value:
+                    type: FeatureCollection
+                    features:
+                      - type: Feature
+                        properties: {}
+                        geometry:
+                          type: Polygon
+                          # first vertices only; truncated
+                          coordinates: [[[14.5, 35.9], [14.6, 35.8], [14.4, 35.8], [14.5, 35.9]]]
+        '304':
+          $ref: '#/components/responses/NotModified'
+
   /v1/map/layers/province-labels:
     get:
       tags: [map]

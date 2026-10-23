@@ -288,8 +288,16 @@
     });
   }
 
+  function loadLand() {
+    if (!map) return;
+    getJson("/map/layers/land")
+      .then(function (data) { map.setLand(data); })
+      .catch(function () { /* without land the markers still draw on the dark sea */ });
+  }
+
   function start() {
     map = window.EpigMap.create(els.map);
+    loadLand();
     busy(true);
     getJson("/facets")
       .then(function (facets) {

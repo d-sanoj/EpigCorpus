@@ -11,8 +11,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed — basemap without labels, province names in province colours (2026-10-23)
 
 - CARTO's basemaps now answer without an API key with an "API KEY REQUIRED"
-  tile. The web map uses Esri's World Dark Gray Base instead: no key, and no
-  place names at all. The "Place names" toggle is gone.
+  tile. The web map no longer uses map tiles at all: the background is
+  Natural Earth land outlines, vendored in
+  `app/data/reference/map_layers/natural_earth_land_50m.geojson` and served
+  at `/v1/map/layers/land`. No key, no tile service, no place names. The
+  "Place names" toggle is gone. (Esri's dark grey tiles were tried first and
+  showed as a black background.)
 - The "Roman provinces" layer now writes each EDCS province's name, in the
   colour of the shading beneath it (`/v1/map/layers/province-labels`).
   Overlapping names are hidden, larger provinces first; more appear as you

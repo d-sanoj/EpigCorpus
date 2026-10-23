@@ -20,6 +20,7 @@ licence, which applies to code only. Each carries its own terms.
 | Roman provinces, AD 117 | `roman_empire_ad_117/` | 111 polygons | Ancient World Mapping Center (AWMC), UNC Chapel Hill |
 | Roman roads | `ba_roads/` | 3,166 linestrings | AWMC, digitised from the *Barrington Atlas* |
 | Cities | `Hanson2016_Cities_OxREP.csv` | 1,388 points | Hanson 2016, Oxford Roman Economy Project |
+| Land (map background) | `natural_earth_land_50m.geojson` | 266 polygons | Natural Earth 1:50m land, public domain, via `world-atlas` 2.0.2 (ISC); clipped to lon −35…80, lat 0…75 |
 
 Each shapefile ships the full component set (`.shp`, `.shx`, `.dbf`, `.prj`,
 plus `.sbn`/`.sbx` indexes). All are read as EPSG:4326.

@@ -112,6 +112,13 @@ def province_labels(inscriptions: pd.DataFrame, load_provinces: Callable[[], Any
     return labels
 
 
+def land_geojson(load_land: Callable[[], Any]) -> dict:
+    """Land outlines as GeoJSON: the map's background, drawn instead of map tiles."""
+    land = load_land().copy()
+    land["geometry"] = land.geometry.simplify(0.02, preserve_topology=True)
+    return json.loads(land[["geometry"]].to_json())
+
+
 def roads_geojson(load_roads: Callable[[], Any]) -> dict:
     """Roads as GeoJSON. Simplified hard: the raw shapefile is far too heavy to inline."""
     roads = load_roads().copy()

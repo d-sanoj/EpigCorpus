@@ -200,6 +200,11 @@ class Catalog:
     def provinces_geojson(self) -> dict:
         return self._once("provinces_geojson", lambda: map_data.provinces_geojson(self.provinces))
 
+    def land_geojson(self) -> dict:
+        return self._once(
+            "land_geojson", lambda: map_data.land_geojson(self._layers.load_land)
+        )
+
     def province_labels(self) -> list[dict]:
         return self._once(
             "province_labels",

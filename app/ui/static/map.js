@@ -2,8 +2,10 @@
  *
  * Ported from the Streamlit app's Leaflet template: same colours,
  * log-scaled radius, zoom scaling, shared marker canvas, layer control, reset
- * control, legend and popups. The basemap carries no labels at all; the only
- * names on the map are the EDCS province names, drawn with the "Roman
+ * control, legend and popups. There is no tile basemap: the background is
+ * Natural Earth land outlines served by the API (/v1/map/layers/land), so it
+ * needs no tile service, no key and no network, and carries no labels. The
+ * only names on the map are the EDCS province names, drawn with the "Roman
  * provinces" layer in the colour of the shading beneath them. The difference is where the
  * data comes from: the API, loaded once for the overlays and the known places
  * and again for each query's results, instead of being inlined per rerun.
@@ -22,12 +24,10 @@
   var LEGEND_STOPS = [1, 10, 100, 1000];
   var CENTER = [41.9028, 12.4964];  // Rome, as EDCS
   var ZOOM = 4;
-  // Esri's dark grey canvas, base layer only: no place names, no API key.
-  // (CARTO's basemaps, used before, now answer without a key with an
-  // "API KEY REQUIRED" tile.)
-  var TILES = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/" +
-    "World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
-  var ATTRIBUTION = "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ";
+  // The background: land drawn from data, sea is the map's own background.
+  var LAND_FILL = "#1e2633";
+  var LAND_EDGE = "#3b475c";
+  var ATTRIBUTION = "Land: Natural Earth";
   var LABEL_FALLBACK_COLOR = "#cbd5e1";
 
   function escapeHtml(value) {
@@ -70,7 +70,20 @@
     labelsPane.style.zIndex = "450";
     labelsPane.style.pointerEvents = "none";
 
-    L.tileLayer(TILES, { maxZoom: 16, attribution: ATTRIBUTION }).addTo(map);
+    var landPane = map.createPane("landPane");
+    landPane.style.zIndex = "200";
+    landPane.style.pointerEvents = "none";
+    map.attributionControl.addAttribution(ATTRIBUTION);
+
+    function setLand(data) {
+      L.geoJSON(data, {
+        pane: "landPane",
+        interactive: false,
+        style: function () {
+          return { fillColor: LAND_FILL, fillOpacity: 1, color: LAND_EDGE, weight: 0.7, opacity: 1 };
+        },
+      }).addTo(map);
+    }
 
     // Radii are calibrated for the default zoom and scale with the zoom level.
     var scaled = [];
@@ -378,7 +391,12 @@
       syncControl(key);
     }
 
-    return { showKnown: showKnown, showResults: showResults, setOverlay: setOverlay };
+    return {
+      showKnown: showKnown,
+      showResults: showResults,
+      setOverlay: setOverlay,
+      setLand: setLand,
+    };
   }
 
   window.EpigMap = { create: create };
