@@ -14,9 +14,9 @@ from app.core.cleaning import (
     CONSERVATIVE_RULES,
     INTERPRETIVE_RULES,
     clean_conservative,
-    clean_data,
     clean_interpretive,
 )
+from app.services.cleaning import clean_data
 
 
 class TestRuleSets:

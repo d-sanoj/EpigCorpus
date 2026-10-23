@@ -31,9 +31,8 @@ _ROOT = str(Path(__file__).resolve().parents[2])
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
+from app.adapters.corpus_files import cleaned_corpus_path  # noqa: E402
 from app.config.paths import (  # noqa: E402
-    CLEANED_JSONL as CLEANED_JSONL_FILE,
-    CLEANED_JSONL_GZ,
     LOOKUP_FILE,
     MAP_LAYERS_DIR,
 )
@@ -234,21 +233,6 @@ def load_cities() -> gpd.GeoDataFrame:
         geometry=gpd.points_from_xy(cities_df["Longitude (X)"], cities_df["Latitude (Y)"], crs="EPSG:4326"),
     )
     return cities
-
-
-def cleaned_corpus_path() -> Path:
-    """Return the cleaned corpus, preferring the plain file over the .gz snapshot.
-
-    pandas infers compression from the extension, so callers need no special
-    handling and users never have to decompress anything by hand.
-    """
-    if CLEANED_JSONL_FILE.exists():
-        return CLEANED_JSONL_FILE
-    if CLEANED_JSONL_GZ.exists():
-        return CLEANED_JSONL_GZ
-    raise FileNotFoundError(
-        f"Missing: {CLEANED_JSONL_FILE} (or {CLEANED_JSONL_GZ.name}). Run main.py first."
-    )
 
 
 @st.cache_data(show_spinner=False, ttl=3600)
