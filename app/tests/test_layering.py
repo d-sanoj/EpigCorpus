@@ -31,13 +31,12 @@ ALLOWED = {
 COMPOSITION_ROOTS = {
     "main.py": {"config", "models", "services", "cli", "adapters"},
     "cli/scrape.py": ALLOWED["cli"] | {"adapters"},
-    "ui/streamlit_app.py": ALLOWED["ui"] | {"adapters"},
     "api/server.py": ALLOWED["api"] | {"adapters"},
 }
 
 # Third-party packages that belong to one layer only.
 FRAMEWORK_ONLY = {
-    "streamlit": {"ui"},
+    "streamlit": set(),  # removed; the UI is app/ui/static, served by the API
     "fastapi": {"api"},
     "starlette": {"api"},
     "pydantic": {"api"},
@@ -105,5 +104,5 @@ def test_module_respects_the_dependency_rule(rel, path):
 
 def test_every_layer_is_present():
     present = {rel.parts[0] for rel, _ in _modules() if len(rel.parts) > 1}
-    for layer in ("config", "models", "core", "adapters", "services", "ui", "cli"):
+    for layer in ("config", "models", "core", "adapters", "services", "api", "cli"):
         assert layer in present

@@ -7,7 +7,7 @@ the cleaner, the search services and the exports.
 
 # ─── OUTPUT COLUMNS ───────────────────────────────────────────────────────────
 # The first block is the original EpigCorpus schema, unchanged, so main.py,
-# edcs_cleaner.py and edcs_streamlit_map.py keep working untouched.
+# the cleaner, the search services and the API read the same names.
 # The second block adds the remaining descriptive fields plus record-level provenance.
 TSV_FIELDS = [
     # — original EpigCorpus columns —

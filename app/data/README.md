@@ -64,7 +64,7 @@ everyone, reviewers included.
 - The scraper writes plain `.jsonl`/`.tsv` during a harvest — appending to a
   gzip stream across a checkpointed resume is not safe — then compresses them
   automatically on completion.
-- `app/main.py` and the Streamlit map read either form. pandas infers gzip from the
+- `app/main.py` and the API read either form. pandas infers gzip from the
   file extension; the loaders prefer a plain file when one exists and fall back
   to the `.gz` snapshot.
 - `.gitignore` ships only the `.gz` and ignores the plain working copies.

@@ -37,9 +37,17 @@ the assertion is rewritten to the correct value in the same commit.
 
 `test_layering.py` enforces the dependency rule between the layers under
 `app/` (see `docs/adr/0001-layered-app-layout.md`): services never import
-adapters, `core` and `models` import nothing above them, and only the UI
-imports streamlit. It reads imports with `ast`, so it needs nothing beyond
-pytest.
+adapters, `core` and `models` import nothing above them, fastapi, starlette
+and pydantic appear only in `api`, uvicorn only in `cli`. It reads imports
+with `ast`, so it needs nothing beyond pytest.
+
+`api/test_contract.py` runs the HTTP API against `app/api/openapi.yaml`. It
+builds a real cleaned corpus offline from the monument fixtures (parse, clean,
+write, read back), routes every operation the contract declares and nothing
+else, validates every response against its declared schema, and checks the
+behaviour that matters: search and places identical to the services, pages
+that join up, problem+json errors, gzip negotiation, the TSV and PNG bytes,
+and the scrape-job lifecycle against a fake harvest.
 
 The name `test_edcs_upstream_contract.py` is deliberate: those tests are about
 the EDCS API we consume, not the EpigCorpus HTTP API described in

@@ -1,8 +1,8 @@
 """Search use cases over the cleaned corpus: load, filter options, query, known places.
 
-Nothing here caches. The Streamlit UI wraps these functions in
-st.cache_data and passes its cached loader back in as `load_all`, so the
-nested loads stay cached exactly as they were when this lived in the UI.
+Nothing here caches. app.services.catalog.Catalog memoises these functions
+and passes its memoised loader back in as `load_all`, so nested loads (filter
+options, known places and queries all reading the search frame) share one copy.
 """
 
 from __future__ import annotations

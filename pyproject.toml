@@ -11,7 +11,6 @@ dependencies = [
     "matplotlib>=3.10.7",
     "pandas>=3.0.1",
     "requests>=2.33.0",
-    "streamlit>=1.45.0",
     "uvicorn>=0.48.0",
 ]
 
@@ -65,12 +64,11 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 # 2026-10-23, app/ restructure: the four modules were split into layers and
 # each finding moved with its line, so the entries now name the module the
 # line lives in. Entries were then cut to the codes that still fire; nothing
-# new was suppressed. Remaining: E501 (T38/T40) in ui/streamlit_app.py,
-# core/search.py, services/search.py, adapters/map_layers.py, cli/main.py;
-# SIM115 (T19) in adapters/harvest_store.py, where scrape()'s file handles
-# now live in CorpusWriter.
+# new was suppressed. Remaining: E501 (T38/T40) in core/search.py,
+# services/search.py, adapters/map_layers.py, cli/main.py; SIM115 (T19) in
+# adapters/harvest_store.py, where scrape()'s file handles now live in
+# CorpusWriter. The Streamlit module and its entry went with Streamlit.
 [tool.ruff.lint.per-file-ignores]
-"app/ui/streamlit_app.py"       = ["E501"]
 "app/core/search.py"            = ["E501"]
 "app/services/search.py"        = ["E501"]
 "app/adapters/map_layers.py"    = ["E501"]

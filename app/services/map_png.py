@@ -1,6 +1,6 @@
 """The publication-style PNG export of the map, rendered with matplotlib.
 
-Moved verbatim from the Streamlit app. The PNG uses the web map's dark
+Moved verbatim from the former Streamlit app. The PNG uses the web map's dark
 palette and symbology; the colours below are mirrored in the web UI's
 app/ui/static/map.js.
 """

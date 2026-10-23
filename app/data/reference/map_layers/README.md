@@ -51,11 +51,12 @@ Cite Hanson 2016 when reusing.
 
 ## Usage
 
-The map loads these through `map_layer_path()` in `src/edcs_streamlit_map.py`,
-which raises an actionable error if a file is missing. Restore them with:
+The API loads these through `map_layer_path()` in
+`app/adapters/map_layers.py` (for /v1/map/layers and the PNG export), which
+raises an actionable error if a file is missing. Restore them with:
 
 ```bash
-git checkout -- data/map_layers
+git checkout -- app/data/reference/map_layers
 ```
 
 ---

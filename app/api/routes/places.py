@@ -10,8 +10,8 @@ from app.api.deps import (
     Cursor,
     Deps,
     FilterParams,
-    PlacesLimit,
     OptionalQueryText,
+    PlacesLimit,
     SearchIn,
     SearchInParam,
 )
