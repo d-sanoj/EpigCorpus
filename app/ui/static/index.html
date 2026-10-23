@@ -1,1 +1,89 @@
-<!doctype html><title>EpigCorpus</title>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EpigCorpus</title>
+  <meta name="description" content="EDCS inscription exploration across the Roman Empire">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1 class="main-title">EpigCorpus</h1>
+    <p class="tagline">EDCS inscription exploration across the Roman Empire</p>
+  </header>
+
+  <main>
+    <form id="search-form" class="controls" autocomplete="off" novalidate>
+      <div class="field">
+        <label for="search-in">Search in:</label>
+        <select id="search-in" name="search_in">
+          <option value="raw">Raw inscriptions</option>
+          <option value="interpretive">Interpretive Cleaned Inscriptions</option>
+          <option value="conservative">Conservative Cleaned Inscriptions</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="keyword">Keyword</label>
+        <input id="keyword" name="q" type="search" placeholder="Enter search term (optional)" maxlength="200">
+      </div>
+      <div class="field" data-filter="language" data-label="Language"></div>
+
+      <div class="field" data-filter="province" data-label="Province"></div>
+      <div class="field" data-filter="place" data-label="Place"></div>
+      <div class="field" data-filter="category" data-label="Category"></div>
+
+      <div class="field" data-filter="material" data-label="Material"></div>
+      <div class="field field-button">
+        <button id="search-button" type="submit">Search</button>
+      </div>
+      <div class="field field-button">
+        <a id="png-download" class="button" href="/v1/exports/map.png" download>Download as PNG</a>
+      </div>
+    </form>
+
+    <div id="summary" class="matches-summary" aria-live="polite">Loading inscriptions…</div>
+    <div id="map" class="map" role="region" aria-label="Map of inscription places"></div>
+    <div id="notice" class="notice" role="status" hidden></div>
+
+    <section id="results" hidden>
+      <h2 class="results-title">Results</h2>
+      <div class="results-actions">
+        <a id="tsv-download" class="button" href="#" download>Download TSV</a>
+      </div>
+      <div class="table-wrap">
+        <table id="results-table">
+          <thead>
+            <tr>
+              <th scope="col">Record</th>
+              <th scope="col">Province</th>
+              <th scope="col">Place</th>
+              <th scope="col">Date</th>
+              <th scope="col">Language</th>
+              <th scope="col">Material</th>
+              <th scope="col">Category</th>
+              <th scope="col" id="text-column">Inscription</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="results-footer">
+        <span id="results-count"></span>
+        <button id="more-button" type="button" hidden>Show more</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Data: Epigraphik-Datenbank Clauss / Slaby (EDCS). Map layers: AWMC, Hanson 2016 (OXREP).
+    <a href="/v1/openapi.yaml">API</a>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="multiselect.js"></script>
+  <script src="map.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -44,6 +44,7 @@ SEARCH_MODES = {
 }
 
 Limit = Annotated[int, Query(ge=1, le=500, description="Page size.")]
+PlacesLimit = Annotated[int, Query(ge=1, le=25000, description="Page size (places are small).")]
 Cursor = Annotated[str | None, Query(description="Opaque cursor from page.next_cursor.")]
 
 

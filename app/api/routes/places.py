@@ -10,7 +10,7 @@ from app.api.deps import (
     Cursor,
     Deps,
     FilterParams,
-    Limit,
+    PlacesLimit,
     OptionalQueryText,
     SearchIn,
     SearchInParam,
@@ -28,7 +28,7 @@ def list_result_places(
     filters: FilterParams,
     q: OptionalQueryText = None,
     search_in: SearchInParam = SearchIn.raw,
-    limit: Limit = 50,
+    limit: PlacesLimit = 50,
     cursor: Cursor = None,
 ):
     result = deps.catalog.run_query(q or "", SEARCH_MODES[search_in], filters.selections())
@@ -48,7 +48,7 @@ def list_result_places(
 
 @router.get("/known", operation_id="listKnownPlaces")
 def list_known_places(
-    request: Request, response: Response, deps: Deps, limit: Limit = 50, cursor: Cursor = None
+    request: Request, response: Response, deps: Deps, limit: PlacesLimit = 50, cursor: Cursor = None
 ):
     known = deps.catalog.known_places()
     page = paginate(request, response, len(known), limit, cursor, deps.catalog.fingerprint())

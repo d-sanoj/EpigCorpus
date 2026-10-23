@@ -17,7 +17,7 @@ info:
     - **Versioning.** Every path starts with `/v1`. Breaking changes get `/v2`;
       additive changes (new optional fields, parameters, operations) do not.
     - **Pagination** is cursor-based. List operations take `limit` (1–500,
-      default 50) and an opaque `cursor`, and return `page.next_cursor`
+      default 50; up to 25,000 for places) and an opaque `cursor`, and return `page.next_cursor`
       (`null` on the last page) plus a `Link: <…>; rel="next"` header. A cursor
       is bound to the query that produced it: reusing it with different
       filters is a `400`.
@@ -321,7 +321,7 @@ paths:
         - $ref: '#/components/parameters/Language'
         - $ref: '#/components/parameters/Province'
         - $ref: '#/components/parameters/Place'
-        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/PlacesLimit'
         - $ref: '#/components/parameters/Cursor'
       responses:
         '200':
@@ -370,7 +370,7 @@ paths:
         inscription (count 0). This is the map's corpus-wide layer. Ordered by
         `count` ascending.
       parameters:
-        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/PlacesLimit'
         - $ref: '#/components/parameters/Cursor'
       responses:
         '200':
@@ -938,6 +938,19 @@ components:
         maximum: 500
         default: 50
       example: 50
+    PlacesLimit:
+      name: limit
+      in: query
+      required: false
+      description: |
+        Page size. Places are small, so a client drawing the map can take
+        every place in one request (there are about 22,000).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 25000
+        default: 50
+      example: 25000
     Cursor:
       name: cursor
       in: query
