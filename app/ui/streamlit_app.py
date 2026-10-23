@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from io import BytesIO
 from pathlib import Path
 
@@ -24,18 +25,27 @@ import streamlit as st
 from matplotlib.lines import Line2D
 from streamlit.components.v1 import html
 
+# `streamlit run app/ui/streamlit_app.py` puts app/ui on sys.path, not the
+# repository root, so the root is added here before anything from `app` loads.
+_ROOT = str(Path(__file__).resolve().parents[2])
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT_DIR / "app" / "data"
+from app.config.paths import (  # noqa: E402
+    CLEANED_JSONL as CLEANED_JSONL_FILE,
+    CLEANED_JSONL_GZ,
+    LOOKUP_FILE,
+    MAP_LAYERS_DIR,
+)
+from app.config.settings import (  # noqa: E402
+    CARTO_ATTRIBUTION,
+    CARTO_LABELLED,
+    CARTO_PLAIN,
+    LEAFLET_CSS,
+    LEAFLET_JS,
+    ROMAN_BOUNDS,
+)
 
-# Base-map layers are vendored in the repository rather than fetched at runtime,
-# so the map is reproducible offline and does not depend on any third-party
-# repository staying online. Provenance and licence terms:
-# app/data/reference/map_layers/README.md
-MAP_LAYERS_DIR = DATA_DIR / "reference" / "map_layers"
-CLEANED_JSONL_FILE = DATA_DIR / "processed" / "edcs_inscriptions_cleaned.jsonl"
-CLEANED_JSONL_GZ = DATA_DIR / "processed" / "edcs_inscriptions_cleaned.jsonl.gz"
-LOOKUP_FILE = DATA_DIR / "reference" / "edcs_lookup.json"
 REPO_URL = "https://github.com/d-sanoj/EpigCorpus"
 REPO_NAME = "d-sanoj/EpigCorpus"
 PNG_CITATION = (
@@ -66,29 +76,9 @@ REQUIRED_COLS = [
 # those rows too, so both are filtered on token overlap rather than equality.
 MULTI_VALUE_FILTERS = ("category_en", "language")
 
-# Roman Empire bounds. Wide enough for the whole empire as EDCS draws it:
-# Britannia in the north-west through Aegyptus and Mesopotamia in the south-east.
-ROMAN_BOUNDS = (20.0, 62.0, -12.0, 50.0)  # (min_lat, max_lat, min_lon, max_lon)
-
 # Map view shared by the initial load and the reset control (EDCS uses Rome).
 MAP_CENTER = (41.9028, 12.4964)
 MAP_ZOOM = 4
-
-# CARTO basemap. "light_all" carries place labels; "light_nolabels" is the same
-# cartography without them, which is how the "Place names" toggle works.
-# CARTO dark basemap ("dark_matter"), the backdrop used throughout the folium
-# cartography tutorial this styling follows:
-# https://nbviewer.org/github/vincentropy/python_cartography_tutorial/blob/master/part1_basic_folium_maps.ipynb
-# "dark_all" carries place labels, "dark_nolabels" is the same cartography
-# without them, which is how the "Place names" toggle works.
-CARTO_LABELLED = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-CARTO_PLAIN = "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-CARTO_ATTRIBUTION = (
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
-    '&copy; <a href="https://carto.com/attributions">CARTO</a>'
-)
-LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-LEAFLET_JS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
 
 # The tutorial's two-colour scheme: teal for one state, tangerine for the other,
 # with magnitude carried by circle size rather than by hue.

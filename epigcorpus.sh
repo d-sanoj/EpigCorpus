@@ -51,7 +51,7 @@ if [[ -x "$SCRIPT_DIR/.venv/bin/python" ]]; then
     echo "Warning: .venv Python version is $VENV_VER, but >= $MIN_PY is recommended."
   fi
 
-  exec "$SCRIPT_DIR/.venv/bin/python" "$SCRIPT_DIR/main.py" "$@"
+  exec "$SCRIPT_DIR/.venv/bin/python" -m app.main "$@"
 fi
 
 ensure_uv
@@ -59,4 +59,4 @@ ensure_uv
 echo "No .venv found. Bootstrapping environment with uv..."
 uv python install "$MIN_PY"
 uv sync --python "$MIN_PY"
-exec uv run --python "$MIN_PY" python "$SCRIPT_DIR/main.py" "$@"
+exec uv run --python "$MIN_PY" python -m app.main "$@"

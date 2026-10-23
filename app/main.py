@@ -9,14 +9,16 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.edcs_cleaner import clean_data
-
-
-ROOT_DIR = Path(__file__).resolve().parent
-SRC_DIR = ROOT_DIR / "src"
-DATA_DIR = ROOT_DIR / "app" / "data"
-RAW_DIR = DATA_DIR / "raw"
-PROCESSED_DIR = DATA_DIR / "processed"
+from app.config.paths import (
+    CLEANED_JSONL,
+    CLEANED_JSONL_GZ,
+    RAW_DIR,
+    ROOT_DIR,
+    SCRAPER_MODULE,
+    SCRAPER_SCRIPT,
+    STREAMLIT_APP,
+)
+from app.core.cleaning import clean_data
 
 
 def print_table(title: str, df: pd.DataFrame, index: bool = True, max_rows: int | None = None) -> None:
@@ -90,7 +92,7 @@ def get_jsonl_files() -> list[Path]:
 
 def run_scraper() -> None:
     """Run the EDCS scraper script."""
-    scraper_script = SRC_DIR / "edcs_scraper.py"
+    scraper_script = SCRAPER_SCRIPT
     
     if not scraper_script.exists():
         raise FileNotFoundError(f"Scraper script not found: {scraper_script}")
@@ -100,7 +102,7 @@ def run_scraper() -> None:
     print(f"{'='*70}\n")
     
     result = subprocess.run(
-        [sys.executable, str(scraper_script)],
+        [sys.executable, "-m", SCRAPER_MODULE],
         capture_output=True,
         text=True,
         env={**os.environ.copy(), **{"MPLBACKEND": "Agg"}},
@@ -138,8 +140,8 @@ def save_cleaned_data(cleaned: pd.DataFrame) -> Path:
     (it is roughly 11x smaller, keeping it under GitHub's 100 MB per-file limit
     without Git LFS). Loaders accept either, so nobody has to decompress by hand.
     """
-    output_jsonl = PROCESSED_DIR / "edcs_inscriptions_cleaned.jsonl"
-    output_gz = PROCESSED_DIR / "edcs_inscriptions_cleaned.jsonl.gz"
+    output_jsonl = CLEANED_JSONL
+    output_gz = CLEANED_JSONL_GZ
 
     cleaned.to_json(output_jsonl, orient="records", lines=True, force_ascii=False)
     print(f"\nSaved cleaned JSONL: {output_jsonl}")
@@ -156,7 +158,7 @@ def save_cleaned_data(cleaned: pd.DataFrame) -> Path:
 
 def launch_streamlit_map() -> None:
     """Launch the Streamlit map application."""
-    map_script = SRC_DIR / "edcs_streamlit_map.py"
+    map_script = STREAMLIT_APP
     
     if not map_script.exists():
         raise FileNotFoundError(f"Streamlit map script not found: {map_script}")

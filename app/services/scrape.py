@@ -70,52 +70,36 @@ from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
+from app.config import paths
+from app.config.settings import (
+    BACKOFF_BASE,
+    CHUNK_SIZE,
+    DEFAULT_WORKERS,
+    EPIGCORPUS_VERSION,
+    HEADERS,
+    IMAGE_URL,
+    INDEX_URL,
+    LANGUAGES_URL,
+    LOOKUPS_URL,
+    MAX_RETRIES,
+    MONUMENT_URL,
+    PLACES_URL,
+    SOURCES_URL,
+)
+
 # ─── PATHS ────────────────────────────────────────────────────────────────────
-SRC_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_DIR = os.path.dirname(SRC_DIR)
-DATA_DIR = os.path.join(PROJECT_DIR, "app", "data")
-RAW_DIR = os.path.join(DATA_DIR, "raw")
-HARVEST_DIR = os.path.join(RAW_DIR, "harvest")
-REFERENCE_DIR = os.path.join(DATA_DIR, "reference")
+# Defined in app.config.paths; the scraper works on os.path strings.
+RAW_DIR = os.fspath(paths.RAW_DIR)
+HARVEST_DIR = os.fspath(paths.HARVEST_DIR)
+REFERENCE_DIR = os.fspath(paths.REFERENCE_DIR)
 
-OUTPUT_JSONL = os.path.join(RAW_DIR, "edcs_inscriptions.jsonl")
-OUTPUT_TSV = os.path.join(RAW_DIR, "edcs_inscriptions.tsv")
-LOOKUP_FILE = os.path.join(REFERENCE_DIR, "edcs_lookup.json")
-CHECKPOINT = os.path.join(HARVEST_DIR, "edcs_checkpoint.json")
-FAILED_FILE = os.path.join(HARVEST_DIR, "edcs_failed_ids.json")
-INDEX_CACHE = os.path.join(HARVEST_DIR, "edcs_index_cache.json")
-MANIFEST = os.path.join(HARVEST_DIR, "edcs_harvest_manifest.json")
-
-# ─── API CONFIG ───────────────────────────────────────────────────────────────
-BASE = "https://edcs.hist.uzh.ch"
-INDEX_URL = f"{BASE}/data/indexes/searchable.json"
-LOOKUPS_URL = f"{BASE}/data/indexes/lookups.json"
-PLACES_URL = f"{BASE}/data/indexes/places.json"
-LANGUAGES_URL = f"{BASE}/data/indexes/languages.json"
-SOURCES_URL = f"{BASE}/data/indexes/sources.json"
-MONUMENT_URL = f"{BASE}/data/monument/{{shard}}/{{id8}}.json"
-IMAGE_URL = f"{BASE}/bilder/{{prefix}}/{{filename}}"
-
-EPIGCORPUS_VERSION = "0.2.0"
-
-# An identifying User-Agent. Verified 2026-08-19: the static /data/ endpoints
-# serve this without complaint (300/300 and 600/600 in survey runs), so there is
-# no access reason to spoof a browser. The old scraper's forged Firefox UA,
-# Referer and X-Requested-With bought nothing — six header variants all got the
-# same 403 from the withdrawn /api/query.
-HEADERS = {
-    "User-Agent": (
-        f"EpigCorpus/{EPIGCORPUS_VERSION} "
-        "(+https://github.com/d-sanoj/EpigCorpus; contact.sanoj.d@gmail.com)"
-    ),
-    "Accept": "application/json",
-    "Accept-Encoding": "gzip, deflate",
-}
-
-DEFAULT_WORKERS = 16
-CHUNK_SIZE = 2000
-MAX_RETRIES = 4
-BACKOFF_BASE = 2.0
+OUTPUT_JSONL = os.fspath(paths.RAW_JSONL)
+OUTPUT_TSV = os.fspath(paths.RAW_TSV)
+LOOKUP_FILE = os.fspath(paths.LOOKUP_FILE)
+CHECKPOINT = os.fspath(paths.CHECKPOINT_FILE)
+FAILED_FILE = os.fspath(paths.FAILED_IDS_FILE)
+INDEX_CACHE = os.fspath(paths.INDEX_CACHE_FILE)
+MANIFEST = os.fspath(paths.MANIFEST_FILE)
 
 # ─── OUTPUT COLUMNS ───────────────────────────────────────────────────────────
 # The first block is the original EpigCorpus schema, unchanged, so main.py,
