@@ -26,15 +26,16 @@ from streamlit.components.v1 import html
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT_DIR / "data"
+DATA_DIR = ROOT_DIR / "app" / "data"
 
 # Base-map layers are vendored in the repository rather than fetched at runtime,
 # so the map is reproducible offline and does not depend on any third-party
-# repository staying online. Provenance and licence terms: data/map_layers/README.md
-MAP_LAYERS_DIR = DATA_DIR / "map_layers"
-CLEANED_JSONL_FILE = DATA_DIR / "edcs_inscriptions_cleaned.jsonl"
-CLEANED_JSONL_GZ = DATA_DIR / "edcs_inscriptions_cleaned.jsonl.gz"
-LOOKUP_FILE = DATA_DIR / "edcs_lookup.json"
+# repository staying online. Provenance and licence terms:
+# app/data/reference/map_layers/README.md
+MAP_LAYERS_DIR = DATA_DIR / "reference" / "map_layers"
+CLEANED_JSONL_FILE = DATA_DIR / "processed" / "edcs_inscriptions_cleaned.jsonl"
+CLEANED_JSONL_GZ = DATA_DIR / "processed" / "edcs_inscriptions_cleaned.jsonl.gz"
+LOOKUP_FILE = DATA_DIR / "reference" / "edcs_lookup.json"
 REPO_URL = "https://github.com/d-sanoj/EpigCorpus"
 REPO_NAME = "d-sanoj/EpigCorpus"
 PNG_CITATION = (
@@ -224,8 +225,8 @@ def map_layer_path(*parts: str) -> Path:
     if not path.exists():
         raise FileNotFoundError(
             f"Missing base-map layer: {path}\n"
-            "These files are vendored in the repository under data/map_layers/. "
-            "Restore them with: git checkout -- data/map_layers"
+            "These files are vendored in the repository under app/data/reference/map_layers/. "
+            "Restore them with: git checkout -- app/data/reference/map_layers"
         )
     return path
 

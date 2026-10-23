@@ -27,31 +27,35 @@ venv/
 .DS_Store
 
 # Scraper runtime artifacts
-data/edcs_checkpoint.json
+app/data/raw/harvest/edcs_checkpoint.json
 
 # Corpus snapshots: commit the COMPRESSED form, ignore the working copies.
 # The scraper writes plain .jsonl/.tsv and compresses them on completion; the
 # loaders read either, so a fresh clone works from the .gz with no manual step.
-data/*.jsonl
-data/*.tsv
-data/edcs_inscriptions_cleaned.csv
-!data/*.jsonl.gz
-!data/*.tsv.gz
+app/data/raw/*.jsonl
+app/data/raw/*.tsv
+app/data/processed/*.jsonl
+app/data/processed/*.tsv
+app/data/processed/edcs_inscriptions_cleaned.csv
+!app/data/raw/*.jsonl.gz
+!app/data/raw/*.tsv.gz
+!app/data/processed/*.jsonl.gz
+!app/data/processed/*.tsv.gz
 
 # Derived caches — regenerated on demand, not worth versioning
-data/edcs_index_cache.json
+app/data/raw/harvest/edcs_index_cache.json
 
 # Small metadata files below are committed deliberately:
-#   data/edcs_lookup.json           code tables for the harvest
-#   data/edcs_harvest_manifest.json completion record
-#   data/edcs_failed_ids.json       failure manifest
+#   app/data/reference/edcs_lookup.json           code tables for the harvest
+#   app/data/raw/harvest/edcs_harvest_manifest.json completion record
+#   app/data/raw/harvest/edcs_failed_ids.json       failure manifest
 
 # Derived pair tables. Same convention as the corpus snapshots above: commit
 # the COMPRESSED form, ignore the plain working copy. The plain .tsv is
 # 140-210 MB (above GitHub's 100 MB hard limit); gzipped it is 23-28 MB.
 # Both are regenerated deterministically by scripts/abbrev_probe.py and
 # scripts/phase3_build_v1.py.
-data/derived/**/*.tsv
-data/derived/*.tsv
-!data/derived/**/*.tsv.gz
-!data/derived/*.tsv.gz
+app/data/processed/derived/**/*.tsv
+app/data/processed/derived/*.tsv
+!app/data/processed/derived/**/*.tsv.gz
+!app/data/processed/derived/*.tsv.gz

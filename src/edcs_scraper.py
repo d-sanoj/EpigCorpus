@@ -73,15 +73,18 @@ import requests
 # ─── PATHS ────────────────────────────────────────────────────────────────────
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(SRC_DIR)
-DATA_DIR = os.path.join(PROJECT_DIR, "data")
+DATA_DIR = os.path.join(PROJECT_DIR, "app", "data")
+RAW_DIR = os.path.join(DATA_DIR, "raw")
+HARVEST_DIR = os.path.join(RAW_DIR, "harvest")
+REFERENCE_DIR = os.path.join(DATA_DIR, "reference")
 
-OUTPUT_JSONL = os.path.join(DATA_DIR, "edcs_inscriptions.jsonl")
-OUTPUT_TSV = os.path.join(DATA_DIR, "edcs_inscriptions.tsv")
-LOOKUP_FILE = os.path.join(DATA_DIR, "edcs_lookup.json")
-CHECKPOINT = os.path.join(DATA_DIR, "edcs_checkpoint.json")
-FAILED_FILE = os.path.join(DATA_DIR, "edcs_failed_ids.json")
-INDEX_CACHE = os.path.join(DATA_DIR, "edcs_index_cache.json")
-MANIFEST = os.path.join(DATA_DIR, "edcs_harvest_manifest.json")
+OUTPUT_JSONL = os.path.join(RAW_DIR, "edcs_inscriptions.jsonl")
+OUTPUT_TSV = os.path.join(RAW_DIR, "edcs_inscriptions.tsv")
+LOOKUP_FILE = os.path.join(REFERENCE_DIR, "edcs_lookup.json")
+CHECKPOINT = os.path.join(HARVEST_DIR, "edcs_checkpoint.json")
+FAILED_FILE = os.path.join(HARVEST_DIR, "edcs_failed_ids.json")
+INDEX_CACHE = os.path.join(HARVEST_DIR, "edcs_index_cache.json")
+MANIFEST = os.path.join(HARVEST_DIR, "edcs_harvest_manifest.json")
 
 # ─── API CONFIG ───────────────────────────────────────────────────────────────
 BASE = "https://edcs.hist.uzh.ch"
@@ -748,7 +751,8 @@ def build_parser():
 
 def main():
     args = build_parser().parse_args()
-    os.makedirs(DATA_DIR, exist_ok=True)
+    for directory in (RAW_DIR, HARVEST_DIR, REFERENCE_DIR):
+        os.makedirs(directory, exist_ok=True)
     install_signal_handlers()
 
     if args.restart:

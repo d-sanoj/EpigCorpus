@@ -14,7 +14,9 @@ from src.edcs_cleaner import clean_data
 
 ROOT_DIR = Path(__file__).resolve().parent
 SRC_DIR = ROOT_DIR / "src"
-DATA_DIR = ROOT_DIR / "data"
+DATA_DIR = ROOT_DIR / "app" / "data"
+RAW_DIR = DATA_DIR / "raw"
+PROCESSED_DIR = DATA_DIR / "processed"
 
 
 def print_table(title: str, df: pd.DataFrame, index: bool = True, max_rows: int | None = None) -> None:
@@ -74,7 +76,7 @@ def get_jsonl_files() -> list[Path]:
     files sort ahead of their own .gz at equal mtime so a freshly harvested
     corpus wins over a committed snapshot.
     """
-    files = list(DATA_DIR.glob("*.jsonl")) + list(DATA_DIR.glob("*.jsonl.gz"))
+    files = list(RAW_DIR.glob("*.jsonl")) + list(RAW_DIR.glob("*.jsonl.gz"))
     # Exclude our own output. It is the newest file in data/ after a run, so
     # without this the next invocation would load the cleaned corpus and clean
     # it a second time, applying every rule twice.
@@ -136,8 +138,8 @@ def save_cleaned_data(cleaned: pd.DataFrame) -> Path:
     (it is roughly 11x smaller, keeping it under GitHub's 100 MB per-file limit
     without Git LFS). Loaders accept either, so nobody has to decompress by hand.
     """
-    output_jsonl = DATA_DIR / "edcs_inscriptions_cleaned.jsonl"
-    output_gz = DATA_DIR / "edcs_inscriptions_cleaned.jsonl.gz"
+    output_jsonl = PROCESSED_DIR / "edcs_inscriptions_cleaned.jsonl"
+    output_gz = PROCESSED_DIR / "edcs_inscriptions_cleaned.jsonl.gz"
 
     cleaned.to_json(output_jsonl, orient="records", lines=True, force_ascii=False)
     print(f"\nSaved cleaned JSONL: {output_jsonl}")
