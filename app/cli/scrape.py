@@ -6,11 +6,12 @@ into the harvest use case.
 
 import argparse
 import signal
+import sys
 
 from app.adapters import edcs_client, harvest_store
 from app.adapters.console import log
 from app.config.settings import DEFAULT_WORKERS
-from app.services.scrape import run_harvest
+from app.services.scrape import HarvestError, run_harvest
 
 
 def install_signal_handlers():
@@ -46,15 +47,19 @@ def build_parser():
 def main():
     args = build_parser().parse_args()
     install_signal_handlers()
-    run_harvest(
-        args.limit,
-        args.workers,
-        args.restart,
-        args.refresh_index,
-        client=edcs_client,
-        store=harvest_store,
-        log=log,
-    )
+    try:
+        run_harvest(
+            args.limit,
+            args.workers,
+            args.restart,
+            args.refresh_index,
+            client=edcs_client,
+            store=harvest_store,
+            log=log,
+        )
+    except HarvestError:
+        # run_harvest has already logged why.
+        sys.exit(1)
 
 
 if __name__ == "__main__":

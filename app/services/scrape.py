@@ -62,13 +62,30 @@ RUN (from project root):
     python -m app.cli.scrape --workers 8       # gentler on the server
 """
 
-import sys
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 
 from app.config.settings import CHUNK_SIZE, MONUMENT_URL
 from app.core.edcs_parsing import parse_monument
 from app.services.ports import EdcsClient, HarvestStore, Log
+
+# Called after every chunk with cursor, total, monuments_done, rows_written,
+# failed and rate_per_second. Optional; the command line passes none.
+ProgressHook = Callable[[dict], None]
+# Polled between chunks; True stops the harvest the way Ctrl+C does. Optional.
+StopHook = Callable[[], bool]
+
+# What run_harvest returns.
+COMPLETE = "complete"  # every monument in the index harvested, outputs compressed
+PARTIAL = "partial"  # every monument up to --limit harvested
+INCOMPLETE = "incomplete"  # the walk finished but some monuments failed
+INTERRUPTED = "interrupted"  # stopped by Ctrl+C, SIGTERM or should_stop; resumable
+ALREADY_COMPLETE = "already_complete"  # nothing to do
+
+
+class HarvestError(RuntimeError):
+    """The harvest could not start: the EDCS index or lookup tables could not be fetched."""
 
 # ─── HARVEST ──────────────────────────────────────────────────────────────────
 
@@ -85,8 +102,15 @@ def harvest(
     client: EdcsClient,
     store: HarvestStore,
     log: Log,
+    should_stop: StopHook | None = None,
+    on_progress: ProgressHook | None = None,
 ):
+    """Fetch and write monuments from start_cursor on, checkpointing every chunk.
+
+    Returns (cursor, monuments_done, rows_written, failed, interrupted).
+    """
     is_resume = start_cursor > 0
+    interrupted = False
 
     # Refuses to truncate non-empty output unless resuming (see CorpusWriter).
     writer = store.open_corpus_writer(is_resume)
@@ -129,6 +153,8 @@ def harvest(
                 retry_ids = sorted(failed)
                 log(f"[+] Retrying {len(retry_ids):,} monuments that failed earlier...")
                 for offset in range(0, len(retry_ids), CHUNK_SIZE):
+                    if should_stop is not None and should_stop():
+                        raise KeyboardInterrupt("stop requested")
                     batch = retry_ids[offset : offset + CHUNK_SIZE]
                     for monument_id, payload in pool.map(fetch_one, enumerate(batch)):
                         if payload is None:
@@ -143,6 +169,8 @@ def harvest(
                 log(f"[+] Recovered {recovered:,}; {len(failed):,} still failing\n")
 
             while cursor < total:
+                if should_stop is not None and should_stop():
+                    raise KeyboardInterrupt("stop requested")
                 chunk = ids[cursor : cursor + CHUNK_SIZE]
                 tasks = list(enumerate(chunk))
 
@@ -167,8 +195,18 @@ def harvest(
                     f"rows={rows_written:>8,} | failed={len(failed):>4,} | "
                     f"{rate:5.1f} mon/s | ~{remaining:.0f} min left"
                 )
+                if on_progress is not None:
+                    on_progress({
+                        "cursor": cursor,
+                        "total": total,
+                        "monuments_done": monuments_done,
+                        "rows_written": rows_written,
+                        "failed": len(failed),
+                        "rate_per_second": round(rate, 1),
+                    })
 
     except KeyboardInterrupt:
+        interrupted = True
         log(f"\n[!] Interrupted at {cursor:,}. Run again to resume.")
 
     finally:
@@ -176,7 +214,7 @@ def harvest(
         store.save_checkpoint(cursor, monuments_done, rows_written)
         store.save_failed(failed)
 
-    return cursor, monuments_done, rows_written, failed
+    return cursor, monuments_done, rows_written, failed, interrupted
 
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
@@ -193,11 +231,14 @@ def run_harvest(
     client: EdcsClient,
     store: HarvestStore,
     log: Log,
-):
+    should_stop: StopHook | None = None,
+    on_progress: ProgressHook | None = None,
+) -> str:
     """The scraper's use case: fetch the index and lookups, then harvest or resume.
 
     Arguments mirror the command line: --limit, --workers, --restart,
-    --refresh-index.
+    --refresh-index. Returns one of the outcomes above. Raises HarvestError,
+    after logging why, when the index or lookups cannot be fetched.
     """
     store.ensure_dirs()
 
@@ -212,7 +253,7 @@ def run_harvest(
     except RuntimeError as exc:
         log(f"[!] Could not fetch the EDCS index: {exc}")
         log("[!] The endpoint or its schema may have changed again — see docs/EDCS_API.md")
-        sys.exit(1)
+        raise HarvestError(f"Could not fetch the EDCS index: {exc}") from exc
 
     if limit:
         ids = ids[:limit]
@@ -222,7 +263,7 @@ def run_harvest(
         lookup = client.build_lookup(session)
     except RuntimeError as exc:
         log(f"[!] Could not fetch lookup tables: {exc}")
-        sys.exit(1)
+        raise HarvestError(f"Could not fetch lookup tables: {exc}") from exc
     store.save_lookup(lookup)
 
     checkpoint = store.load_checkpoint()
@@ -241,7 +282,7 @@ def run_harvest(
         log("\n    Nothing to do. Use --restart to re-harvest from scratch "
             "(this DELETES the existing corpus),")
         log("    or --refresh-index to check whether EDCS has grown since.")
-        return
+        return ALREADY_COMPLETE
 
     if checkpoint and not restart:
         cursor = checkpoint.get("cursor", 0)
@@ -250,12 +291,15 @@ def run_harvest(
         if cursor >= len(ids):
             log(f"[✓] Already complete — {monuments_done:,} monuments, "
                 f"{rows_written:,} rows. Use --restart to re-harvest.")
-            return
+            return ALREADY_COMPLETE
         log(f"[resume] Checkpoint at monument {cursor:,} "
             f"({rows_written:,} rows already written)")
 
     started = time.time()
-    cursor, monuments_done, rows_written, failed = harvest(
+    def progress(update: dict) -> None:
+        on_progress({**update, "index_fetched_at": index_fetched_at})
+
+    cursor, monuments_done, rows_written, failed, interrupted = harvest(
         client.make_session,
         ids,
         lookup,
@@ -266,6 +310,8 @@ def run_harvest(
         client=client,
         store=store,
         log=log,
+        should_stop=should_stop,
+        on_progress=progress if on_progress is not None else None,
     )
     duration = time.time() - started
 
@@ -287,3 +333,11 @@ def run_harvest(
     log(f"\n[✓] JSONL  : {store.OUTPUT_JSONL}")
     log(f"[✓] TSV    : {store.OUTPUT_TSV}")
     log(f"[✓] Lookup : {store.LOOKUP_FILE}")
+
+    if interrupted:
+        return INTERRUPTED
+    if failed:
+        return INCOMPLETE
+    if cursor >= len(ids):
+        return PARTIAL if limit else COMPLETE
+    return INTERRUPTED
