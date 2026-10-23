@@ -14,9 +14,10 @@ import csv, json, os, sys, time
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
-SPLITS = REPO/"data"/"derived"/"v1"/"splits"
-CELLS = REPO/"results"/"cells"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+SPLITS = paths.SPLITS_DIR
+CELLS = paths.CELLS_DIR
 CELLS.mkdir(parents=True, exist_ok=True)
 
 SEEDS = [1, 2, 3]

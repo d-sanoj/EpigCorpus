@@ -41,10 +41,11 @@ from pathlib import Path
 
 import pandas as pd
 
-REPO = Path(__file__).resolve().parent.parent
-RAW = REPO / "data" / "edcs_inscriptions.jsonl"
-OUT_TSV = REPO / "data" / "derived" / "abbrev_pairs.tsv"
-OUT_MD = REPO / "reports" / "abbrev_probe.md"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+RAW = paths.RAW_JSONL
+OUT_TSV = paths.DERIVED_DIR/"abbrev_pairs.tsv"
+OUT_MD = paths.REPORTS_DIR/"abbrev_probe.md"
 
 # Fields this probe refuses to run without.
 REQUIRED_FIELDS = ["record_id", "inscription_text", "province", "not_before", "not_after"]

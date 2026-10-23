@@ -21,8 +21,9 @@ import json, re, unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
-RAW = REPO/"data"/"edcs_inscriptions.jsonl"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+RAW = paths.RAW_JSONL
 
 # Code points the brief names, plus every block that could carry the job.
 NAMED = {0x0305: "COMBINING OVERLINE",
@@ -127,7 +128,7 @@ def main():
         },
         "ascii_pipe_occurrences": charct.get("|", 0),
     }
-    p = REPO/"data"/"derived"/"phase2_vinculum.json"
+    p = paths.ANALYSIS_DIR/"phase2_vinculum.json"
     p.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 
     print(f"records {n_rec:,}  chars {sum(charct.values()):,}  distinct {len(charct):,}")

@@ -5,7 +5,8 @@ from __future__ import annotations
 import json, re, unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
-REPO = Path(__file__).resolve().parent.parent
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
 
 MARKS = {"̅", "̄", "̲"}
 # the milliary / thousands family from the Phase 1 pipe inventory
@@ -29,7 +30,7 @@ def roman_val(s):
         prev = max(prev, x)
     return tot
 
-for line in (REPO/"data"/"edcs_inscriptions.jsonl").open(encoding="utf-8"):
+for line in (paths.RAW_JSONL).open(encoding="utf-8"):
     r = json.loads(line)
     t = r.get("inscription_text") or ""
     if not t: continue
@@ -78,7 +79,7 @@ out = {
     "dot_below_top_tokens": dict(dot_below_tokens.most_common(30)),
     "sample_contexts": [c for c, _ in thous_ctx.most_common(25)],
 }
-p = REPO/"data"/"derived"/"phase2_crossref.json"
+p = paths.ANALYSIS_DIR/"phase2_crossref.json"
 p.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 
 print("=== THE THREE OVERLINE/LOWLINE SIGHTINGS, IN FULL ===")

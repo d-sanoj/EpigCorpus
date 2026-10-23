@@ -33,9 +33,10 @@ import importlib.util, json, random, re, sys, unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
-RAW = REPO / "data" / "edcs_inscriptions.jsonl"
-OUT = REPO / "reports" / "exclusion_audit_supplement.md"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+RAW = paths.RAW_JSONL
+OUT = paths.REPORTS_DIR/"exclusion_audit_supplement.md"
 SEED = 20260820
 
 def load_probe():
@@ -227,7 +228,7 @@ def main():
         "kept_province": dict(kept_prov),
         "drop_province": {k: dict(v) for k, v in drop_prov.items()},
     }
-    outp = REPO/"data"/"derived"/"phase1_supplement.json"
+    outp = paths.ANALYSIS_DIR/"phase1_supplement.json"
     outp.parent.mkdir(parents=True, exist_ok=True)
     outp.write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"kept {kept:,}  tokens_with_paren {tokens_with_paren:,}  "

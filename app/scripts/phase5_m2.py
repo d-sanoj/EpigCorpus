@@ -28,9 +28,10 @@ from scipy import sparse
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.linear_model import SGDClassifier
 
-REPO = Path(__file__).resolve().parent.parent
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
 def _l(n):
-    s = importlib.util.spec_from_file_location(n, REPO/"scripts"/f"{n}.py")
+    s = importlib.util.spec_from_file_location(n, paths.SCRIPTS_DIR/f"{n}.py")
     m = importlib.util.module_from_spec(s); s.loader.exec_module(m); return m
 C = _l("phase5_common"); E = _l("phase5_eval")
 

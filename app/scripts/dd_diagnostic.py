@@ -37,9 +37,10 @@ from pathlib import Path
 
 import pandas as pd
 
-REPO = Path(__file__).resolve().parent.parent
-RAW = REPO / "data" / "edcs_inscriptions.jsonl"
-OUT_MD = REPO / "reports" / "dd_diagnostic.md"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+RAW = paths.RAW_JSONL
+OUT_MD = paths.REPORTS_DIR/"dd_diagnostic.md"
 
 # The probe's own reported total, used to prove this walker is a faithful mirror.
 EXPECTED_PAIRS = 1_424_314

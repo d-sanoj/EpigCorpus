@@ -11,12 +11,13 @@ from __future__ import annotations
 import csv, importlib.util, json, math, random
 from collections import Counter, defaultdict
 from pathlib import Path
-REPO = Path(__file__).resolve().parent.parent
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
 SEED = 20260820; NPERM = 200
 def _load(n,p):
     s=importlib.util.spec_from_file_location(n,p); m=importlib.util.module_from_spec(s)
     s.loader.exec_module(m); return m
-ap=_load("abbrev_probe", REPO/"scripts"/"abbrev_probe.py")
+ap=_load("abbrev_probe", paths.SCRIPTS_DIR/"abbrev_probe.py")
 
 def nmi(xs, ys):
     n=len(xs)
@@ -34,7 +35,7 @@ def century_of(a,b):
     return ap.century_label(c) if (c is not None and s) else None
 
 rows=defaultdict(list)   # abbrev -> [(base_id, expansion, province, century)]
-with (REPO/"data"/"derived"/"v1"/"abbrev_pairs_v1.tsv").open(encoding="utf-8",newline="") as fh:
+with (paths.DERIVED_V1_DIR/"abbrev_pairs_v1.tsv").open(encoding="utf-8",newline="") as fh:
     rd=csv.reader(fh,delimiter="\t",quoting=csv.QUOTE_NONE); h=next(rd)
     I={c:i for i,c in enumerate(h)}
     for r in rd:
@@ -90,5 +91,5 @@ for ab,cond,ci in (("v","province",2),("c","century",3)):
         print(f"  {k:<34}n={tot:>7,}   {top}")
     res[f"dist_{ab}_{cond}"]={k:dict(g[k].most_common(5)) for k in order[:12]}
 
-(REPO/"data"/"derived"/"v1"/"phase3f_blockperm.json").write_text(
+(paths.ANALYSIS_V1_DIR/"phase3f_blockperm.json").write_text(
     json.dumps(res,ensure_ascii=False,indent=1),encoding="utf-8")

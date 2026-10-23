@@ -27,9 +27,10 @@ from pathlib import Path
 
 import pandas as pd
 
-REPO = Path(__file__).resolve().parent.parent
-RAW = REPO / "data" / "edcs_inscriptions.jsonl"
-OUT_MD = REPO / "reports" / "exclusion_audit.md"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+RAW = paths.RAW_JSONL
+OUT_MD = paths.REPORTS_DIR/"exclusion_audit.md"
 
 N_EXAMPLES = 40
 TEXT_CAP = 300

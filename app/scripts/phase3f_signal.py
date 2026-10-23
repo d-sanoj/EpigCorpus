@@ -24,7 +24,8 @@ import csv, importlib.util, json, math, random, re, sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
 SEED = 20260820
 NPERM = 200
 TARGETS = ["v", "c", "a", "l", "aug", "d", "f", "p", "m", "s"]
@@ -33,7 +34,7 @@ MIN_N = 200
 def _load(n, p):
     s = importlib.util.spec_from_file_location(n, p); m = importlib.util.module_from_spec(s)
     s.loader.exec_module(m); return m
-ap = _load("abbrev_probe", REPO/"scripts"/"abbrev_probe.py")
+ap = _load("abbrev_probe", paths.SCRIPTS_DIR/"abbrev_probe.py")
 
 def rebuild(core, cl):
     """Rewrite each paren group with its uncertainty marker stripped."""
@@ -91,7 +92,7 @@ def century_of(a, b):
 
 # ---- V0 and V1c from the corrected file -----------------------------------
 v0, v1c = [], []
-with (REPO/"data"/"derived"/"v1"/"abbrev_pairs_v1.tsv").open(encoding="utf-8", newline="") as fh:
+with (paths.DERIVED_V1_DIR/"abbrev_pairs_v1.tsv").open(encoding="utf-8", newline="") as fh:
     rd = csv.reader(fh, delimiter="\t", quoting=csv.QUOTE_NONE); h = next(rd)
     I = {c: i for i, c in enumerate(h)}
     for r in rd:
@@ -106,7 +107,7 @@ with (REPO/"data"/"derived"/"v1"/"abbrev_pairs_v1.tsv").open(encoding="utf-8", n
 # ---- PRE-EXCLUSION: kept pairs + bracket-excluded tokens that parse --------
 pre = list(v0)
 n_recovered = 0
-for line in (REPO/"data"/"edcs_inscriptions.jsonl").open(encoding="utf-8"):
+for line in (paths.RAW_JSONL).open(encoding="utf-8"):
     rec = json.loads(line)
     t = rec.get("inscription_text") or ""
     if "(" not in t: continue
@@ -143,7 +144,7 @@ res = {"seed": SEED, "permutations": NPERM, "min_n": MIN_N,
 for name, data in (("V0", v0), ("V1c", v1c), ("PRE", pre)):
     res[name] = signal(data, name, random.Random(SEED))
 
-(REPO/"data"/"derived"/"v1"/"phase3f_signal.json").write_text(
+(paths.ANALYSIS_V1_DIR/"phase3f_signal.json").write_text(
     json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
 
 print(f"\n{'abbrev|cond':<16}{'V0 nmi':>9}{'ratio':>7}{'V1c nmi':>10}{'ratio':>7}{'PRE nmi':>10}{'ratio':>7}   {'n V0':>9}{'n PRE':>9}")

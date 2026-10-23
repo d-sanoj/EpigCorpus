@@ -15,8 +15,9 @@ from __future__ import annotations
 import csv, json
 from collections import Counter, defaultdict
 from pathlib import Path
-REPO = Path(__file__).resolve().parent.parent
-V1 = REPO/"data"/"derived"/"v1"/"abbrev_pairs_v1.tsv"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+V1 = paths.DERIVED_V1_DIR/"abbrev_pairs_v1.tsv"
 
 def lcp(a, b):
     n = 0
@@ -108,7 +109,7 @@ res["keys_gaining_expansions_from_collapse"] = [
     {"key": k, "before": b, "after": a, "pairs": n} for k, b, a, n in gain[:30]]
 res["n_keys_gaining"] = len(gain)
 
-(REPO/"data"/"derived"/"v1"/"phase3_diff.json").write_text(
+(paths.ANALYSIS_V1_DIR/"phase3_diff.json").write_text(
     json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
 
 print(f"rows {n_rows:,}   flagged excluded {excluded:,}\n")

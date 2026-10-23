@@ -16,9 +16,10 @@ import csv, hashlib, json, sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
-V1 = REPO/"data"/"derived"/"v1"/"abbrev_pairs_v1.tsv"
-OUT = REPO/"data"/"derived"/"v1"/"splits"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+V1 = paths.DERIVED_V1_DIR/"abbrev_pairs_v1.tsv"
+OUT = paths.SPLITS_DIR
 SEED = 20260820
 
 # 4b. Held-out provinces, chosen on the stated criteria in

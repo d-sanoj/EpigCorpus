@@ -10,8 +10,9 @@ from __future__ import annotations
 import csv, json, re
 from collections import Counter
 from pathlib import Path
-REPO = Path(__file__).resolve().parent.parent
-TSV = REPO/"data"/"derived"/"abbrev_pairs.tsv"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+TSV = paths.DERIVED_DIR/"abbrev_pairs.tsv"
 ROMAN = re.compile(r"^[IVXLCDM]+$")
 
 exp_freq = Counter()
@@ -52,7 +53,7 @@ def rv(s):
         x=v.get(c,0); t += -x if x<p else x; p=max(p,x)
     return t
 bare_num = Counter(); pipe_pre = Counter(); hs_prefixed = 0; bare_total = 0
-for line in (REPO/"data"/"edcs_inscriptions.jsonl").open(encoding="utf-8"):
+for line in (paths.RAW_JSONL).open(encoding="utf-8"):
     t = json.loads(line).get("inscription_text") or ""
     if "mil" not in t and "Mil" not in t: continue
     for m in BARE.finditer(t):
@@ -76,7 +77,7 @@ out = {
   "bare_numeral_values": {k: {"n": v, "value": rv(k)} for k, v in bare_num.most_common(25)},
   "pipe_milia_preceding_token": dict(pipe_pre.most_common(25)),
 }
-p = REPO/"data"/"derived"/"phase2_numeral_fusion.json"
+p = paths.ANALYSIS_DIR/"phase2_numeral_fusion.json"
 p.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 
 print(f"FUSED numeral pairs currently in the kept 1,424,314 : {sum(fused.values()):,}  ({len(fused)} types)")

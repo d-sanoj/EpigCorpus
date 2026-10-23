@@ -16,7 +16,8 @@ import importlib.util, json, random, re
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
 SEED = 20260820
 BOOT = 200
 
@@ -51,7 +52,7 @@ hidden_ex = defaultdict(list)
 prov_all = defaultdict(Counter)   # bucket -> province counter, for TVD
 kept_prov = Counter()
 
-RAW = REPO/"data"/"edcs_inscriptions.jsonl"
+RAW = paths.RAW_JSONL
 for line in RAW.open(encoding="utf-8"):
     r = json.loads(line)
     t = r.get("inscription_text") or ""
@@ -75,7 +76,7 @@ for line in RAW.open(encoding="utf-8"):
                 hidden_ex[c].append((tok, r["record_id"]))
 
 # ---------- (ii) TVD null baseline ----------------------------------------
-sup = json.load(open(REPO/"data"/"derived"/"phase1_supplement.json"))
+sup = json.load(open(paths.ANALYSIS_DIR/"phase1_supplement.json"))
 kept_prov = Counter(sup["kept_province"])
 drop_prov = {k: Counter(v) for k, v in sup["drop_province"].items()}
 
@@ -142,7 +143,7 @@ out = {
     "tvd_null": null,
     "pipe_typo_candidates": sorted(typos, key=lambda d: -d["nearest_count"]),
 }
-p = REPO/"data"/"derived"/"phase1_supplement2.json"
+p = paths.ANALYSIS_DIR/"phase1_supplement2.json"
 p.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 print("hidden empty-paren tokens inside brackets:")
 for k, v in hidden.most_common(): print(f"  {v:>7,}  {k}")

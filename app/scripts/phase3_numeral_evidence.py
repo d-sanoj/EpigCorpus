@@ -12,14 +12,15 @@ from __future__ import annotations
 import csv, re
 from collections import Counter, defaultdict
 from pathlib import Path
-REPO = Path(__file__).resolve().parent.parent
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
 ROMAN = re.compile(r"^[IVXLCDM]+$")
 
 multi = Counter(); single = Counter()
 multi_pairs = defaultdict(Counter); single_pairs = defaultdict(Counter)
 exp_freq = Counter(); abbrev_freq = Counter()
 
-with (REPO/"data"/"derived"/"abbrev_pairs.tsv").open(encoding="utf-8", newline="") as fh:
+with (paths.DERIVED_DIR/"abbrev_pairs.tsv").open(encoding="utf-8", newline="") as fh:
     rd = csv.reader(fh, delimiter="\t", quoting=csv.QUOTE_NONE); next(rd)
     for r in rd:
         ab, ex = r[1], r[2]

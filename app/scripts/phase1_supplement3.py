@@ -11,7 +11,8 @@ import importlib.util, json, random, re, statistics
 from collections import Counter
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
 SEED = 20260820; BOOT = 200
 def load_probe():
     p = Path(__file__).resolve().parent/"abbrev_probe.py"
@@ -47,7 +48,7 @@ kept_c = Counter(); drop_c = Counter()
 kept_len = []; drop_len = []
 kept_p = Counter(); drop_p = Counter()
 
-for line in (REPO/"data"/"edcs_inscriptions.jsonl").open(encoding="utf-8"):
+for line in (paths.RAW_JSONL).open(encoding="utf-8"):
     r = json.loads(line)
     t = r.get("inscription_text") or ""
     if "(" not in t: continue
@@ -88,7 +89,7 @@ out={"seed":SEED,
  "century_table":{k:{"drop":drop_c[k],"kept":kept_c[k]} for k in set(drop_c)|set(kept_c)},
  "province_table":{k:{"drop":drop_p[k],"kept":kept_p[k]} for k in set(drop_p)|set(kept_p)},
 }
-(REPO/"data"/"derived"/"phase1_supplement3.json").write_text(json.dumps(out,ensure_ascii=False,indent=1),encoding="utf-8")
+(paths.ANALYSIS_DIR/"phase1_supplement3.json").write_text(json.dumps(out,ensure_ascii=False,indent=1),encoding="utf-8")
 print(f"kept {out['kept_pairs']:,}  dropped {out['dropped_tokens']:,}")
 print(f"province TVD {out['province']['tvd']:.3f}  null p95 {out['province']['null'][1]:.3f}")
 print(f"century  TVD {out['century']['tvd']:.3f}  null p95 {out['century']['null'][1]:.3f}  (kept n={out['century']['kept_n']:,} drop n={out['century']['drop_n']:,})")

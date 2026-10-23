@@ -10,14 +10,15 @@ from __future__ import annotations
 import csv, importlib.util, json, math, random
 from collections import Counter, defaultdict
 from pathlib import Path
-REPO = Path(__file__).resolve().parent.parent
-S = REPO/"data"/"derived"/"v1"/"splits"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+S = paths.SPLITS_DIR
 SEED = 20260820
 
 def _load(n, p):
     sp = importlib.util.spec_from_file_location(n, p); m = importlib.util.module_from_spec(sp)
     sp.loader.exec_module(m); return m
-ap = _load("abbrev_probe", REPO/"scripts"/"abbrev_probe.py")
+ap = _load("abbrev_probe", paths.SCRIPTS_DIR/"abbrev_probe.py")
 
 def century(a, b):
     ya, yb = ap.parse_year(a), ap.parse_year(b)

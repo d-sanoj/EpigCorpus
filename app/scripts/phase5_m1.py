@@ -14,9 +14,10 @@ genuinely undecided, which is the honest thing for the floor model to report.
 from __future__ import annotations
 import importlib.util, json, random, sys, time
 from pathlib import Path
-REPO = Path(__file__).resolve().parent.parent
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
 def _l(n):
-    s = importlib.util.spec_from_file_location(n, REPO/"scripts"/f"{n}.py")
+    s = importlib.util.spec_from_file_location(n, paths.SCRIPTS_DIR/f"{n}.py")
     m = importlib.util.module_from_spec(s); s.loader.exec_module(m); return m
 C = _l("phase5_common"); E = _l("phase5_eval")
 

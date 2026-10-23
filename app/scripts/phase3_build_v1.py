@@ -36,9 +36,10 @@ import csv, importlib.util, json, re, sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
-IN_TSV = REPO/"data"/"derived"/"abbrev_pairs.tsv"
-OUT_DIR = REPO/"data"/"derived"/"v1"
+import _paths as paths  # paths are defined in app/config/paths.py
+REPO = paths.ROOT_DIR
+IN_TSV = paths.DERIVED_DIR/"abbrev_pairs.tsv"
+OUT_DIR = paths.DERIVED_V1_DIR
 OUT_TSV = OUT_DIR/"abbrev_pairs_v1.tsv"
 STATS = OUT_DIR/"phase3_stats.json"
 SEED = 20260820
@@ -46,7 +47,7 @@ SEED = 20260820
 def _load(name, path):
     s = importlib.util.spec_from_file_location(name, path)
     m = importlib.util.module_from_spec(s); s.loader.exec_module(m); return m
-WL = _load("wl", REPO/"scripts"/"phase3_wordlists.py")
+WL = _load("wl", paths.SCRIPTS_DIR/"phase3_wordlists.py")
 
 # ---------------------------------------------------------------------------
 # 3d. Dates. The brief forbids dropping post-700 records: prior work
