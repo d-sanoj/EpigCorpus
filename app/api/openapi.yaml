@@ -1,0 +1,1499 @@
+openapi: 3.1.0
+info:
+  title: EpigCorpus API
+  version: 0.1.0-draft
+  summary: Search, read, export and harvest Latin inscriptions from the EDCS.
+  description: |
+    Contract-first design of the EpigCorpus HTTP API. **No endpoint is
+    implemented yet.** Every operation maps onto a use case that already exists
+    in `app/services`; `app/api/README.md` lists which one, and
+    `docs/adr/0002-api-first-design.md` explains why the contract comes first.
+
+    ## Conventions
+
+    - **Versioning.** Every path starts with `/v1`. Breaking changes get `/v2`;
+      additive changes (new optional fields, parameters, operations) do not.
+    - **Pagination** is cursor-based. List operations take `limit` (1–500,
+      default 50) and an opaque `cursor`, and return `page.next_cursor`
+      (`null` on the last page) plus a `Link: <…>; rel="next"` header. A cursor
+      is bound to the query that produced it: reusing it with different
+      filters is a `400`.
+    - **Errors** are `application/problem+json` (RFC 9457) with `type`,
+      `title`, `status`, `detail`, `instance`; validation errors add `errors[]`.
+    - **Search semantics** are exactly those of the existing map search
+      (`app/core/search.py`):
+      - `q` is a case-insensitive **substring** match — not a regular
+        expression, not tokenised — against the text column selected by
+        `search_in`: `raw` → `inscription_text`, `interpretive` →
+        `inscription_text_interpretive`, `conservative` →
+        `inscription_text_conservative`.
+      - `material`, `province` and `place` match a value **exactly**.
+        `category` and `language` match on **token overlap**: `category_en`
+        is a list and `language` is comma-joined, so `language=Latin` matches
+        `"Greek, Latin"`.
+      - Each filter may be repeated (`province=Noricum&province=Dalmatia`);
+        values within one filter are alternatives (OR); different filters
+        must all hold (AND).
+      - Search, list and places operate on the **map's search frame**: rows
+        with coordinates inside the Roman Empire bounding box
+        (latitude 20–62, longitude −12–50), 568,560 of the 588,509 rows in
+        the current snapshot. Reading one inscription by id uses the full
+        corpus. Whether the API should keep the bounding box is an open
+        question recorded in `app/api/README.md`.
+
+    ## Authentication
+
+    The API will be protected with **OAuth 2.0 / OpenID Connect**. Which flows
+    are offered (for example authorization code with PKCE for the browser UI,
+    client credentials for automation) and which scopes guard which
+    operations (starting and cancelling scrape jobs at minimum) are not
+    decided here; that decision is open in
+    `docs/adr/0003-api-authentication.md` (status: proposed). The
+    `openIdConnect` scheme below is declared so tooling can see it, but no
+    operation requires it in this draft.
+  license:
+    name: MIT (code). Inscription data carries the EDCS terms.
+    identifier: MIT
+  contact:
+    name: EpigCorpus
+    url: https://github.com/d-sanoj/EpigCorpus
+
+servers:
+  - url: http://localhost:8000
+    description: Local development (placeholder; nothing listens here yet)
+
+tags:
+  - name: inscriptions
+    description: Search, list and read inscription records.
+  - name: variants
+    description: The raw text and its two cleaned variants.
+  - name: places
+    description: Inscriptions aggregated per findspot, as the map draws them.
+  - name: map
+    description: Historical map layers (provinces, roads, cities).
+  - name: exports
+    description: Whole-corpus and search-result downloads.
+  - name: lookups
+    description: EDCS code tables and the filter values present in the corpus.
+  - name: scrape-jobs
+    description: Asynchronous harvests from the EDCS.
+
+paths:
+  /v1/inscriptions:
+    get:
+      tags: [inscriptions]
+      operationId: listInscriptions
+      summary: List inscriptions, optionally filtered
+      description: |
+        Pages through the search frame, narrowed by the attribute filters.
+        No keyword: use `/v1/inscriptions/search` for text search. With no
+        filters this pages through every inscription in the frame.
+      parameters:
+        - $ref: '#/components/parameters/Material'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Province'
+        - $ref: '#/components/parameters/Place'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: One page of inscriptions.
+          headers:
+            Link:
+              $ref: '#/components/headers/Link'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InscriptionPage'
+              examples:
+                noricumLatin:
+                  summary: "province=Noricum&language=Latin&limit=1: 4,606 matches"
+                  value:
+                    data:
+                      - record_id: EDCS-00000001-0
+                        edcs_id: EDCS-00000001
+                        province: Noricum
+                        place: Maribor / Marburg
+                        latitude: 46.55563
+                        longitude: 15.64477
+                        not_before: null
+                        not_after: null
+                        language: Latin
+                        material_en: stone
+                        category_en: [tomb inscriptions, men, first name and gentile name, 'municipal magistrates, priests and councillors']
+                        inscription_text: "?] C(aius) Trebonius IIvir et praef(ectus) i(ure) d(icundo) civitatis Agunti [?"
+                        inscription_text_interpretive: Caius Trebonius II vir et praefectus iure dicundo civitatis Agunti
+                        inscription_text_conservative: C Trebonius II vir et praef i d civitatis Agunti
+                    page:
+                      limit: 1
+                      total: 4606
+                      next_cursor: eyJvIjoxLCJxIjoiYjM3YyJ9
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /v1/inscriptions/search:
+    get:
+      tags: [inscriptions]
+      operationId: searchInscriptions
+      summary: Keyword search, combinable with the filters
+      description: |
+        Case-insensitive substring search of `q` in the column chosen by
+        `search_in`, then narrowed by the filters. Same results, in the same
+        order, as the map's search for the same inputs.
+      parameters:
+        - $ref: '#/components/parameters/QRequired'
+        - $ref: '#/components/parameters/SearchIn'
+        - $ref: '#/components/parameters/Material'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Province'
+        - $ref: '#/components/parameters/Place'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: One page of matching inscriptions.
+          headers:
+            Link:
+              $ref: '#/components/headers/Link'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InscriptionPage'
+              examples:
+                viator:
+                  summary: "q=viator in raw text: 515 matches"
+                  value:
+                    data:
+                      - record_id: EDCS-00000144-0
+                        edcs_id: EDCS-00000144
+                        province: Germania superior
+                        place: Avenches / Aventicum
+                        latitude: 46.87961
+                        longitude: 7.04087
+                        not_before: 30
+                        not_after: 74
+                        language: Latin
+                        material_en: iron
+                        category_en: ["manufacturer's inscriptions", owner inscriptions]
+                        inscription_text: Viator(is)?
+                        inscription_text_interpretive: Viatoris
+                        inscription_text_conservative: Viator
+                    page:
+                      limit: 1
+                      total: 515
+                      next_cursor: eyJvIjoxLCJxIjoiOWYxZSJ9
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /v1/inscriptions/{record_id}:
+    get:
+      tags: [inscriptions]
+      operationId: getInscription
+      summary: Read one inscription, every column
+      description: Reads from the full cleaned corpus, not the bounded search frame.
+      parameters:
+        - $ref: '#/components/parameters/RecordId'
+      responses:
+        '200':
+          description: The inscription.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inscription'
+              examples:
+                edcs1:
+                  $ref: '#/components/examples/InscriptionEdcs1'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/inscriptions/{record_id}/variants:
+    get:
+      tags: [variants]
+      operationId: getInscriptionVariants
+      summary: The raw text and both cleaned variants
+      description: |
+        `conservative` approximates what is carved on the stone (expansions
+        dropped, inscribed letters kept where the editors corrected them);
+        `interpretive` is the editors' reading (expansions kept, corrections
+        applied). Produced by the cleaning rules in `app/core/cleaning.py`.
+        A variant that cleans to nothing is `null`.
+      parameters:
+        - $ref: '#/components/parameters/RecordId'
+      responses:
+        '200':
+          description: All three texts and the two flags the cleaner sets.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Variants'
+              examples:
+                edcs1:
+                  value:
+                    record_id: EDCS-00000001-0
+                    raw: "?] C(aius) Trebonius IIvir et praef(ectus) i(ure) d(icundo) civitatis Agunti [?"
+                    conservative: C Trebonius II vir et praef i d civitatis Agunti
+                    interpretive: Caius Trebonius II vir et praefectus iure dicundo civitatis Agunti
+                    is_unreadable: false
+                    is_forged: false
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/inscriptions/{record_id}/variants/{variant}:
+    get:
+      tags: [variants]
+      operationId: getInscriptionVariant
+      summary: One text variant
+      parameters:
+        - $ref: '#/components/parameters/RecordId'
+        - name: variant
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/VariantName'
+          example: interpretive
+      responses:
+        '200':
+          description: The requested text.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Variant'
+              examples:
+                interpretive:
+                  value:
+                    record_id: EDCS-00000001-0
+                    variant: interpretive
+                    text: Caius Trebonius II vir et praefectus iure dicundo civitatis Agunti
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /v1/places:
+    get:
+      tags: [places]
+      operationId: listResultPlaces
+      summary: Places matching a query, with counts and example inscriptions
+      description: |
+        Aggregates the inscriptions a query matches into one row per place
+        (coordinates rounded to 5 decimals), with up to 8 example
+        inscriptions each, as the map's result layer. `q` is optional here;
+        with neither `q` nor a filter every place in the search frame is
+        returned. Ordered by `count` ascending, then by first appearance.
+      parameters:
+        - $ref: '#/components/parameters/QOptional'
+        - $ref: '#/components/parameters/SearchIn'
+        - $ref: '#/components/parameters/Material'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Province'
+        - $ref: '#/components/parameters/Place'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: One page of places.
+          headers:
+            Link:
+              $ref: '#/components/headers/Link'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultPlacePage'
+              examples:
+                viatorLargest:
+                  summary: "q=viator: the place with the most matches"
+                  value:
+                    data:
+                      - place: Roma
+                        latitude: 41.89332
+                        longitude: 12.48293
+                        count: 131
+                        examples:
+                          - "EDCS-00600842 · D(is) M(anibus) / Felici filio / dulcissimo / Viator et / Spes parent(es) / fec(erunt) vix(it) a(nnos) III / mens(es) IV d(ies) XXI"
+                          - "EDCS-02700829 · D(is) M(anibus) / L(uci) Passieni / Eutychetis / viatoris / consular(is)"
+                    page:
+                      limit: 1
+                      total: 257
+                      next_cursor: null
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /v1/places/known:
+    get:
+      tags: [places]
+      operationId: listKnownPlaces
+      summary: Every known place with its inscription count
+      description: |
+        Every place in the search frame with its inscription count, plus
+        places the EDCS lookup knows inside the bounding box that carry no
+        inscription (count 0). This is the map's corpus-wide layer. Ordered by
+        `count` ascending.
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: One page of places.
+          headers:
+            Link:
+              $ref: '#/components/headers/Link'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacePage'
+              examples:
+                firstPage:
+                  value:
+                    data:
+                      - place: Crastes / Ausci / Eliumberrum
+                        latitude: 43.72347
+                        longitude: 0.72958
+                        count: 1
+                    page:
+                      limit: 1
+                      total: 21999
+                      next_cursor: eyJvIjoxfQ
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v1/map/layers/provinces:
+    get:
+      tags: [map]
+      operationId: getProvincesLayer
+      summary: Roman provinces, AD 117, as GeoJSON
+      description: |
+        AWMC province boundaries, simplified (tolerance 0.01°) and pre-coloured
+        (`_color`) for drawing. Static: send `If-None-Match` to revalidate.
+      responses:
+        '200':
+          description: A GeoJSON FeatureCollection.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/FeatureCollection'
+              examples:
+                oneFeature:
+                  value:
+                    type: FeatureCollection
+                    features:
+                      - type: Feature
+                        properties: {_color: '#f9c784'}
+                        geometry:
+                          type: Polygon
+                          # first three vertices of the first ring; truncated
+                          coordinates: [[[-1.57431, 55.16792], [-1.50632, 54.98433], [-1.45197, 54.99405]]]
+        '304':
+          $ref: '#/components/responses/NotModified'
+
+  /v1/map/layers/roads:
+    get:
+      tags: [map]
+      operationId: getRoadsLayer
+      summary: Roman roads (Barrington Atlas) as GeoJSON
+      description: AWMC road network, simplified (tolerance 0.02°). Static.
+      responses:
+        '200':
+          description: A GeoJSON FeatureCollection of LineStrings.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/FeatureCollection'
+              examples:
+                oneRoad:
+                  value:
+                    type: FeatureCollection
+                    features:
+                      - type: Feature
+                        properties: {}
+                        geometry:
+                          type: LineString
+                          # first three vertices; truncated
+                          coordinates: [[26.97074, 39.53252], [27.23296, 39.78384], [27.39479, 39.84867]]
+        '304':
+          $ref: '#/components/responses/NotModified'
+
+  /v1/map/layers/cities:
+    get:
+      tags: [map]
+      operationId: getCitiesLayer
+      summary: Roman cities (Hanson 2016) as labelled points
+      description: |
+        1,388 cities from the OXREP database. The label is the ancient
+        toponym, `/ modern toponym` when it differs, then the province.
+      responses:
+        '200':
+          description: All cities.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CityPoint'
+              examples:
+                roma:
+                  value:
+                    - latitude: 41.89278
+                      longitude: 12.4851
+                      label: Roma / Rome, Italia (VII Etruria)
+        '304':
+          $ref: '#/components/responses/NotModified'
+
+  /v1/exports/corpus.jsonl:
+    get:
+      tags: [exports]
+      operationId: exportCorpusJsonl
+      summary: Download the raw corpus as JSON Lines
+      description: |
+        The scraped corpus, one inscription per line, list-valued columns as
+        JSON arrays. Served gzip-compressed when the client sends
+        `Accept-Encoding: gzip` (the stored form).
+      responses:
+        '200':
+          $ref: '#/components/responses/JsonlDownload'
+
+  /v1/exports/corpus.tsv:
+    get:
+      tags: [exports]
+      operationId: exportCorpusTsv
+      summary: Download the raw corpus as TSV
+      description: |
+        Same records as the JSONL, tab-separated with a header row;
+        list-valued columns (`category`, `category_en`, `belege`, `status`,
+        `language_codes`) are joined with `" | "`.
+      responses:
+        '200':
+          $ref: '#/components/responses/TsvDownload'
+
+  /v1/exports/cleaned.jsonl:
+    get:
+      tags: [exports]
+      operationId: exportCleanedJsonl
+      summary: Download the cleaned corpus as JSON Lines
+      description: |
+        The corpus with `inscription_text_conservative`,
+        `inscription_text_interpretive`, `is_unreadable` and `is_forged`
+        added, and `belege` renamed to `evidence`.
+      responses:
+        '200':
+          $ref: '#/components/responses/JsonlDownload'
+
+  /v1/exports/search.tsv:
+    get:
+      tags: [exports]
+      operationId: exportSearchTsv
+      summary: Download a query's results as TSV
+      description: |
+        The map's "Download TSV": every column of the cleaned corpus for the
+        query's results, as `edcs_search_results.tsv`. Note the current
+        behaviour this preserves: rows are selected by **monument**
+        (`edcs_id`), so every inscription on a matching monument is included
+        — for `q=viator`, 515 matching inscriptions give 927 rows.
+        At least one of `q` or a filter is required.
+      parameters:
+        - $ref: '#/components/parameters/QOptional'
+        - $ref: '#/components/parameters/SearchIn'
+        - $ref: '#/components/parameters/Material'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Province'
+        - $ref: '#/components/parameters/Place'
+      responses:
+        '200':
+          description: The results table.
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: attachment; filename="edcs_search_results.tsv"
+          content:
+            text/tab-separated-values:
+              schema:
+                type: string
+              examples:
+                viator:
+                  value: "edcs_id\tprovince\tplace\tlatitude\tlongitude\t…\tis_unreadable\tis_forged\nEDCS-00000144\tGermania superior\tAvenches / Aventicum\t46.87961\t7.04087\t…\tFalse\tFalse\n"
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /v1/lookups:
+    get:
+      tags: [lookups]
+      operationId: getLookups
+      summary: All EDCS code tables
+      description: |
+        The flattened code tables saved by the last harvest
+        (`app/data/reference/edcs_lookup.json`): materials, categories,
+        provinces, languages, places and citation sources. About 3 MB; prefer
+        `/v1/lookups/{table}` for one table.
+      responses:
+        '200':
+          description: Every table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lookups'
+              examples:
+                excerpt:
+                  summary: One entry per table
+                  value:
+                    materials: {'1': {token: aes, en: bronze}}
+                    categories: {'21': {token: Augusti/Augustae, en: emperor/emperess}}
+                    provinces: [Achaia]
+                    languages: {'1': {en: Etruscan, code: et}}
+                    places: {'110002': {ort: Afesou, province: Achaia, lat: '', lon: ''}}
+                    sources: {'2': AA}
+                    _meta: {retrieved_at: '2026-08-19T20:29:07Z', epigcorpus_version: 0.2.0}
+        '503':
+          $ref: '#/components/responses/LookupUnavailable'
+
+  /v1/lookups/{table}:
+    get:
+      tags: [lookups]
+      operationId: getLookupTable
+      summary: One EDCS code table
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [materials, categories, provinces, languages, places, sources]
+          example: materials
+      responses:
+        '200':
+          description: The table.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LookupTable'
+              examples:
+                materials:
+                  value:
+                    table: materials
+                    entries: {'1': {token: aes, en: bronze}, '2': {token: argentum, en: silver}}
+                provinces:
+                  value:
+                    table: provinces
+                    entries: [Achaia, Aegyptus, Aemilia / Regio VIII]
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/LookupUnavailable'
+
+  /v1/facets:
+    get:
+      tags: [lookups]
+      operationId: getFacets
+      summary: Values each filter can take, with their short forms
+      description: |
+        The distinct values present in the search frame for each filter (the
+        map's dropdown options), and the EDCS short form (Latin token or
+        language code) for each English value where one exists.
+      responses:
+        '200':
+          description: Filter values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Facets'
+              examples:
+                excerpt:
+                  value:
+                    values:
+                      material: [amber, bone, brass]
+                      province: [Achaia, Aegyptus, Aemilia / Regio VIII]
+                      place: ["'Ain Beida", "'Ain Khalfoun", "'Ain Loulou"]
+                      category: [Roman knights, boundary stones, building inscriptions]
+                      language: [Etruscan, Greek, Hebrew]
+                    short_forms:
+                      material: {bronze: aes, silver: argentum}
+                      category: {emperor/emperess: Augusti/Augustae, epigrammes: carmina}
+                      language: {Etruscan: et, Greek: gr}
+
+  /v1/scrape-jobs:
+    post:
+      tags: [scrape-jobs]
+      operationId: startScrapeJob
+      summary: Start a harvest (asynchronous)
+      description: |
+        Starts a harvest from the EDCS and returns at once with `202` and the
+        job's URL in `Location`; poll `GET /v1/scrape-jobs/{job_id}`. The
+        body mirrors the scraper's command line (`--limit`, `--workers`,
+        `--restart`, `--refresh-index`) with the same defaults.
+
+        A harvest is incremental and resumable: without `restart` it resumes
+        from the checkpoint, and if the corpus is already complete the job
+        succeeds with outcome `already_complete` without touching it.
+        `restart: true` **deletes** the existing corpus output first.
+
+        Only one harvest can run at a time (there is one checkpoint), so a
+        second start while one is queued or running is a `409`.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScrapeJobRequest'
+            examples:
+              smokeTest:
+                summary: First 500 monuments, gently
+                value: {limit: 500, workers: 8}
+              resume:
+                summary: Resume or complete the full harvest with defaults
+                value: {}
+      responses:
+        '202':
+          description: The job was accepted.
+          headers:
+            Location:
+              description: URL of the new job.
+              schema:
+                type: string
+                format: uri-reference
+              example: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapeJob'
+              examples:
+                queued:
+                  $ref: '#/components/examples/ScrapeJobQueued'
+        '409':
+          description: A harvest is already queued or running.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                busy:
+                  value:
+                    type: https://epigcorpus.example/problems/scrape-job-running
+                    title: A harvest is already running
+                    status: 409
+                    detail: Job 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10 is running; cancel it or wait for it to finish.
+                    instance: /v1/scrape-jobs
+                    running_job: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /v1/scrape-jobs/{job_id}:
+    get:
+      tags: [scrape-jobs]
+      operationId: getScrapeJob
+      summary: Status and progress of a harvest
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: The job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapeJob'
+              examples:
+                running:
+                  $ref: '#/components/examples/ScrapeJobRunning'
+                incomplete:
+                  $ref: '#/components/examples/ScrapeJobIncomplete'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/scrape-jobs/{job_id}/cancel:
+    post:
+      tags: [scrape-jobs]
+      operationId: cancelScrapeJob
+      summary: Ask a harvest to stop (asynchronous)
+      description: |
+        Requests a stop. The harvest finishes its current chunk, flushes the
+        output, writes the checkpoint and the failure list, and ends with
+        status `cancelled` — the same path as Ctrl+C or SIGTERM on the
+        command line, so a later job resumes where it stopped. Returns `202`
+        with the job in status `cancelling`; poll it for the final state.
+        Cancelling a finished job is a `409`; cancelling a cancelling job is
+        a no-op `202`.
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '202':
+          description: Stop requested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapeJob'
+              examples:
+                cancelling:
+                  $ref: '#/components/examples/ScrapeJobCancelling'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The job has already finished.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                finished:
+                  value:
+                    type: https://epigcorpus.example/problems/scrape-job-finished
+                    title: The job has already finished
+                    status: 409
+                    detail: Job 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10 ended with status succeeded.
+                    instance: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
+
+components:
+  securitySchemes:
+    openIdConnect:
+      type: openIdConnect
+      description: |
+        Declared, not enforced. Flows and scopes are decided in
+        docs/adr/0003-api-authentication.md (proposed). The URL is a
+        placeholder.
+      openIdConnectUrl: https://auth.example.invalid/.well-known/openid-configuration
+
+  parameters:
+    QRequired:
+      name: q
+      in: query
+      required: true
+      description: Case-insensitive substring to find in the `search_in` column. Not a regex.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 200
+      example: viator
+    QOptional:
+      name: q
+      in: query
+      required: false
+      description: Case-insensitive substring to find in the `search_in` column. Not a regex.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 200
+      example: viator
+    SearchIn:
+      name: search_in
+      in: query
+      required: false
+      description: |
+        Which text `q` is matched against: `raw` (inscription_text, EDCS
+        markup intact), `interpretive` or `conservative`. The map's labels are
+        "Raw inscriptions", "Interpretive Cleaned Inscriptions" and
+        "Conservative Cleaned Inscriptions".
+      schema:
+        $ref: '#/components/schemas/SearchIn'
+      example: raw
+    Material:
+      name: material
+      in: query
+      required: false
+      description: English material label, exact match (`material_en`). Repeatable.
+      style: form
+      explode: true
+      schema:
+        type: array
+        items: {type: string}
+      example: [stone, marble]
+    Category:
+      name: category
+      in: query
+      required: false
+      description: English category label; matches when any of the inscription's categories (`category_en`) is listed. Repeatable.
+      style: form
+      explode: true
+      schema:
+        type: array
+        items: {type: string}
+      example: [tomb inscriptions]
+    Language:
+      name: language
+      in: query
+      required: false
+      description: Language name; matches when any of the inscription's languages is listed (`Latin` matches `Greek, Latin`). Repeatable.
+      style: form
+      explode: true
+      schema:
+        type: array
+        items: {type: string}
+      example: [Latin]
+    Province:
+      name: province
+      in: query
+      required: false
+      description: Province, exact match. Repeatable.
+      style: form
+      explode: true
+      schema:
+        type: array
+        items: {type: string}
+      example: [Noricum, Dalmatia]
+    Place:
+      name: place
+      in: query
+      required: false
+      description: Findspot, exact match. Repeatable.
+      style: form
+      explode: true
+      schema:
+        type: array
+        items: {type: string}
+      example: [Roma]
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Page size.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 50
+      example: 50
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque cursor from a previous page's `page.next_cursor`. Omit for the first page.
+      schema:
+        type: string
+      example: eyJvIjo1MCwicSI6IjlmMWUifQ
+    RecordId:
+      name: record_id
+      in: path
+      required: true
+      description: Monument id plus 0-based inscription index.
+      schema:
+        $ref: '#/components/schemas/RecordId'
+      example: EDCS-00000001-0
+    JobId:
+      name: job_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+
+  headers:
+    Link:
+      description: RFC 8288 link to the next page, when there is one.
+      schema:
+        type: string
+      example: </v1/inscriptions/search?q=viator&limit=50&cursor=eyJvIjo1MCwicSI6IjlmMWUifQ>; rel="next"
+    ETag:
+      description: Validator for a static resource.
+      schema:
+        type: string
+      example: '"provinces-ad117-1"'
+
+  responses:
+    BadRequest:
+      description: Malformed request, such as a cursor from a different query.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          examples:
+            staleCursor:
+              value:
+                type: https://epigcorpus.example/problems/cursor-mismatch
+                title: Cursor does not belong to this query
+                status: 400
+                detail: The cursor was issued for different filters. Restart from the first page.
+                instance: /v1/inscriptions/search?q=viator&cursor=eyJvIjo1MCwicSI6ImFhYWEifQ
+    ValidationFailed:
+      description: A parameter or body field is invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ValidationProblem'
+          examples:
+            badSearchIn:
+              value:
+                type: https://epigcorpus.example/problems/validation
+                title: Invalid request
+                status: 422
+                detail: 1 parameter is invalid.
+                instance: /v1/inscriptions/search?q=viator&search_in=diplomatic
+                errors:
+                  - in: query
+                    name: search_in
+                    detail: must be one of raw, interpretive, conservative
+    NotFound:
+      description: No such resource.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          examples:
+            noRecord:
+              value:
+                type: https://epigcorpus.example/problems/not-found
+                title: Not found
+                status: 404
+                detail: No inscription EDCS-99999999-0 in the corpus.
+                instance: /v1/inscriptions/EDCS-99999999-0
+    NotModified:
+      description: The cached copy is current.
+    LookupUnavailable:
+      description: The lookup table has not been harvested yet.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          examples:
+            missing:
+              value:
+                type: https://epigcorpus.example/problems/lookup-unavailable
+                title: Lookup table not available
+                status: 503
+                detail: app/data/reference/edcs_lookup.json does not exist; run a harvest.
+                instance: /v1/lookups
+    JsonlDownload:
+      description: JSON Lines download.
+      headers:
+        Content-Disposition:
+          schema:
+            type: string
+          example: attachment; filename="edcs_inscriptions.jsonl"
+        Content-Encoding:
+          description: Present when the client accepted gzip.
+          schema:
+            type: string
+            enum: [gzip]
+      content:
+        application/x-ndjson:
+          schema:
+            type: string
+          examples:
+            firstLine:
+              summary: First line of the raw corpus, truncated
+              value: '{"edcs_id": "EDCS-00000001", "province": "Noricum", "place": "Maribor / Marburg", "latitude": 46.55563, "longitude": 15.64477, "material": "lapis", "material_en": "stone", "belege": ["ILSlov-02-01-0, 00455"], "publication": "ILSlov-02-01-0, 00455", …}'
+    TsvDownload:
+      description: Tab-separated download with a header row.
+      headers:
+        Content-Disposition:
+          schema:
+            type: string
+          example: attachment; filename="edcs_inscriptions.tsv"
+        Content-Encoding:
+          description: Present when the client accepted gzip.
+          schema:
+            type: string
+            enum: [gzip]
+      content:
+        text/tab-separated-values:
+          schema:
+            type: string
+          examples:
+            header:
+              value: "record_id\tedcs_id\tinscription_index\tprovince\tplace\tlatitude\tlongitude\t…\n"
+
+  examples:
+    InscriptionEdcs1:
+      value:
+        record_id: EDCS-00000001-0
+        edcs_id: EDCS-00000001
+        inscription_index: 0
+        province: Noricum
+        place: Maribor / Marburg
+        latitude: 46.55563
+        longitude: 15.64477
+        material: lapis
+        material_en: stone
+        not_before: null
+        not_after: null
+        dating_from: null
+        dating_to: null
+        raw_dating: '-'
+        inscription_text: "?] C(aius) Trebonius IIvir et praef(ectus) i(ure) d(icundo) civitatis Agunti [?"
+        language: Latin
+        language_codes: [la]
+        category: [tituli sepulcrales, viri, praenomen et nomen, ordo decurionum]
+        category_en: [tomb inscriptions, men, first name and gentile name, 'municipal magistrates, priests and councillors']
+        status: [tomb inscriptions, men, first name and gentile name, 'municipal magistrates, priests and councillors']
+        evidence: ['ILSlov-02-01-0, 00455']
+        publication: ILSlov-02-01-0, 00455
+        image_urls: https://edcs.hist.uzh.ch/bilder/Mu/Muchar_1_p_398.jpg
+        photo: https://edcs.hist.uzh.ch/bilder/Mu/Muchar_1_p_398.jpg
+        photo_credits: null
+        comment: null
+        retrieved_at: '2026-08-19T16:32:11Z'
+        source_url: https://edcs.hist.uzh.ch/data/monument/000/00000001.json
+        inscription_text_conservative: C Trebonius II vir et praef i d civitatis Agunti
+        inscription_text_interpretive: Caius Trebonius II vir et praefectus iure dicundo civitatis Agunti
+        is_unreadable: false
+        is_forged: false
+    ScrapeJobQueued:
+      value:
+        id: 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+        status: queued
+        request: {limit: 500, workers: 8, restart: false, refresh_index: false}
+        created_at: '2026-10-23T18:00:00Z'
+        started_at: null
+        finished_at: null
+        progress: null
+        outcome: null
+        error: null
+        links:
+          self: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+          cancel: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
+    ScrapeJobRunning:
+      value:
+        id: 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+        status: running
+        request: {limit: null, workers: 16, restart: false, refresh_index: false}
+        created_at: '2026-10-23T18:00:00Z'
+        started_at: '2026-10-23T18:00:01Z'
+        finished_at: null
+        progress:
+          cursor: 214000
+          total: 542854
+          monuments_done: 213988
+          rows_written: 231807
+          failed: 12
+          rate_per_second: 41.7
+          index_fetched_at: '2026-10-23T18:00:04Z'
+        outcome: null
+        error: null
+        links:
+          self: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+          cancel: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
+    ScrapeJobIncomplete:
+      summary: Finished, but some monuments could not be fetched
+      value:
+        id: 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+        status: succeeded
+        request: {limit: null, workers: 16, restart: false, refresh_index: false}
+        created_at: '2026-10-23T18:00:00Z'
+        started_at: '2026-10-23T18:00:01Z'
+        finished_at: '2026-10-23T21:37:12Z'
+        progress:
+          cursor: 542854
+          total: 542854
+          monuments_done: 542852
+          rows_written: 588507
+          failed: 2
+          rate_per_second: 41.6
+          index_fetched_at: '2026-10-23T18:00:04Z'
+        outcome: incomplete
+        error: null
+        links:
+          self: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+          cancel: null
+    ScrapeJobCancelling:
+      value:
+        id: 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+        status: cancelling
+        request: {limit: null, workers: 16, restart: false, refresh_index: false}
+        created_at: '2026-10-23T18:00:00Z'
+        started_at: '2026-10-23T18:00:01Z'
+        finished_at: null
+        progress:
+          cursor: 214000
+          total: 542854
+          monuments_done: 213988
+          rows_written: 231807
+          failed: 12
+          rate_per_second: 41.7
+          index_fetched_at: '2026-10-23T18:00:04Z'
+        outcome: null
+        error: null
+        links:
+          self: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+          cancel: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
+
+  schemas:
+    RecordId:
+      type: string
+      pattern: '^EDCS-[0-9]{8}-[0-9]+$'
+      examples: [EDCS-00000001-0]
+
+    SearchIn:
+      type: string
+      enum: [raw, interpretive, conservative]
+      default: raw
+
+    VariantName:
+      type: string
+      enum: [raw, conservative, interpretive]
+
+    PageInfo:
+      type: object
+      required: [limit, total, next_cursor]
+      properties:
+        limit:
+          type: integer
+        total:
+          type: integer
+          description: Number of items the whole query matches.
+        next_cursor:
+          type: [string, 'null']
+          description: Pass as `cursor` for the next page; `null` on the last page.
+
+    InscriptionSummary:
+      description: The columns the search frame carries (`REQUIRED_COLS` in app/models/inscription.py).
+      type: object
+      required: [record_id, edcs_id, latitude, longitude, inscription_text]
+      properties:
+        record_id: {$ref: '#/components/schemas/RecordId'}
+        edcs_id: {type: string, pattern: '^EDCS-[0-9]{8}$'}
+        province: {type: [string, 'null']}
+        place: {type: [string, 'null']}
+        latitude: {type: number, description: 'WGS 84; findspot or settlement level.'}
+        longitude: {type: number}
+        not_before: {type: [integer, 'null'], description: 'Earliest year; negative is BC.'}
+        not_after: {type: [integer, 'null'], description: 'Latest year; negative is BC.'}
+        language: {type: [string, 'null'], description: 'Comma-joined language names, e.g. "Greek, Latin".'}
+        material_en: {type: [string, 'null']}
+        category_en:
+          type: array
+          items: {type: string}
+        inscription_text: {type: [string, 'null'], description: 'Raw EDCS text, editorial markup intact.'}
+        inscription_text_interpretive: {type: [string, 'null']}
+        inscription_text_conservative: {type: [string, 'null']}
+
+    Inscription:
+      description: |
+        Every column of the cleaned corpus (see app/data/README.md for the
+        schema). One row per inscription; a monument may carry several.
+        Unlike the search frame, the full corpus has rows without
+        coordinates.
+      type: object
+      required: [record_id, edcs_id, inscription_index, is_unreadable, is_forged]
+      properties:
+        record_id: {$ref: '#/components/schemas/RecordId'}
+        edcs_id: {type: string, pattern: '^EDCS-[0-9]{8}$'}
+        inscription_index: {type: integer, minimum: 0}
+        province: {type: [string, 'null']}
+        place: {type: [string, 'null']}
+        latitude: {type: [number, 'null']}
+        longitude: {type: [number, 'null']}
+        material: {type: [string, 'null'], description: 'Latin token'}
+        material_en: {type: [string, 'null']}
+        not_before: {type: [integer, 'null'], description: 'Earliest year; negative is BC.'}
+        not_after: {type: [integer, 'null'], description: 'Latest year; negative is BC.'}
+        dating_from: {type: [integer, 'null']}
+        dating_to: {type: [integer, 'null']}
+        raw_dating: {type: [string, 'null'], description: '"101 .. 299", a bare year, or "-" if undated.'}
+        inscription_text: {type: [string, 'null'], description: 'Raw EDCS text, editorial markup intact.'}
+        inscription_text_conservative: {type: [string, 'null']}
+        inscription_text_interpretive: {type: [string, 'null']}
+        language: {type: [string, 'null']}
+        language_codes:
+          type: array
+          items: {type: string}
+        category:
+          type: array
+          items: {type: string}
+        category_en:
+          type: array
+          items: {type: string}
+        status:
+          type: array
+          items: {type: string}
+        evidence:
+          description: Citations (`belege` in the raw corpus). A `*` on the number marks a forgery.
+          type: array
+          items: {type: string}
+        publication: {type: [string, 'null'], description: 'Citations joined with " | ".'}
+        image_urls: {type: [string, 'null'], description: 'Image URLs joined with " | ".'}
+        photo: {type: [string, 'null']}
+        photo_credits: {type: [string, 'null']}
+        comment: {type: [string, 'null']}
+        retrieved_at: {type: string, format: date-time}
+        source_url: {type: string, format: uri}
+        is_unreadable: {type: boolean, description: 'Raw text empty or "?".'}
+        is_forged: {type: boolean, description: 'A citation carries the EDCS falsa marker "*".'}
+
+    InscriptionPage:
+      type: object
+      required: [data, page]
+      properties:
+        data:
+          type: array
+          items: {$ref: '#/components/schemas/InscriptionSummary'}
+        page: {$ref: '#/components/schemas/PageInfo'}
+
+    Variants:
+      type: object
+      required: [record_id, raw, conservative, interpretive, is_unreadable, is_forged]
+      properties:
+        record_id: {$ref: '#/components/schemas/RecordId'}
+        raw: {type: [string, 'null']}
+        conservative: {type: [string, 'null'], description: 'Approximates what is carved.'}
+        interpretive: {type: [string, 'null'], description: 'The editors'' reading.'}
+        is_unreadable: {type: boolean}
+        is_forged: {type: boolean}
+
+    Variant:
+      type: object
+      required: [record_id, variant, text]
+      properties:
+        record_id: {$ref: '#/components/schemas/RecordId'}
+        variant: {$ref: '#/components/schemas/VariantName'}
+        text: {type: [string, 'null']}
+
+    Place:
+      type: object
+      required: [place, latitude, longitude, count]
+      properties:
+        place: {type: string, description: '"?" when EDCS records no place name.'}
+        latitude: {type: number, description: 'Rounded to 5 decimals.'}
+        longitude: {type: number}
+        count: {type: integer, minimum: 0}
+
+    ResultPlace:
+      allOf:
+        - $ref: '#/components/schemas/Place'
+        - type: object
+          required: [examples]
+          properties:
+            examples:
+              description: Up to 8 matching inscriptions, "EDCS id · text" with the text cut at 160 characters.
+              type: array
+              maxItems: 8
+              items: {type: string}
+
+    PlacePage:
+      type: object
+      required: [data, page]
+      properties:
+        data:
+          type: array
+          items: {$ref: '#/components/schemas/Place'}
+        page: {$ref: '#/components/schemas/PageInfo'}
+
+    ResultPlacePage:
+      type: object
+      required: [data, page]
+      properties:
+        data:
+          type: array
+          items: {$ref: '#/components/schemas/ResultPlace'}
+        page: {$ref: '#/components/schemas/PageInfo'}
+
+    FeatureCollection:
+      description: A GeoJSON FeatureCollection (RFC 7946), WGS 84.
+      type: object
+      required: [type, features]
+      properties:
+        type: {const: FeatureCollection}
+        features:
+          type: array
+          items:
+            type: object
+            required: [type, geometry, properties]
+            properties:
+              type: {const: Feature}
+              geometry: {type: object}
+              properties: {type: [object, 'null']}
+
+    CityPoint:
+      type: object
+      required: [latitude, longitude, label]
+      properties:
+        latitude: {type: number}
+        longitude: {type: number}
+        label: {type: string}
+
+    MaterialEntry:
+      type: object
+      properties:
+        token: {type: string}
+        en: {type: string}
+
+    LanguageEntry:
+      type: object
+      properties:
+        en: {type: string}
+        code: {type: string}
+
+    PlaceEntry:
+      type: object
+      properties:
+        ort: {type: string}
+        province: {type: string}
+        lat: {type: [number, string], description: 'Empty string when EDCS has no coordinates.'}
+        lon: {type: [number, string]}
+
+    Lookups:
+      type: object
+      properties:
+        materials:
+          type: object
+          additionalProperties: {$ref: '#/components/schemas/MaterialEntry'}
+        categories:
+          type: object
+          additionalProperties: {$ref: '#/components/schemas/MaterialEntry'}
+        provinces:
+          type: array
+          items: {type: string}
+        languages:
+          type: object
+          additionalProperties: {$ref: '#/components/schemas/LanguageEntry'}
+        places:
+          type: object
+          additionalProperties: {$ref: '#/components/schemas/PlaceEntry'}
+        sources:
+          type: object
+          additionalProperties: {type: string}
+        _meta:
+          type: object
+          properties:
+            retrieved_at: {type: string, format: date-time}
+            epigcorpus_version: {type: string}
+
+    LookupTable:
+      type: object
+      required: [table, entries]
+      properties:
+        table:
+          type: string
+          enum: [materials, categories, provinces, languages, places, sources]
+        entries:
+          description: The table as stored; `provinces` is a list, the others are keyed by EDCS id.
+          type: [object, array]
+
+    Facets:
+      type: object
+      required: [values, short_forms]
+      properties:
+        values:
+          type: object
+          properties:
+            material: {type: array, items: {type: string}}
+            province: {type: array, items: {type: string}}
+            place: {type: array, items: {type: string}}
+            category: {type: array, items: {type: string}}
+            language: {type: array, items: {type: string}}
+        short_forms:
+          type: object
+          properties:
+            material: {type: object, additionalProperties: {type: string}}
+            category: {type: object, additionalProperties: {type: string}}
+            language: {type: object, additionalProperties: {type: string}}
+
+    ScrapeJobRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        limit:
+          type: [integer, 'null']
+          minimum: 1
+          default: null
+          description: Only harvest the first N monuments (smoke test). `--limit`.
+        workers:
+          type: integer
+          minimum: 1
+          maximum: 32
+          default: 16
+          description: Concurrent requests to the EDCS. `--workers`.
+        restart:
+          type: boolean
+          default: false
+          description: Discard existing output and checkpoint, then start over. `--restart`. Destructive.
+        refresh_index:
+          type: boolean
+          default: false
+          description: Re-fetch the corpus index instead of using the cache. `--refresh-index`.
+
+    ScrapeJobStatus:
+      type: string
+      enum: [queued, running, cancelling, succeeded, cancelled, failed]
+      description: |
+        `succeeded` means the job ran to its end; read `outcome` for whether
+        the corpus is complete. `cancelled` jobs are resumable. `failed` means
+        the job could not run (index or lookup fetch failed, output refused).
+
+    ScrapeJobOutcome:
+      type: [string, 'null']
+      enum: [complete, incomplete, partial, already_complete, null]
+      description: |
+        `complete`: every monument harvested, outputs compressed, manifest
+        written. `incomplete`: the index was walked but some monuments failed
+        (listed in the failure file; a new job retries them first).
+        `partial`: a `limit` stopped the walk early. `already_complete`: the
+        manifest showed a finished corpus and nothing was done.
+
+    ScrapeJobProgress:
+      type: object
+      properties:
+        cursor: {type: integer, description: 'Monuments walked so far in the index.'}
+        total: {type: integer, description: 'Monuments in the (possibly limited) index.'}
+        monuments_done: {type: integer}
+        rows_written: {type: integer}
+        failed: {type: integer}
+        rate_per_second: {type: number}
+        index_fetched_at: {type: string, format: date-time}
+
+    ScrapeJob:
+      type: object
+      required: [id, status, request, created_at, links]
+      properties:
+        id: {type: string, format: uuid}
+        status: {$ref: '#/components/schemas/ScrapeJobStatus'}
+        request: {$ref: '#/components/schemas/ScrapeJobRequest'}
+        created_at: {type: string, format: date-time}
+        started_at: {type: [string, 'null'], format: date-time}
+        finished_at: {type: [string, 'null'], format: date-time}
+        progress:
+          oneOf:
+            - $ref: '#/components/schemas/ScrapeJobProgress'
+            - type: 'null'
+        outcome: {$ref: '#/components/schemas/ScrapeJobOutcome'}
+        error:
+          oneOf:
+            - $ref: '#/components/schemas/Problem'
+            - type: 'null'
+        links:
+          type: object
+          properties:
+            self: {type: string, format: uri-reference}
+            cancel: {type: [string, 'null'], format: uri-reference}
+
+    Problem:
+      description: RFC 9457 problem details. Extension members are allowed.
+      type: object
+      required: [type, title, status]
+      properties:
+        type: {type: string, format: uri-reference, default: about:blank}
+        title: {type: string}
+        status: {type: integer, minimum: 400, maximum: 599}
+        detail: {type: string}
+        instance: {type: string, format: uri-reference}
+      additionalProperties: true
+
+    ValidationProblem:
+      allOf:
+        - $ref: '#/components/schemas/Problem'
+        - type: object
+          required: [errors]
+          properties:
+            errors:
+              type: array
+              items:
+                type: object
+                required: [detail]
+                properties:
+                  in: {type: string, enum: [query, path, body, header]}
+                  name: {type: string, description: 'Parameter name or JSON pointer into the body.'}
+                  detail: {type: string}

@@ -39,6 +39,7 @@ them as historical records of phase 0.
 | `app/main.py --help` | "Skip scraping and only clean the latest data/*.jsonl file." The input folder is now `app/data/raw/`. Text kept identical so the CLI help did not change, so fixing it is your call. |
 | `app/adapters/corpus_files.py` `load_latest_data` | Error message "No JSONL file found in 'data/' after running scraper." Same reason. |
 | `app/data/processed/derived/v1/splits/SHA256SUMS.txt` | Hashes the **plain** `.tsv` splits, which are not committed. It can only be checked after decompressing. |
+| `app/data/README.md`, last caveat | Says the map's bounding box discards ~9.3% of the corpus, including all of Britannia. The bounds were widened since then: today 19,949 rows are dropped, 19,938 of them for having no coordinates. This was already stale before the move and is left for you. |
 | `docs/AUDIT.md`, `docs/CLEANING_COMPARISON.md`, `docs/LATEPIG_BREAKAGE.md`, `app/data/reports/*.md`, `CHANGELOG.md` | Cite pre-move paths (`src/…`, `data/…`). These are historical records and were not rewritten. See `docs/refactor/path-map.tsv`. |
 
 ## Lint debt carried over
