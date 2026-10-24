@@ -68,12 +68,7 @@ const THEMES: { value: ThemeChoice; label: ReactNode; title: string }[] = [
 
 function Logo() {
   return (
-    <svg viewBox="0 0 28 28" className="size-7 flex-none" aria-hidden="true">
-      <rect width="28" height="28" rx="8" className="fill-ink" />
-      <circle cx="10.5" cy="11" r="3.2" className="fill-known" />
-      <circle cx="18" cy="16.5" r="4.6" className="fill-search" />
-      <circle cx="9.5" cy="19" r="1.8" className="fill-ink-fg" opacity="0.7" />
-    </svg>
+    <img src="/epigcorpus-logo.png" className="size-7 flex-none" alt="" aria-hidden="true" />
   );
 }
 

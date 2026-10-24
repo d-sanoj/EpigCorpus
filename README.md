@@ -1,5 +1,7 @@
 # EpigCorpus
 
+![EpigCorpus logo](frontend/public/epigcorpus-logo.png)
+
 EpigCorpus is a reproducible Latin epigraphy pipeline for extracting inscriptions from the Epigraphik-Datenbank Clauss / Slaby (EDCS), cleaning inscription text into research-ready variants, and exploring results on an interactive Roman Empire map.
 
 The repository is designed as a practical, end-to-end workflow:
