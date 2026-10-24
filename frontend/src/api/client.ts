@@ -12,7 +12,6 @@ export type InscriptionSummary = Schemas["InscriptionSummary"];
 export type InscriptionPage = Schemas["InscriptionPage"];
 export type ProvinceLabel = Schemas["ProvinceLabel"];
 export type CityPoint = Schemas["CityPoint"];
-export type Basemap = Schemas["Basemap"];
 export type PipelineRun = Schemas["PipelineRun"];
 export type PipelineRunRequest = Partial<Schemas["PipelineRunRequest"]>;
 export type Problem = Schemas["Problem"];

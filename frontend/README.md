@@ -28,6 +28,8 @@ src/
 └── App.tsx           layout, the current query, loading and reloading the corpus
 ```
 
-The map is plain Leaflet inside a React component. Places, roads, cities and
+The map is plain Leaflet inside a React component. Its background is
+OpenFreeMap's dark vector style, drawn by MapLibre GL through
+`@maplibre/maplibre-gl-leaflet` (no API key). Places, roads, cities and
 results share one canvas, and their stacking follows draw order, so the map
 code stays imperative. See `docs/adr/0005-backend-frontend-split.md`.

@@ -5,7 +5,7 @@
  */
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
-import { getJson, type Basemap, type CityPoint, type ProvinceLabel } from "../../api/client";
+import { getJson, type CityPoint, type ProvinceLabel } from "../../api/client";
 import { formatInteger } from "../../lib/format";
 import {
   EpigMap,
@@ -35,7 +35,6 @@ export function MapView({ known, results }: Props) {
   const element = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<EpigMap | null>(null);
   const [layers, setLayers] = useState<LayerState | null>(null);
-  const [keyMissing, setKeyMissing] = useState(false);
 
   useEffect(() => {
     const instance = new EpigMap(element.current!);
@@ -43,10 +42,6 @@ export function MapView({ known, results }: Props) {
     const unsubscribe = instance.onLayersChange(setLayers);
     // Overlays are optional: a layer that fails to load keeps its toggle off.
     const ignore = () => {};
-    getJson<Basemap>("/map/layers/basemap").then((config) => {
-      instance.setBasemap(config);
-      setKeyMissing(!config.key_configured);
-    }, ignore);
     getJson<GeoJSON.GeoJsonObject>("/map/layers/provinces").then(
       (d) => instance.setProvinces(d),
       ignore,
@@ -85,19 +80,6 @@ export function MapView({ known, results }: Props) {
         role="region"
         aria-label="Map of inscription places"
       />
-
-      {keyMissing && (
-        <div
-          role="alert"
-          className="absolute top-2.5 left-14 z-[1000] max-w-md rounded-lg border border-amber-500/50 bg-slate-900/95 px-3 py-2 text-xs text-amber-100"
-        >
-          CARTO needs an API key for its map tiles. Get a free one at{" "}
-          <a className="underline" href="https://carto.com/basemaps/apikey" target="_blank" rel="noreferrer">
-            carto.com/basemaps/apikey
-          </a>
-          , set <code>EPIGCORPUS_CARTO_KEY</code> for the server and restart it.
-        </div>
-      )}
 
       <fieldset className="map-panel absolute top-2.5 right-2.5 z-[1000] grid gap-1.5 px-3 py-2.5">
         <legend className="sr-only">Map layers</legend>

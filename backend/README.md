@@ -22,7 +22,6 @@ in `frontend/`). Without it the API still runs.
 | `EPIGCORPUS_DATA_DIR` | `<repo>/data` | the corpus, harvest state, lookups, map layers |
 | `EPIGCORPUS_RESEARCH_DIR` | `<repo>/research` | research outputs (scripts only) |
 | `EPIGCORPUS_STATIC_DIR` | `<repo>/frontend/dist` | the built web UI |
-| `EPIGCORPUS_CARTO_KEY` | none | CARTO basemap API key (free at https://carto.com/basemaps/apikey); without it the map's tiles say "API KEY REQUIRED" |
 
 ## Layers
 

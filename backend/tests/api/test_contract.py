@@ -6,7 +6,6 @@ declares for that path, method, status and media type.
 
 from __future__ import annotations
 
-import dataclasses
 import gzip
 import io
 import json
@@ -511,22 +510,3 @@ def test_unknown_api_paths_stay_404_problems(client):
     assert response.status_code == 404
     assert response.headers["content-type"].startswith("application/problem+json")
 
-
-def test_basemap_without_a_key_says_so(client, validate):
-    response = client.get("/api/v1/map/layers/basemap")
-    validate(response, "/api/v1/map/layers/basemap")
-    body = response.json()
-    assert body["key_configured"] is False
-    assert body["url"] == "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-
-
-def test_basemap_carries_the_servers_key(client, validate):
-    deps = client.app.state.deps
-    client.app.state.deps = dataclasses.replace(deps, carto_key="abc 123")
-    try:
-        response = client.get("/api/v1/map/layers/basemap")
-    finally:
-        client.app.state.deps = deps
-    validate(response, "/api/v1/map/layers/basemap")
-    assert response.json()["key_configured"] is True
-    assert response.json()["url"].endswith(".png?key=abc+123")

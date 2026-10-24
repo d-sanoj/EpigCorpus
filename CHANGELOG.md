@@ -8,6 +8,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — OpenFreeMap vector basemap, no API key; tests that cannot fail by design (2026-10-24)
+
+- **Basemap.** The map's background is OpenFreeMap's `dark` vector style,
+  drawn by MapLibre GL inside the Leaflet map (`@maplibre/maplibre-gl-leaflet`).
+  It is the same Dark Matter design CARTO served, without the API key
+  CARTO's raster tiles now need, and without usage limits.
+  - Its place-name layers are removed.
+  - Attribution (OpenFreeMap, OpenMapTiles, OpenStreetMap) comes from the
+    style itself.
+  - MapLibre is loaded as a separate chunk after the app, so markers and
+    controls show at once.
+  - The CARTO key setting (`EPIGCORPUS_CARTO_KEY`,
+    `/api/v1/map/layers/basemap`, `.env.example`) is removed.
+- **Cleaner tests.** The 16 expected-to-fail cases in
+  `test_cleaner_baseline.py` are removed. They asserted cleaning rules that
+  were never written (non-enclitic -que, spelled-out numeral prefixes,
+  Roman numerals, erasure and symbol markup, nested parentheses). Those
+  gaps remain recorded in `docs/AUDIT.md` (T05–T09).
+- **End-to-end tests.** These no longer assume the committed corpus's
+  counts (21,999 places, 515 viator matches, …). They check what is shown,
+  so they pass on any harvest.
+
 ### Fixed — CARTO's "API KEY REQUIRED" tiles (2026-10-24)
 
 - **Cause.** CARTO now serves its raster basemaps only with an API key.

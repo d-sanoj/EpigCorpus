@@ -10,6 +10,11 @@ const backend = process.env.EPIGCORPUS_API ?? "http://127.0.0.1:8000";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  build: {
+    // MapLibre (the basemap renderer) is one ~1 MB chunk, loaded on its own
+    // after the app; it cannot be split further.
+    chunkSizeWarningLimit: 1100,
+  },
   server: {
     proxy: { "/api": { target: backend, changeOrigin: true } },
   },

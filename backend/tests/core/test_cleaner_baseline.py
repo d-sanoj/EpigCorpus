@@ -1,10 +1,10 @@
 """Characterisation tests for the cleaning pipeline.
 
 The rule sets are pinned here so that any change to corpus semantics is a
-deliberate, visible edit rather than a side effect. Tests marked
-``xfail(strict=True)`` assert the epigraphically correct output and currently
-fail; each names the task that will fix it. When a fix lands, its xfail is
-removed in the same commit.
+deliberate, visible edit rather than a side effect. Known gaps in the rules
+(non-enclitic -que, spelled-out numeral prefixes, Roman numerals, erasure and
+symbol markup, nested parentheses: T05-T09) are recorded in docs/AUDIT.md;
+a fix for one adds its test here.
 """
 
 import pandas as pd
@@ -52,12 +52,6 @@ class TestEditorialCorrection:
         assert clean_interpretive("f<e=F>cit") == "fecit"
         assert clean_conservative("f<e=F>cit") == "fFcit"
 
-    @pytest.mark.xfail(strict=True, reason="single-character rule; multi-letter spans unresolved")
-    def test_multi_character_correction(self):
-        assert clean_interpretive("no<vem=BAE>") == "novem"
-        assert clean_conservative("no<vem=BAE>") == "noBAE"
-
-
 class TestRestorationAndLineBreaks:
     def test_restoration_leaves_a_word_boundary(self):
         """Dropping [...] must not fuse the fragments either side of it."""
@@ -103,62 +97,14 @@ class TestQueEnclitic:
     def test_genuine_enclitic_is_split(self, word):
         assert clean_conservative(word) == word[:-3] + " que"
 
-    @pytest.mark.parametrize(
-        "word",
-        ["atque", "neque", "usque", "quinque", "cuiusque", "denique", "itaque", "quisque"],
-    )
-    @pytest.mark.xfail(strict=True, reason="T05: needs a non-enclitic stoplist")
-    def test_non_enclitic_is_left_alone(self, word):
-        assert clean_conservative(word) == word
-
-
 class TestNumeralVir:
     @pytest.mark.parametrize("word,expected", [("IIvir", "II vir"), ("VIvir", "VI vir")])
     def test_roman_numeral_prefix_is_split(self, word, expected):
         assert clean_conservative(word) == expected
 
-    @pytest.mark.parametrize("word,expected", [("sevir", "se vir"), ("duovir", "duo vir")])
-    @pytest.mark.xfail(strict=True, reason="T06: spelled-out numeral prefixes unhandled")
-    def test_spelled_out_prefix_is_split(self, word, expected):
-        assert clean_conservative(word) == expected
-
-
 class TestNumerals:
     def test_arabic_digits_are_stripped(self):
         assert clean_conservative("anno 2024 die") == "anno die"
-
-    @pytest.mark.xfail(strict=True, reason="T08: Roman numerals kept while digits are stripped")
-    def test_numeral_handling_is_symmetric(self):
-        assert clean_conservative("vixit annos XXV") == "vixit annos"
-
-
-class TestUnhandledMarkup:
-    """EDCS conventions the current rules do not yet address."""
-
-    @pytest.mark.xfail(strict=True, reason="erasure marker not handled")
-    def test_erasure_marker_is_removed(self):
-        assert "⟦" not in clean_conservative("⟦Domitiani⟧ erasa")
-        assert "⟧" not in clean_conservative("⟦Domitiani⟧ erasa")
-
-    @pytest.mark.xfail(strict=True, reason="antique insertion marker not handled")
-    def test_antique_insertion_marker_is_removed(self):
-        assert "«" not in clean_interpretive("«Constantino»")
-
-    @pytest.mark.xfail(strict=True, reason="'|' introduces a symbol, it is not a line break")
-    def test_symbol_marker_survives_conservative_cleaning(self):
-        """`|(centurio)` is a symbol carved on the stone, not an expansion.
-
-        The '|' is currently deleted as a line break and the remainder is then
-        treated as an editorial expansion, so conservative loses the symbol
-        entirely. Interpretive happens to yield the right string by accident.
-        """
-        assert clean_conservative("|(centurio)") != ""
-        assert clean_conservative("|(denarius) V") != "V"
-
-    @pytest.mark.xfail(strict=True, reason="T09: needs a balanced-delimiter parser")
-    def test_nested_parens_are_parsed_as_a_unit(self):
-        assert clean_conservative("(A(uli) f(ilius))") == ""
-
 
 class TestIsForged:
     def test_forged_flag_fires_on_the_edcs_marker(self):

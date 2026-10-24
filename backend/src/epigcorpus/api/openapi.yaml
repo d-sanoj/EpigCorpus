@@ -469,33 +469,6 @@ paths:
                           places: {type: integer}
                           inscriptions: {type: integer}
 
-  /api/v1/map/layers/basemap:
-    get:
-      tags: [map]
-      operationId: getBasemap
-      summary: The basemap tile layer the web map draws
-      description: |
-        CARTO's dark basemap without labels, the background of the original
-        map. CARTO serves its raster tiles only with an API key (free at
-        https://carto.com/basemaps/apikey); the server adds the key set in
-        `EPIGCORPUS_CARTO_KEY` to the URL. Without one, `key_configured` is
-        false and every tile is CARTO's "API KEY REQUIRED" watermark.
-      responses:
-        '200':
-          description: A Leaflet tile layer definition.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Basemap'
-              examples:
-                configured:
-                  value:
-                    url: https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png?key=YOUR_KEY
-                    subdomains: abcd
-                    max_zoom: 19
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                    key_configured: true
-
   /api/v1/map/layers/provinces:
     get:
       tags: [map]
@@ -1624,18 +1597,6 @@ components:
                 type: [object, 'null']
                 description: 'null when simplification left nothing to draw (RFC 7946 allows it).'
               properties: {type: [object, 'null']}
-
-    Basemap:
-      type: object
-      required: [url, subdomains, max_zoom, attribution, key_configured]
-      properties:
-        url: {type: string, description: 'Leaflet tile URL template ({s}, {z}, {x}, {y}, {r}).'}
-        subdomains: {type: string}
-        max_zoom: {type: integer}
-        attribution: {type: string, description: 'HTML, as Leaflet shows it.'}
-        key_configured:
-          type: boolean
-          description: Whether the server has a CARTO API key; without one the tiles are watermarked.
 
     ProvinceLabel:
       type: object

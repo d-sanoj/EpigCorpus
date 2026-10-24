@@ -4,17 +4,19 @@
  * every marker sharing one canvas in a fixed draw order, which a declarative
  * wrapper would fight. React owns the page; this module owns the map element.
  *
- * The background is CARTO's dark basemap without labels, set up as the original
- * Streamlit map on main set it up (src/edcs_streamlit_map.py), plus the API
- * key CARTO now requires: the server hands over the tile URL with its key
- * (GET /api/v1/map/layers/basemap). The only names on the map are the EDCS
- * province names, drawn in the colour of the shading beneath them.
+ * The background is OpenFreeMap's "dark" vector basemap, drawn by MapLibre GL
+ * inside the Leaflet map (maplibre-gl-leaflet). It is the same Dark Matter
+ * design CARTO served, but needs no API key and has no usage limit; CARTO's
+ * raster tiles now require a key. Its place-name layers are removed, so the
+ * only names on the map are the EDCS province names, drawn in the colour of
+ * the shading beneath them.
  *
  * Known places (about 22,000) are grouped into a grid of cells while zoomed
  * out, one dot per cell shaded by its inscriptions, and drawn one by one from
  * DETAIL_ZOOM in. Search results are always drawn one by one.
  */
 import L from "leaflet";
+import type { StyleSpecification } from "maplibre-gl";
 import type { CityPoint, ProvinceLabel } from "../../api/client";
 import { formatInteger, plural } from "../../lib/format";
 
@@ -46,12 +48,9 @@ export const DETAIL_ZOOM = 7;
 const KNOWN_CAP = 1;
 // Grid cell size on screen while grouped, in pixels.
 const CELL_PX = 26;
-export interface BasemapConfig {
-  url: string;
-  subdomains: string;
-  max_zoom: number;
-  attribution: string;
-}
+// OpenFreeMap: free vector tiles from OpenStreetMap data, no key, no limits.
+// Its style carries the attribution (OpenFreeMap, OpenMapTiles, OpenStreetMap).
+export const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/dark";
 
 export interface MapPlace {
   place: string;
@@ -112,6 +111,7 @@ export class EpigMap {
   // The zoom the known-places layer was last drawn for (null: redraw).
   private knownDrawnAt: number | null = null;
   private listeners = new Set<(state: LayerState) => void>();
+  private removed = false;
 
   constructor(element: HTMLElement) {
     // The same map options as main: whole zoom steps, so tiles are always
@@ -128,6 +128,7 @@ export class EpigMap {
     this.pane("provincesPane", 400, false);
     this.pane("markersPane", 410, true);
     this.pane("labelsPane", 450, false);
+    this.addBasemap();
 
     this.markerRenderer = L.canvas({ pane: "markersPane", padding: 0.5, tolerance: 5 });
     this.layers = {
@@ -148,6 +149,7 @@ export class EpigMap {
   }
 
   destroy() {
+    this.removed = true;
     this.listeners.clear();
     this.map.remove();
   }
@@ -186,12 +188,19 @@ export class EpigMap {
 
   // ─── basemap ───────────────────────────────────────────────────────────────
 
-  setBasemap(config: BasemapConfig) {
-    L.tileLayer(config.url, {
-      maxZoom: config.max_zoom,
-      subdomains: config.subdomains,
-      attribution: config.attribution,
-    }).addTo(this.map);
+  private addBasemap() {
+    // MapLibre is about 1 MB: load it apart from the app, so the markers and
+    // controls show at once and the background fills in behind them.
+    Promise.all([
+      import("@maplibre/maplibre-gl-leaflet"),
+      import("maplibre-gl/dist/maplibre-gl.css"),
+      fetch(BASEMAP_STYLE).then((response) => response.json() as Promise<StyleSpecification>),
+    ])
+      .then(([plugin, , style]) => {
+        if (!this.removed) plugin.maplibreGL({ style: withoutLabels(style) }).addTo(this.map);
+      })
+      // Without the basemap the overlays still draw on the dark background.
+      .catch(() => {});
   }
 
   /** Every known place, built once; usable with or without a query. */
@@ -565,4 +574,9 @@ export function groupIntoCells(
     }))
     // Fullest cells last, so they draw on top.
     .sort((a, b) => a.inscriptions - b.inscriptions);
+}
+
+/** The style without its text and icon layers: no place names on the map. */
+export function withoutLabels(style: StyleSpecification): StyleSpecification {
+  return { ...style, layers: style.layers.filter((layer) => layer.type !== "symbol") };
 }

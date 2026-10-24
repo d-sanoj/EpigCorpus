@@ -1,5 +1,5 @@
 import L from "leaflet";
-import { groupIntoCells, lighten, radiusFor } from "./epigMap";
+import { groupIntoCells, lighten, radiusFor, withoutLabels } from "./epigMap";
 
 describe("map styling", () => {
   it("sizes places on a log scale, with a floor for empty ones", () => {
@@ -33,5 +33,22 @@ describe("grouping known places", () => {
     expect(full).toMatchObject({ places: 2, inscriptions: 4, intensity: 1 });
     expect(full.center.lat).toBeCloseTo((40.1 * 1 + 40.2 * 3) / 4);
     expect(full.center.lng).toBeCloseTo((10.1 * 1 + 10.3 * 3) / 4);
+  });
+});
+
+describe("the basemap style", () => {
+  it("loses its text and icon layers, and keeps the rest in order", () => {
+    const style = {
+      version: 8 as const,
+      sources: {},
+      layers: [
+        { id: "background", type: "background" as const },
+        { id: "place_label", type: "symbol" as const, source: "x" },
+        { id: "water", type: "fill" as const, source: "x" },
+        { id: "road_label", type: "symbol" as const, source: "x" },
+      ],
+    };
+    expect(withoutLabels(style).layers.map((layer) => layer.id)).toEqual(["background", "water"]);
+    expect(style.layers).toHaveLength(4); // the original is left alone
   });
 });
