@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="frontend/public/epigcorpus-logo.svg" width="112" alt="EpigCorpus logo" />
+  <img src="frontend/public/epigcorpus-logo.png" width="112" alt="EpigCorpus logo" />
 </p>
 
 <h1 align="center">EpigCorpus</h1>

@@ -68,7 +68,7 @@ const THEMES: { value: ThemeChoice; label: ReactNode; title: string }[] = [
 
 function Logo() {
   return (
-    <img src="/epigcorpus-logo.svg" className="size-7 flex-none rounded-lg" alt="" aria-hidden="true" />
+    <img src="/epigcorpus-logo.png" className="size-7 flex-none" alt="" aria-hidden="true" />
   );
 }
 
