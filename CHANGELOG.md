@@ -8,6 +8,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed — pipeline runs no longer exhaust memory ("Load failed") (2026-10-24)
+
+- **Symptom.** A pipeline run's clean stage could kill the server in a
+  Docker container with the usual 4–8 GB allowance. The browser then showed
+  "Load failed".
+- **Cause.** Cleaning parsed the whole raw JSONL at once (6.5 GB peak) next
+  to the corpus the server already held. The reload then held the old and
+  new corpus side by side.
+- **Fix.**
+  - JSONL files are read in chunks of 50,000 rows. The frames are identical,
+    and the peak drops from 6.5 GB to 1.5 GB.
+  - Cleaning streams chunk by chunk into temporary files, which replace the
+    corpus only when complete. The output is byte-identical (sha256
+    `54b9ee37…79699`). A failed run leaves the previous corpus untouched.
+  - The clean stage runs in a child process, which also refreshes the
+    Parquet snapshot. Its memory is freed when it ends. If memory still runs
+    out, only the child dies, and the run fails with a message that says so.
+  - The reload drops the old catalog before loading the new one.
+  - In a container limited to 4 GB, a full clean-and-reload run now succeeds
+    and peaks at 3.1 GB.
+- **UI.** The pipeline panel keeps polling through a lost connection, and
+  explains when a restarted server has forgotten a run.
+
 ### Changed — backend/frontend split; the pipeline runs through the API (2026-10-24)
 
 - **Layout.** The code is the installable package `backend/src/epigcorpus`,

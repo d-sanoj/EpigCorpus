@@ -92,5 +92,8 @@ Measured before deciding, on the full corpus (588,509 rows):
   two steps: build the UI once, then start uvicorn.
 - Leaflet is bundled from npm, so the UI no longer needs unpkg.
 - The UI build needs Node 22. The runtime does not.
-- Cleaning the full corpus inside the server needs about 8 GB of memory in
-  total.
+- Cleaning runs in a child process, 50,000 rows at a time, and writes
+  exactly the bytes whole-frame cleaning wrote (same sha256 on the full
+  corpus). A reload drops the old catalog before loading the new one. A full
+  clean-and-reload run peaks at about 3 GB, checked in a container limited to
+  4 GB.

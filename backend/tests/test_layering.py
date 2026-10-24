@@ -28,6 +28,7 @@ ALLOWED = {
 
 COMPOSITION_ROOTS = {
     "api/server.py": ALLOWED["api"] | {"adapters"},
+    "api/workers.py": ALLOWED["api"] | {"adapters"},
 }
 
 # Third-party packages that belong to one layer only.

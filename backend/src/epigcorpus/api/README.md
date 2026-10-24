@@ -99,8 +99,10 @@ curl -si -X POST localhost:8000/api/v1/pipeline-runs/<id>/cancel
 
 A full harvest takes hours and runs inside the server process. If the server
 stops mid-harvest, the next run resumes from the checkpoint. Cleaning the
-full corpus needs several GB of memory on top of the loaded catalog (allow
-8 GB in total).
+full corpus runs in a child process, chunk by chunk, and a reload drops the old
+catalog before loading the new one. A full clean-and-reload run peaks at about
+3 GB, checked in a container limited to 4 GB. If the machine still runs out,
+only the child dies, and the run fails with a message that says so.
 
 ## How the open questions from the design were settled
 

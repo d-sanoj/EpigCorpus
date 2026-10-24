@@ -30,6 +30,7 @@ from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 
+from epigcorpus.services.isolation import ChildProcessDied, IsolatedWorkFailed
 from epigcorpus.services.scrape import INTERRUPTED, HarvestError
 
 # harvest(limit, workers, restart, refresh_index, *, should_stop, on_progress) -> outcome.
@@ -254,7 +255,8 @@ class PipelineRuns:
         self._finish(run_id, SUCCEEDED)
 
     def _fail(self, run_id: str, stage: str, slug: str, title: str, exc: Exception) -> None:
-        detail = str(exc) if isinstance(exc, HarvestError) else f"{type(exc).__name__}: {exc}"
+        explained = (HarvestError, ChildProcessDied, IsolatedWorkFailed)
+        detail = str(exc) if isinstance(exc, explained) else f"{type(exc).__name__}: {exc}"
         self._set_stage(run_id, stage, status=FAILED, finished_at=_now())
         self._finish(run_id, FAILED, error={
             "type": f"https://epigcorpus.example/problems/{slug}",

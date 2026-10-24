@@ -48,7 +48,7 @@ READING IN PYTHON:
 
 RUN:
     Through the API only: POST /api/v1/pipeline-runs starts the pipeline
-    (harvest, clean, index) in the background; run_harvest is its first step.
+    (harvest, clean, reload) in the background; run_harvest is its first step.
     Arguments mirror the old command line: limit, workers, restart,
     refresh_index.
 """

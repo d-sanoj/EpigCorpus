@@ -4,8 +4,10 @@ pandas infers gzip from the extension, so every reader here accepts either the
 plain working copy or the committed .gz snapshot.
 """
 
+import gzip
 import hashlib
 import json
+from collections.abc import Iterator
 from pathlib import Path
 
 import pandas as pd
@@ -21,6 +23,19 @@ from epigcorpus.config.paths import (
     RAW_JSONL,
     RAW_TSV,
 )
+
+# Rows per chunk when reading a JSONL. Parsing the whole 588k-row corpus in
+# one call peaks at 6.5-7.5 GB; in chunks it peaks at about 1.5 GB and gives
+# an identical frame (checked on both the raw and the cleaned corpus).
+JSONL_CHUNK_ROWS = 50_000
+
+
+def read_jsonl(path: Path) -> pd.DataFrame:
+    """Read a JSON Lines file (plain or .gz) in chunks, to bound peak memory."""
+    chunks = pd.read_json(path, lines=True, chunksize=JSONL_CHUNK_ROWS)
+    with chunks:
+        return pd.concat(chunks, ignore_index=True)
+
 
 # ─── Scraped input and cleaned output (the pipeline's cleaning step) ──────────
 
@@ -45,44 +60,78 @@ def get_jsonl_files() -> list[Path]:
     )
 
 
-def load_latest_data() -> pd.DataFrame:
-    """Load the most recently created JSONL file from data directory."""
+def iter_latest_data() -> Iterator[pd.DataFrame]:
+    """The newest scraped corpus, JSONL_CHUNK_ROWS rows at a time.
+
+    Read in chunks so cleaning never holds more than one chunk of the raw
+    corpus: parsing it whole peaks at 6.5 GB.
+    """
     jsonl_files = get_jsonl_files()
     if not jsonl_files:
-        raise FileNotFoundError("No JSONL file found in 'data/' after running scraper.")
+        raise FileNotFoundError(f"No scraped corpus (*.jsonl or *.jsonl.gz) in {RAW_DIR}.")
 
     jsonl_path = jsonl_files[0]
+    print(f"\nLoading: {jsonl_path}")
     # pandas infers gzip from the .gz extension, so both forms load identically.
-    data = pd.read_json(jsonl_path, lines=True)
-    print(f"\nLoaded: {jsonl_path}")
-
-    if "belege" in data.columns:
-        data = data.rename(columns={"belege": "evidence"})
-
-    return data
+    with pd.read_json(jsonl_path, lines=True, chunksize=JSONL_CHUNK_ROWS) as chunks:
+        for chunk in chunks:
+            if "belege" in chunk.columns:
+                chunk = chunk.rename(columns={"belege": "evidence"})
+            yield chunk
 
 
-def save_cleaned_data(cleaned: pd.DataFrame) -> Path:
-    """Save cleaned data as JSONL, plus a .gz copy for distribution.
+class CleanedCorpusWriter:
+    """Writes the cleaned corpus chunk by chunk, as JSONL plus a .gz copy.
 
-    The plain file is what the app reads locally; the .gz is what gets committed
-    (it is roughly 11x smaller, keeping it under GitHub's 100 MB per-file limit
-    without Git LFS). Loaders accept either, so nobody has to decompress by hand.
+    The plain file is what the app reads locally; the .gz is what gets
+    committed (roughly 11x smaller, under GitHub's 100 MB per-file limit
+    without Git LFS). Both are written to temporary files and only replace
+    the current corpus once every chunk is in, so a failed or killed run
+    leaves the previous corpus intact.
     """
-    output_jsonl = CLEANED_JSONL
-    output_gz = CLEANED_JSONL_GZ
 
-    cleaned.to_json(output_jsonl, orient="records", lines=True, force_ascii=False)
-    print(f"\nSaved cleaned JSONL: {output_jsonl}")
+    def __init__(self):
+        self._plain_tmp = CLEANED_JSONL.with_name(CLEANED_JSONL.name + ".partial")
+        self._gz_tmp = CLEANED_JSONL_GZ.with_name(CLEANED_JSONL_GZ.name + ".partial")
+        self._plain = None
+        self._gz = None
+        self.rows = 0
 
-    cleaned.to_json(output_gz, orient="records", lines=True, force_ascii=False,
-                    compression="gzip")
-    raw_mb = output_jsonl.stat().st_size / 1048576
-    gz_mb = output_gz.stat().st_size / 1048576
-    print(f"Saved compressed   : {output_gz} "
-          f"({gz_mb:.1f} MB, {raw_mb / gz_mb:.1f}x smaller)")
+    def __enter__(self) -> "CleanedCorpusWriter":
+        self._plain = open(self._plain_tmp, "wb")
+        # mtime=0: the same corpus compresses to the same bytes on every run.
+        self._gz = gzip.GzipFile(self._gz_tmp, "wb", mtime=0)
+        return self
 
-    return output_jsonl
+    def write(self, cleaned: pd.DataFrame) -> None:
+        # Chunk by chunk, to_json writes exactly the bytes it writes for the
+        # whole frame (checked on the full corpus: same sha256).
+        text = cleaned.to_json(orient="records", lines=True, force_ascii=False)
+        if text and not text.endswith("\n"):
+            text += "\n"
+        data = text.encode("utf-8")
+        self._plain.write(data)
+        self._gz.write(data)
+        self.rows += len(cleaned)
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        self._plain.close()
+        self._gz.close()
+        if exc_type is not None:
+            self._plain_tmp.unlink(missing_ok=True)
+            self._gz_tmp.unlink(missing_ok=True)
+            return
+        self._plain_tmp.replace(CLEANED_JSONL)
+        self._gz_tmp.replace(CLEANED_JSONL_GZ)
+        raw_mb = CLEANED_JSONL.stat().st_size / 1048576
+        gz_mb = CLEANED_JSONL_GZ.stat().st_size / 1048576
+        print(f"\nSaved cleaned JSONL: {CLEANED_JSONL} ({self.rows:,} rows)")
+        print(f"Saved compressed   : {CLEANED_JSONL_GZ} "
+              f"({gz_mb:.1f} MB, {raw_mb / gz_mb:.1f}x smaller)")
+
+
+def cleaned_writer() -> CleanedCorpusWriter:
+    return CleanedCorpusWriter()
 
 
 # ─── Cleaned corpus and lookup (search and map) ───────────────────────────────
@@ -160,7 +209,7 @@ def read_cleaned_corpus() -> pd.DataFrame:
     source = cleaned_corpus_path()
     frame = _read_snapshot(source)
     if frame is None:
-        frame = pd.read_json(source, lines=True)
+        frame = read_jsonl(source)
         _write_snapshot(frame, source)
     return frame
 

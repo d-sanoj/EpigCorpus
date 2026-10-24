@@ -2,7 +2,8 @@
 #
 # data/ is mounted read-write: the server writes the Parquet snapshot of the
 # cleaned corpus there, and pipeline runs write the harvest and the cleaned
-# corpus. Cleaning the full corpus needs about 8 GB of memory.
+# corpus. A full pipeline run peaks at about 3 GB of memory, so the usual
+# Docker Desktop allowance (4 GB or more) is enough.
 services:
   epigcorpus:
     build: .

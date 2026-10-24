@@ -5,7 +5,13 @@
  * the app reloads what it shows.
  */
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { getJson, postJson, type PipelineRun, type PipelineRunRequest } from "../../api/client";
+import {
+  ApiError,
+  getJson,
+  postJson,
+  type PipelineRun,
+  type PipelineRunRequest,
+} from "../../api/client";
 import { formatInteger } from "../../lib/format";
 
 const POLL_MS = 2000;
@@ -32,6 +38,8 @@ export function PipelinePanel({ onCorpusReloaded }: Props) {
   }>({ harvest: true, clean: true, limit: "", workers: 16, restart: false, refresh_index: false });
   const [run, setRun] = useState<PipelineRun | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Bumped after a failed poll, so polling carries on until the server answers.
+  const [retry, setRetry] = useState(0);
   const reported = useRef<string | null>(null);
 
   // The latest run, so a page opened mid-run shows it.
@@ -50,12 +58,30 @@ export function PipelinePanel({ onCorpusReloaded }: Props) {
   useEffect(() => {
     if (!run || !ACTIVE.has(run.status)) return;
     const timer = window.setTimeout(() => {
-      getJson<PipelineRun>(`/pipeline-runs/${run.id}`).then(setRun, (reason: Error) =>
-        setError(reason.message),
+      getJson<PipelineRun>(`/pipeline-runs/${run.id}`).then(
+        (next) => {
+          setError(null);
+          setRun(next);
+        },
+        (reason: Error) => {
+          if (reason instanceof ApiError && reason.status === 404) {
+            // The registry lives in memory: a restarted server forgets runs.
+            setError(
+              "The server restarted and no longer knows this run. If it was cleaning, the " +
+                "server probably ran out of memory: give Docker at least 4 GB, then run again.",
+            );
+            setRun(null);
+            return;
+          }
+          // fetch() rejects with a bare "Load failed" / "Failed to fetch" when
+          // the server does not answer; keep polling until it does.
+          setError("Lost contact with the server; still trying…");
+          setRetry((count) => count + 1);
+        },
       );
     }, POLL_MS);
     return () => window.clearTimeout(timer);
-  }, [run]);
+  }, [run, retry]);
 
   useEffect(() => {
     if (!run || reported.current === run.id) return;

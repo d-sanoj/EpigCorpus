@@ -93,9 +93,20 @@ def clean_data(data: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
     return cleaned
 
 
-def run_cleaning(store: RawCorpusStore) -> pd.DataFrame:
-    """Load the newest scraped corpus, clean it, save both output files."""
-    data = store.load_latest_data()
-    cleaned = clean_data(data, verbose=True)
-    store.save_cleaned_data(cleaned)
-    return cleaned
+def run_cleaning(store: RawCorpusStore) -> int:
+    """Clean the newest scraped corpus chunk by chunk and save it; return the rows.
+
+    Every rule in clean_data works on one row at a time, so cleaning chunk by
+    chunk writes exactly what cleaning the whole frame wrote (the full corpus
+    gives the same sha256) while holding one chunk instead of the corpus.
+    """
+    forged = unreadable = 0
+    with store.cleaned_writer() as writer:
+        for chunk in store.iter_latest_data():
+            cleaned = clean_data(chunk, verbose=False)
+            forged += int(cleaned["is_forged"].sum())
+            unreadable += int(cleaned["is_unreadable"].sum())
+            writer.write(cleaned)
+        rows = writer.rows
+    print(f"Cleaned: {rows:,} rows\nForged: {forged}\nUnreadable: {unreadable}")
+    return rows

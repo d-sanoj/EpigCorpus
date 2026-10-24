@@ -8,7 +8,7 @@ functions match the Protocol's methods is a valid implementation.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -81,12 +81,24 @@ class HarvestStore(Protocol):
     def load_failed(self) -> set: ...
 
 
+class CleanedWriter(Protocol):
+    """A context manager taking the cleaned corpus chunk by chunk."""
+
+    rows: int
+
+    def __enter__(self) -> CleanedWriter: ...
+
+    def __exit__(self, exc_type, exc, tb) -> None: ...
+
+    def write(self, cleaned: pd.DataFrame) -> None: ...
+
+
 class RawCorpusStore(Protocol):
-    """The scraped corpus as main.py's cleaning step reads it, and the cleaned output."""
+    """The scraped corpus as the cleaning step reads it, and the cleaned output."""
 
-    def load_latest_data(self) -> pd.DataFrame: ...
+    def iter_latest_data(self) -> Iterator[pd.DataFrame]: ...
 
-    def save_cleaned_data(self, cleaned: pd.DataFrame) -> Path: ...
+    def cleaned_writer(self) -> CleanedWriter: ...
 
 
 class CleanedCorpusReader(Protocol):

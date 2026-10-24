@@ -14,11 +14,12 @@ from functools import partial
 
 from epigcorpus.adapters import corpus_files, edcs_client, harvest_store, map_layers
 from epigcorpus.adapters.console import log
+from epigcorpus.api import workers
 from epigcorpus.api.app import create_app
 from epigcorpus.api.deps import ApiDeps
 from epigcorpus.config.paths import API_SPEC, UI_STATIC_DIR
 from epigcorpus.services.catalog import Catalog, CatalogSlot
-from epigcorpus.services.cleaning import run_cleaning
+from epigcorpus.services.isolation import run_isolated
 from epigcorpus.services.pipeline import PipelineRuns, PipelineSteps
 from epigcorpus.services.scrape import run_harvest
 
@@ -27,7 +28,9 @@ def build_deps() -> ApiDeps:
     catalogs = CatalogSlot(lambda: Catalog(corpus_files, map_layers))
     steps = PipelineSteps(
         harvest=partial(run_harvest, client=edcs_client, store=harvest_store, log=log),
-        clean=lambda: len(run_cleaning(corpus_files)),
+        # In a child process: cleaning's memory is freed when it ends, and
+        # running out of memory fails the stage instead of killing the server.
+        clean=partial(run_isolated, workers.clean_corpus),
         reload=catalogs.reload,
     )
     return ApiDeps(

@@ -13,6 +13,7 @@ file name.
 
 from __future__ import annotations
 
+import gc
 import threading
 from collections import OrderedDict
 from collections.abc import Callable
@@ -271,9 +272,13 @@ class Catalog:
 class CatalogSlot:
     """The catalog the server currently answers from, replaceable while it runs.
 
-    A pipeline run's reload builds a new catalog over the freshly cleaned
-    corpus, warms it while the old one keeps answering, then swaps it in.
-    Requests already holding the old catalog finish on it.
+    A pipeline run's reload swaps in a new catalog over the freshly cleaned
+    corpus. The old one is dropped first rather than kept until the new one
+    is warm: holding both doubles the server's memory (about 1.6 GB each),
+    which is what pushes a small Docker allowance over the edge. Requests in
+    the few seconds the new catalog takes to load (from the Parquet snapshot
+    the clean stage refreshed) wait for it, as they do at startup. Requests
+    already holding the old catalog finish on it.
     """
 
     def __init__(self, build: Callable[[], Catalog]):
@@ -289,6 +294,7 @@ class CatalogSlot:
         """Load the corpus on disk into a new catalog, swap it in, return its fingerprint."""
         with self._reload_lock:
             fresh = self._build()
-            fresh.warm()
             self._current = fresh
+            gc.collect()
+            fresh.warm()
             return fresh.fingerprint()
