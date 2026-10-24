@@ -8,6 +8,31 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — a redesigned interface, light and dark (2026-10-24)
+
+- **Design.** The UI is redesigned from scratch: Inter type, warm neutrals,
+  and terracotta as the one accent. It comes in a light theme (the default)
+  and a dark theme. A switch in the top bar offers light, dark or the
+  system's setting, and the choice is remembered.
+- **Layout.**
+  - A slim top bar holds the corpus totals, the pipeline and the theme
+    switch.
+  - The search panel can be hidden: keyword, where to search (as a
+    segmented control), and the filters with a count and "Clear filters".
+  - The map fills the rest.
+- **Map.** Floating controls replace Leaflet's: zoom, reset view, a layers
+  menu with switches and descriptions, and the PNG download. The legend
+  starts collapsed. A summary card says what the map shows.
+- **Results.** The table is a drawer along the bottom of the map. It starts
+  collapsed as one bar with the counts and the TSV download, and opens
+  into the table on request; rows load only when it opens.
+- **Pipeline.** The pipeline is a side panel. Harvest options sit behind a
+  disclosure, and the run is shown as stages with progress. A dot on the
+  Pipeline button shows a run in progress, even with the panel closed.
+- **Map colours.** The map follows the theme: OpenFreeMap "positron" or
+  "dark" underneath, and marker, province, road and label colours tuned for
+  each. The markers keep their shape and sizes.
+
 ### Changed — OpenFreeMap vector basemap, no API key; tests that cannot fail by design (2026-10-24)
 
 - **Basemap.** The map's background is OpenFreeMap's `dark` vector style,

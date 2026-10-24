@@ -4,12 +4,13 @@
  * every marker sharing one canvas in a fixed draw order, which a declarative
  * wrapper would fight. React owns the page; this module owns the map element.
  *
- * The background is OpenFreeMap's "dark" vector basemap, drawn by MapLibre GL
- * inside the Leaflet map (maplibre-gl-leaflet). It is the same Dark Matter
- * design CARTO served, but needs no API key and has no usage limit; CARTO's
- * raster tiles now require a key. Its place-name layers are removed, so the
- * only names on the map are the EDCS province names, drawn in the colour of
- * the shading beneath them.
+ * The background is an OpenFreeMap vector basemap, drawn by MapLibre GL inside
+ * the Leaflet map (maplibre-gl-leaflet): "positron" in the light theme, "dark"
+ * in the dark one, the same designs CARTO served, with no API key and no usage
+ * limit. Their place-name layers are removed, so the only names on the map
+ * are the EDCS province names, drawn in the colour of the shading beneath
+ * them. Every colour on the map comes from the theme's palette, and changing
+ * theme restyles everything in place.
  *
  * Known places (about 22,000) are grouped into a grid of cells while zoomed
  * out, one dot per cell shaded by its inscriptions, and drawn one by one from
@@ -20,18 +21,42 @@ import type { StyleSpecification } from "maplibre-gl";
 import type { CityPoint, ProvinceLabel } from "../../api/client";
 import { formatInteger, plural } from "../../lib/format";
 
-// Solid markers in bright, well-separated hues over muted province fills.
-// A thin dark outline keeps neighbouring and overlapping circles apart.
-export const COLORS = {
-  known: "#2dd4bf", // teal: every known place
-  empty: "#64748b", // slate: a place with no inscription
-  city: "#facc15", // yellow: cities (Hanson 2016)
-  search: "#f97316", // orange: search results
-  road: "#e2e8f0",
-  edge: "#0b0f17",
-  labelFallback: "#cbd5e1",
+export type MapTheme = "light" | "dark";
+
+// Solid markers in well-separated hues over muted province fills: teal known
+// places, terracotta search results, ochre cities. A thin outline in the
+// basemap's own tone keeps neighbouring and overlapping circles apart.
+export const PALETTES = {
+  light: {
+    known: "#0f766e",
+    empty: "#a8a29e",
+    city: "#b7791f",
+    search: "#e05a1c",
+    road: "#57534e",
+    edge: "#ffffff",
+    provinceOpacity: 0.3,
+    provinceBorder: "rgba(28, 25, 23, 0.22)",
+    labelFallback: "#44403c",
+  },
+  dark: {
+    known: "#2dd4bf",
+    empty: "#64748b",
+    city: "#f5c542",
+    search: "#fb7a3c",
+    road: "#e2e8f0",
+    edge: "#0b0f17",
+    provinceOpacity: 0.55,
+    provinceBorder: "rgba(226, 232, 240, 0.28)",
+    labelFallback: "#cbd5e1",
+  },
+} as const;
+
+// OpenFreeMap: free vector tiles from OpenStreetMap data, no key, no limits.
+// Each style carries its attribution (OpenFreeMap, OpenMapTiles, OpenStreetMap).
+export const BASEMAP_STYLES: Record<MapTheme, string> = {
+  light: "https://tiles.openfreemap.org/styles/positron",
+  dark: "https://tiles.openfreemap.org/styles/dark",
 };
-const PROVINCE_FILL_OPACITY = 0.6;
 // Results sit on top of everything and must stay findable even where a place
 // has a single match: they never draw smaller than this.
 const SEARCH_MIN_RADIUS = 3.6;
@@ -48,9 +73,6 @@ export const DETAIL_ZOOM = 7;
 const KNOWN_CAP = 1;
 // Grid cell size on screen while grouped, in pixels.
 const CELL_PX = 26;
-// OpenFreeMap: free vector tiles from OpenStreetMap data, no key, no limits.
-// Its style carries the attribution (OpenFreeMap, OpenMapTiles, OpenStreetMap).
-export const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/dark";
 
 export interface MapPlace {
   place: string;
@@ -74,6 +96,15 @@ export function lighten(hex: string, amount: number): string {
   const n = parseInt(hex.slice(1), 16);
   const channels = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) =>
     Math.round(c + (255 - c) * amount),
+  );
+  return `rgb(${channels.join(", ")})`;
+}
+
+/** Mix a #rrggbb colour towards black by `amount` (0..1). */
+export function darken(hex: string, amount: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const channels = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) =>
+    Math.round(c * (1 - amount)),
   );
   return `rgb(${channels.join(", ")})`;
 }
@@ -112,11 +143,21 @@ export class EpigMap {
   private knownDrawnAt: number | null = null;
   private listeners = new Set<(state: LayerState) => void>();
   private removed = false;
+  private theme: MapTheme;
+  private basemap: L.Layer | null = null;
+  private basemapRequest = 0;
+  private cityMarkers: L.CircleMarker[] = [];
+  private resultMarkers: L.CircleMarker[] = [];
+  private provinceLabels: ProvinceLabel[] = [];
 
-  constructor(element: HTMLElement) {
-    // The same map options as main: whole zoom steps, so tiles are always
-    // drawn at their own size.
-    const map = L.map(element, { preferCanvas: true, worldCopyJump: true }).setView(CENTER, ZOOM);
+  constructor(element: HTMLElement, theme: MapTheme) {
+    this.theme = theme;
+    // Zoom buttons are React's (MapView); attribution stays Leaflet's.
+    const map = L.map(element, {
+      preferCanvas: true,
+      worldCopyJump: true,
+      zoomControl: false,
+    }).setView(CENTER, ZOOM);
     this.map = map;
 
     // Stacking, bottom to top: land, provinces (the base), known places, roads,
@@ -145,7 +186,37 @@ export class EpigMap {
       this.drawKnown();
     });
     map.on("zoomend moveend", () => this.declutter());
-    this.addResetControl();
+  }
+
+  private get colors() {
+    return PALETTES[this.theme];
+  }
+
+  /** Switch theme: basemap, markers, provinces, roads and labels restyle in place. */
+  setTheme(theme: MapTheme) {
+    if (theme === this.theme) return;
+    this.theme = theme;
+    this.addBasemap();
+    const colors = this.colors;
+    if (this.layers.provinces instanceof L.GeoJSON) {
+      (this.layers.provinces as L.GeoJSON).setStyle((feature) => this.provinceStyle(feature));
+    }
+    if (this.layers.roads instanceof L.GeoJSON) {
+      (this.layers.roads as L.GeoJSON).setStyle({ color: colors.road });
+    }
+    for (const dot of this.cityMarkers) dot.setStyle({ color: colors.edge, fillColor: colors.city });
+    for (const dot of this.resultMarkers) dot.setStyle({ color: colors.edge, fillColor: colors.search });
+    this.knownDrawnAt = null;
+    this.drawKnown();
+    this.colorLabels();
+  }
+
+  zoomIn() {
+    this.map.zoomIn();
+  }
+
+  zoomOut() {
+    this.map.zoomOut();
   }
 
   destroy() {
@@ -191,15 +262,23 @@ export class EpigMap {
   private addBasemap() {
     // MapLibre is about 1 MB: load it apart from the app, so the markers and
     // controls show at once and the background fills in behind them.
+    const request = ++this.basemapRequest;
     Promise.all([
       import("@maplibre/maplibre-gl-leaflet"),
       import("maplibre-gl/dist/maplibre-gl.css"),
-      fetch(BASEMAP_STYLE).then((response) => response.json() as Promise<StyleSpecification>),
+      fetch(BASEMAP_STYLES[this.theme]).then(
+        (response) => response.json() as Promise<StyleSpecification>,
+      ),
     ])
       .then(([plugin, , style]) => {
-        if (!this.removed) plugin.maplibreGL({ style: withoutLabels(style) }).addTo(this.map);
+        // A newer theme switch, or the map's removal, wins.
+        if (this.removed || request !== this.basemapRequest) return;
+        const next = plugin.maplibreGL({ style: withoutLabels(style) });
+        next.addTo(this.map);
+        if (this.basemap) this.map.removeLayer(this.basemap);
+        this.basemap = next;
       })
-      // Without the basemap the overlays still draw on the dark background.
+      // Without the basemap the overlays still draw on the plain background.
       .catch(() => {});
   }
 
@@ -228,7 +307,8 @@ export class EpigMap {
   showResults(places: MapPlace[]) {
     this.mode = "results";
     this.forget(this.layers.search);
-    for (const place of places) this.resultMarker(place).addTo(this.layers.search);
+    this.resultMarkers = places.map((place) => this.resultMarker(place));
+    for (const marker of this.resultMarkers) marker.addTo(this.layers.search);
     this.available.search = places.length > 0;
     this.applyMode();
     if (places.length) {
@@ -242,7 +322,7 @@ export class EpigMap {
           [Math.min(...lats), Math.min(...lons)],
           [Math.max(...lats), Math.max(...lons)],
         ],
-        { padding: [24, 24] },
+        { paddingTopLeft: [32, 88], paddingBottomRight: [32, 72] },
       );
     }
   }
@@ -250,14 +330,18 @@ export class EpigMap {
   setProvinces(data: GeoJSON.GeoJsonObject) {
     this.layers.provinces = L.geoJSON(data, {
       pane: "provincesPane",
-      style: (feature) => ({
-        fillColor: (feature?.properties && feature.properties._color) || "#f0f0f0",
-        color: "rgba(226, 232, 240, 0.28)",
-        weight: 0.7,
-        fillOpacity: PROVINCE_FILL_OPACITY,
-      }),
+      style: (feature) => this.provinceStyle(feature),
     });
     this.overlayReady("provinces");
+  }
+
+  private provinceStyle(feature?: GeoJSON.Feature): L.PathOptions {
+    return {
+      fillColor: (feature?.properties && feature.properties._color) || "#f0f0f0",
+      color: this.colors.provinceBorder,
+      weight: 0.7,
+      fillOpacity: this.colors.provinceOpacity,
+    };
   }
 
   setRoads(data: GeoJSON.GeoJsonObject) {
@@ -266,37 +350,35 @@ export class EpigMap {
     this.layers.roads = L.geoJSON(data, {
       renderer: this.markerRenderer,
       interactive: false,
-      style: () => ({ color: COLORS.road, weight: 1.1, opacity: 0.7 }),
+      style: () => ({ color: this.colors.road, weight: 1.1, opacity: 0.7 }),
     } as L.GeoJSONOptions);
     this.overlayReady("roads");
   }
 
   setCities(cities: CityPoint[]) {
-    this.layers.cities = L.layerGroup(
-      cities.map((city) => {
+    this.cityMarkers = cities.map((city) => {
         const dot = L.circleMarker([city.latitude, city.longitude], {
           renderer: this.markerRenderer,
           radius: CITY_RADIUS * this.zoomScale(),
-          color: COLORS.edge,
+          color: this.colors.edge,
           weight: 0.8,
           opacity: 1,
-          fillColor: COLORS.city,
+          fillColor: this.colors.city,
           fillOpacity: 0.95,
         });
         dot.bindTooltip(escapeHtml(city.label || "Unnamed city"), { direction: "top", sticky: true });
         this.scaled.push({ marker: dot, base: CITY_RADIUS });
         return dot;
-      }),
-    );
+      });
+    this.layers.cities = L.layerGroup(this.cityMarkers);
     this.overlayReady("cities");
   }
 
   setProvinceLabels(labels: ProvinceLabel[]) {
+    this.provinceLabels = labels;
     this.labelMarkers = labels.map((label) => {
       const text = document.createElement("span");
       text.textContent = label.name;
-      // The fills are muted; the name uses a lighter tint of the same hue.
-      text.style.color = label.color ? lighten(label.color, 0.55) : COLORS.labelFallback;
       return L.marker([label.latitude, label.longitude], {
         pane: "labelsPane",
         interactive: false,
@@ -305,7 +387,24 @@ export class EpigMap {
       });
     });
     for (const marker of this.labelMarkers) this.layers.provinceLabels.addLayer(marker);
+    this.colorLabels();
     this.setLayerVisible("provinces");
+  }
+
+  /** Each name in the hue of its province: lighter on the dark map, deeper on
+   *  the light one, so it reads against the shading in both. */
+  private colorLabels() {
+    this.labelMarkers.forEach((marker, index) => {
+      const label = this.provinceLabels[index];
+      const color = label?.color
+        ? this.theme === "dark"
+          ? lighten(label.color, 0.55)
+          : darken(label.color, 0.35)
+        : this.colors.labelFallback;
+      const icon = marker.options.icon as L.DivIcon | undefined;
+      const html = icon?.options.html;
+      if (html instanceof HTMLElement) html.style.color = color;
+    });
   }
 
   // ─── internals ─────────────────────────────────────────────────────────────
@@ -432,10 +531,10 @@ export class EpigMap {
     const marker = L.circleMarker(cell.center, {
       renderer: this.markerRenderer,
       radius: CELL_PX * (0.12 + 0.28 * intensity),
-      color: COLORS.edge,
+      color: this.colors.edge,
       weight: 0.6,
       opacity: 0.8,
-      fillColor: cell.inscriptions > 0 ? COLORS.known : COLORS.empty,
+      fillColor: cell.inscriptions > 0 ? this.colors.known : this.colors.empty,
       fillOpacity: 0.3 + 0.6 * intensity,
       fill: true,
     });
@@ -461,10 +560,10 @@ export class EpigMap {
       // Zoomed in this far, places are many and close: they keep their
       // default-zoom size rather than growing with the zoom.
       radius: base * Math.min(KNOWN_CAP, this.zoomScale()),
-      color: COLORS.edge,
+      color: this.colors.edge,
       weight: 0.8,
       opacity: 0.9,
-      fillColor: hasInscriptions ? COLORS.known : COLORS.empty,
+      fillColor: hasInscriptions ? this.colors.known : this.colors.empty,
       fillOpacity: hasInscriptions ? 0.75 : 0.6,
       fill: true,
     });
@@ -487,10 +586,10 @@ export class EpigMap {
     const marker = L.circleMarker([place.latitude, place.longitude], {
       renderer: this.markerRenderer,
       radius: base * this.zoomScale(),
-      color: COLORS.edge,
+      color: this.colors.edge,
       weight: 1.1,
       opacity: 1,
-      fillColor: COLORS.search,
+      fillColor: this.colors.search,
       fillOpacity: 0.95,
       fill: true,
     });
@@ -499,31 +598,13 @@ export class EpigMap {
     const listed = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
     const remainder = count - items.length;
     marker.bindPopup(
-      `<div class="overview-popup"><h4>${name}<br>${matches}</h4><ul>${listed}</ul>` +
+      `<div class="overview-popup"><h4>${name}<br><span>${matches}</span></h4><ul>${listed}</ul>` +
         (remainder > 0 ? `<div class="more">+ ${formatInteger(remainder)} more</div>` : "") +
         "</div>",
       { maxWidth: 420 },
     );
     this.scaled.push({ marker, base });
     return marker;
-  }
-
-  private addResetControl() {
-    const reset = new L.Control({ position: "topleft" });
-    reset.onAdd = () => {
-      const wrapper = L.DomUtil.create("div", "leaflet-bar overview-map-reset");
-      const button = L.DomUtil.create("button", "", wrapper);
-      button.type = "button";
-      button.title = "Reset view";
-      button.setAttribute("aria-label", "Reset view");
-      button.innerHTML =
-        '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">' +
-        '<path d="M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3z" fill="currentColor"></path></svg>';
-      L.DomEvent.disableClickPropagation(wrapper);
-      L.DomEvent.on(button, "click", () => this.resetView());
-      return wrapper;
-    };
-    reset.addTo(this.map);
   }
 }
 

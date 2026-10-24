@@ -3,8 +3,15 @@ import { expect, test, type Page } from "@playwright/test";
 // The tests hold for any corpus: they check the shape of what is shown, not
 // counts, which change with every harvest.
 const COUNT = "[\\d,]+";
+
+// OpenFreeMap is outside the app; tests run without it (the map's overlays
+// draw on the plain background).
+test.beforeEach(async ({ page }) => {
+  await page.route(/tiles\.openfreemap\.org/, (route) => route.abort());
+});
+
 async function search(page: Page, keyword: string) {
-  await page.getByLabel("Keyword").fill(keyword);
+  await page.getByRole("searchbox", { name: "Keyword" }).fill(keyword);
   await page.getByRole("button", { name: "Search", exact: true }).click();
 }
 
@@ -16,24 +23,50 @@ async function choose(page: Page, label: string, value: string) {
   await box.blur();
 }
 
+async function openLayers(page: Page) {
+  await page.getByRole("button", { name: "Map layers" }).click();
+}
+
+const layer = (page: Page, key: string) => page.locator(`[data-map-layer="${key}"]`);
+
 test("with no query the map shows every known place", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("#summary")).toHaveText(new RegExp(`All known places: ${COUNT}`));
-  await expect(page.locator('[data-map-layer="all"]')).toBeChecked();
-  await expect(page.locator('[data-map-layer="search"]')).toBeDisabled();
-  await expect(page.locator('[data-map-layer="provinces"]')).toBeChecked();
+  await expect(page.getByText("All known places")).toBeVisible();
+  await expect(page.locator("#summary")).toHaveText(new RegExp(`^${COUNT} places · ${COUNT} inscriptions$`));
+  await openLayers(page);
+  await expect(layer(page, "all")).toBeChecked();
+  await expect(layer(page, "search")).toBeDisabled();
+  await expect(layer(page, "provinces")).toBeChecked();
   await expect(page.locator(".province-label").first()).toBeAttached();
   await expect(page.getByRole("region", { name: "Results" })).toHaveCount(0);
 });
 
-test("a keyword search fills the map, the table and the address bar", async ({ page }) => {
+test("the legend starts collapsed and opens on demand", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("#summary")).toContainText("All known places");
+  await expect(page.getByRole("dialog", { name: "Legend" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Legend" }).click();
+  await expect(page.getByRole("dialog", { name: "Legend" })).toBeVisible();
+  await page.getByRole("button", { name: "Hide legend" }).click();
+  await expect(page.getByRole("dialog", { name: "Legend" })).toHaveCount(0);
+});
+
+test("a keyword search fills the map, the drawer and the address bar", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText("All known places")).toBeVisible();
   await search(page, "viator");
 
-  await expect(page.locator("#summary")).toHaveText(new RegExp(`^${COUNT} inscriptions match`));
+  await expect(page.locator("#summary")).toHaveText(new RegExp(`^${COUNT} inscriptions · ${COUNT} places`));
   await expect(page).toHaveURL(/\?q=viator&search_in=raw$/);
+
+  // The results drawer starts collapsed: a bar with the counts and the TSV.
   const results = page.getByRole("region", { name: "Results" });
+  await expect(results.getByRole("table")).toHaveCount(0);
+  await expect(results.getByRole("link", { name: /TSV/ })).toHaveAttribute(
+    "href",
+    "/api/v1/exports/search.tsv?q=viator&search_in=raw",
+  );
+
+  await results.getByRole("button", { name: "Show table" }).click();
   const status = results.getByRole("status");
   // The table starts at "Showing 0 of N" while its first page loads.
   await expect(status).toHaveText(new RegExp(`^Showing [1-9][\\d,]* of ${COUNT} inscriptions$`));
@@ -43,49 +76,63 @@ test("a keyword search fills the map, the table and the address bar", async ({ p
     await results.getByRole("button", { name: "Show more" }).click();
     await expect(results.locator("tbody tr")).toHaveCount(Math.min(200, total));
   }
+  await results.getByRole("button", { name: "Hide table" }).click();
+  await expect(results.getByRole("table")).toHaveCount(0);
 
-  await expect(page.locator('[data-map-layer="search"]')).toBeChecked();
   // Known places step aside for results, but can be switched back on.
-  const known = page.locator('[data-map-layer="all"]');
-  await expect(known).not.toBeChecked();
-  await expect(known).toBeEnabled();
-  await known.check();
-  await expect(known).toBeChecked();
-
-  const tsv = page.getByRole("link", { name: "Results as TSV" });
-  await expect(tsv).toHaveAttribute("href", "/api/v1/exports/search.tsv?q=viator&search_in=raw");
+  await openLayers(page);
+  await expect(layer(page, "search")).toBeChecked();
+  await expect(layer(page, "all")).not.toBeChecked();
+  await expect(layer(page, "all")).toBeEnabled();
+  await page.locator('label:has([data-map-layer="all"])').click();
+  await expect(layer(page, "all")).toBeChecked();
 });
 
 test("filters alone are a query", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("#summary")).toContainText("All known places");
+  await expect(page.getByText("All known places")).toBeVisible();
   await choose(page, "Province", "Noricum");
   await choose(page, "Language", "Latin");
   await page.getByRole("button", { name: "Search", exact: true }).click();
-  await expect(page.locator("#summary")).toHaveText(new RegExp(`^${COUNT} inscriptions match`));
+  await expect(page.locator("#summary")).toHaveText(new RegExp(`^${COUNT} inscriptions · ${COUNT} places`));
   await expect(page.getByRole("button", { name: "Remove Noricum" })).toBeVisible();
 });
 
 test("a shared address restores the query", async ({ page }) => {
   await page.goto("/?q=viator&search_in=interpretive");
-  await expect(page.getByLabel("Keyword")).toHaveValue("viator");
-  await expect(page.getByLabel("Search in")).toHaveValue("interpretive");
-  await expect(page.locator("#summary")).toHaveText(new RegExp(`^${COUNT} inscriptions match`));
+  await expect(page.getByRole("searchbox", { name: "Keyword" })).toHaveValue("viator");
+  await expect(page.getByRole("radio", { name: "Interpretive" })).toHaveAttribute("aria-checked", "true");
+  await expect(page.locator("#summary")).toHaveText(new RegExp(`^${COUNT} inscriptions`));
+  await page.getByRole("button", { name: "Show table" }).click();
   await expect(page.getByRole("columnheader", { name: "Interpretive text" })).toBeVisible();
 });
 
 test("nothing matching says so", async ({ page }) => {
   await page.goto("/");
   await search(page, "zzzzqqqq");
-  await expect(page.locator("#summary")).toContainText("0 inscriptions match");
-  await expect(page.getByRole("status").filter({ hasText: "Nothing matches" })).toBeVisible();
+  await expect(page.locator("#summary")).toContainText("Nothing matches");
+  await expect(page.getByRole("region", { name: "Results" })).toHaveCount(0);
 });
 
-test("the pipeline panel shows its options", async ({ page }) => {
+test("the theme can be switched and is remembered", async ({ page }) => {
   await page.goto("/");
-  const panel = page.getByRole("region", { name: "Pipeline" });
+  await page.getByRole("radio", { name: "Dark" }).click();
+  await expect(page.locator("html")).toHaveClass(/dark/);
+  await page.reload();
+  await expect(page.locator("html")).toHaveClass(/dark/);
+  await page.getByRole("radio", { name: "Light" }).click();
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
+});
+
+test("the pipeline opens in a panel", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Pipeline" }).click();
+  const panel = page.getByRole("dialog", { name: "Data pipeline" });
+  await expect(panel).toBeVisible();
   await expect(panel.getByRole("button", { name: "Run pipeline" })).toBeEnabled();
-  await panel.getByLabel("Harvest from the EDCS").uncheck();
-  await panel.getByLabel("Clean and reload the corpus").uncheck();
+  await panel.getByText("Harvest from the EDCS", { exact: true }).click();
+  await panel.getByText("Clean and reload the corpus", { exact: true }).click();
   await expect(panel.getByRole("button", { name: "Run pipeline" })).toBeDisabled();
+  await page.keyboard.press("Escape");
+  await expect(panel).toBeHidden();
 });

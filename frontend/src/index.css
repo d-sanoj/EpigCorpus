@@ -1,131 +1,212 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
 
-/* Dark throughout, as the earlier UI. */
+/* Dark mode follows a class on <html>, set by lib/theme.ts. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── design tokens ──────────────────────────────────────────────────────────
+ * Warm neutrals with one accent, Roman terracotta. Every surface, line and
+ * text colour comes from here, so both themes stay in step. */
 :root {
-  color-scheme: dark;
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface-2: #f3f2ee;
+  --surface-3: #e9e7e1;
+  --line: #e4e1da;
+  --line-strong: #d2cec5;
+  --fg: #1b1a17;
+  --fg-2: #47453f;
+  --muted: #7d7a72;
+  --accent: #c2410c;
+  --accent-soft: #c2410c14;
+  --ink: #1b1a17;
+  --ink-fg: #faf9f6;
+  --ring: #c2410c59;
+  --shadow: 0 1px 2px #1b1a170d, 0 8px 24px -6px #1b1a171f;
+  --known: #0f766e;
+  --search: #e05a1c;
+  --city: #b7791f;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0b0b0c;
+  --surface: #141415;
+  --surface-2: #1b1b1d;
+  --surface-3: #242427;
+  --line: #262628;
+  --line-strong: #36363a;
+  --fg: #eeede9;
+  --fg-2: #c7c5bf;
+  --muted: #8f8d87;
+  --accent: #f0743a;
+  --accent-soft: #f0743a1f;
+  --ink: #f2f1ed;
+  --ink-fg: #141415;
+  --ring: #f0743a66;
+  --shadow: 0 1px 2px #0000004d, 0 12px 32px -8px #0000008c;
   --known: #2dd4bf;
-  --search: #f97316;
-  --city: #facc15;
-  --edge: #0b0f17;
+  --search: #fb7a3c;
+  --city: #f5c542;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-ink: var(--ink);
+  --color-ink-fg: var(--ink-fg);
+  --color-known: var(--known);
+  --color-search: var(--search);
+  --color-city: var(--city);
+  --shadow-float: var(--shadow);
+}
+
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
   margin: 0;
-  background: #000;
-  color: #e5e7eb;
-  font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Theme switches cross-fade instead of flashing. */
+.theme-transition,
+.theme-transition * {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease !important;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
 @layer components {
+  /* A floating card over the map. */
+  .float-card {
+    @apply rounded-xl border border-line/80 bg-surface/90 shadow-float backdrop-blur-md;
+  }
   .field {
-    @apply min-h-10 w-full rounded-lg border border-slate-700 bg-[#1a1f2b] px-3 py-2 text-slate-100;
+    @apply w-full rounded-lg border border-line bg-surface px-3 text-sm text-fg shadow-[0_1px_0_#1b1a1708] transition-colors placeholder:text-muted hover:border-line-strong;
   }
   .field:focus,
   .field:focus-within {
-    @apply border-orange-500 outline-none;
-  }
-  .button {
-    @apply inline-flex min-h-10 w-full cursor-pointer items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-slate-100 no-underline;
-  }
-  .button:hover {
-    @apply border-orange-500 text-white;
-  }
-  .button-primary {
-    @apply inline-flex min-h-10 w-full cursor-pointer items-center justify-center rounded-lg border border-orange-500 bg-orange-500/90 font-semibold text-black;
-  }
-  .button-primary:hover {
-    @apply bg-orange-400;
-  }
-  .button:disabled,
-  .button[aria-disabled="true"],
-  .button-primary:disabled {
-    @apply cursor-not-allowed opacity-50;
-  }
-  .map-panel {
-    @apply rounded-lg border border-slate-400/30 bg-slate-900/90 text-[0.82rem] text-slate-200 shadow-md shadow-black/50;
+    @apply border-accent outline-none ring-3 ring-accent-soft;
   }
   .swatch {
-    @apply block size-3 flex-none rounded-full border border-[#0b0f17];
-  }
-  .swatch-known {
-    background: var(--known);
-  }
-  .swatch-search {
-    background: var(--search);
-  }
-  .swatch-cities {
-    background: var(--city);
-    @apply mx-[1.5px] size-[9px];
-  }
-  .swatch-roads {
-    @apply h-[3px] w-3 rounded-sm border-0 bg-slate-200;
-  }
-  .swatch-provinces {
-    @apply rounded-sm;
-    background: linear-gradient(90deg, #5b4b8a 0 25%, #3f6b8f 25% 50%, #4f7a4a 50% 75%, #8a7440 75% 100%);
+    @apply inline-block size-2.5 flex-none rounded-full ring-1 ring-black/10 dark:ring-white/10;
   }
 }
 
-th {
-  @apply sticky top-0 bg-slate-900 px-2.5 py-1.5 text-left font-semibold whitespace-nowrap text-slate-400;
+/* ─── tables ─────────────────────────────────────────────────────────────── */
+.data-table th {
+  @apply sticky top-0 z-10 border-b border-line bg-surface-2/95 px-3 py-2 text-left text-[0.7rem] font-semibold tracking-wide whitespace-nowrap text-muted uppercase backdrop-blur;
 }
-td {
-  @apply border-b border-slate-800 px-2.5 py-1.5 align-top;
+.data-table td {
+  @apply border-b border-line/70 px-3 py-2 align-top text-[0.8rem] leading-relaxed text-fg-2;
+}
+.data-table tbody tr {
+  @apply transition-colors hover:bg-surface-2;
 }
 
-/* ─── Leaflet chrome on the dark map ─────────────────────────────────────── */
+/* ─── Leaflet chrome, themed ─────────────────────────────────────────────── */
 .leaflet-container {
-  font-family: inherit;
-  background: #0b0f17;
-}
-.leaflet-bar a,
-.leaflet-bar a:hover {
-  background: #111827;
-  color: #e5e7eb;
-  border-bottom-color: rgba(148, 163, 184, 0.25);
-}
-.leaflet-bar {
-  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  font-family: var(--font-sans);
+  background: var(--surface-3);
 }
 .leaflet-control-attribution {
-  background: rgba(17, 24, 39, 0.82) !important;
-  color: #94a3b8;
+  background: color-mix(in srgb, var(--surface) 80%, transparent) !important;
+  color: var(--muted) !important;
+  font-size: 10px !important;
+  border-top-left-radius: 6px;
+  backdrop-filter: blur(6px);
 }
 .leaflet-control-attribution a {
-  color: #cbd5e1;
+  color: var(--fg-2) !important;
 }
 .leaflet-tooltip {
-  background: rgba(17, 24, 39, 0.94);
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  color: #e5e7eb;
-  box-shadow: none;
-}
-.leaflet-tooltip .tooltip-hint {
-  color: #94a3b8;
-  font-size: 0.72rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--fg);
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 9px;
 }
 .leaflet-tooltip-top:before {
-  border-top-color: rgba(148, 163, 184, 0.5);
+  border-top-color: var(--line);
+}
+.leaflet-tooltip .tooltip-hint {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
 }
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
-  background: #111827;
-  color: #e5e7eb;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: var(--shadow);
 }
-.leaflet-popup-close-button {
-  color: #94a3b8 !important;
+.leaflet-popup-content-wrapper {
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }
-.overview-map-reset button {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #111827;
-  border: 0;
-  cursor: pointer;
-  color: #e5e7eb;
+.leaflet-popup-content {
+  margin: 14px 16px;
+}
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--muted);
+  top: 6px;
+  right: 6px;
+}
+.overview-popup h4 {
+  margin: 0 0 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+.overview-popup h4 span {
+  color: var(--search);
+  font-weight: 600;
+}
+.overview-popup ul {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--fg-2);
+  list-style: disc;
+}
+.overview-popup .more {
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.72rem;
 }
 /* Province names, coloured like the shading beneath them (set inline). */
 .province-label {
@@ -137,23 +218,26 @@ td {
   white-space: nowrap;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.03em;
-  text-shadow: 0 0 3px #000, 0 0 2px #000, 0 0 1px #000;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 0 3px #fff,
+    0 0 2px #fff,
+    0 0 1px #fff;
 }
-.overview-popup h4 {
-  margin: 0 0 0.3rem;
-  font-size: 0.85rem;
-  color: var(--search);
+.dark .province-label span {
+  text-shadow:
+    0 0 3px #000,
+    0 0 2px #000,
+    0 0 1px #000;
 }
-.overview-popup ul {
-  margin: 0;
-  padding-left: 1rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
-  list-style: disc;
-}
-.overview-popup .more {
-  margin-top: 0.3rem;
-  color: #94a3b8;
-  font-size: 0.72rem;
+
+@keyframes sheet-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }

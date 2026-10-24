@@ -4,6 +4,7 @@
  * code), shown dimmed under the English label and searchable too. Only the
  * first matches are rendered, so the ~22,000 places stay quick to filter.
  */
+import { X } from "lucide-react";
 import { useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { formatInteger } from "../../lib/format";
 
@@ -87,11 +88,11 @@ export function MultiSelect({
   const listId = `${id}-list`;
   return (
     <div className="relative flex min-w-0 flex-col gap-1.5">
-      <span id={`${id}-label`} className="text-sm text-slate-300">
+      <span id={`${id}-label`} className="text-[0.78rem] font-medium text-fg-2">
         {label}
       </span>
       <div
-        className="field flex min-h-10 cursor-text flex-wrap items-center gap-1.5"
+        className="field flex min-h-9 cursor-text flex-wrap items-center gap-1 py-1"
         onMouseDown={(event) => {
           if (event.target === event.currentTarget) {
             event.preventDefault();
@@ -102,18 +103,18 @@ export function MultiSelect({
         {selected.map((value) => (
           <span
             key={value}
-            className="inline-flex max-w-full items-center gap-1 rounded-md border border-orange-500/55 bg-orange-500/15 py-0.5 pr-1 pl-2 text-sm"
+            className="inline-flex h-6 max-w-full items-center gap-0.5 rounded-md bg-surface-3 pr-0.5 pl-2 text-[0.78rem] font-medium text-fg"
           >
             <span className="truncate" title={value}>
               {value}
             </span>
             <button
               type="button"
-              className="px-1 leading-none text-slate-400 hover:text-white"
+              className="flex size-5 items-center justify-center rounded text-muted transition-colors hover:bg-line hover:text-fg"
               aria-label={`Remove ${value}`}
               onClick={() => remove(value)}
             >
-              ×
+              <X className="size-3" />
             </button>
           </span>
         ))}
@@ -126,7 +127,7 @@ export function MultiSelect({
           aria-labelledby={`${id}-label`}
           aria-autocomplete="list"
           aria-activedescendant={open && shown.length ? `${id}-opt-${active}` : undefined}
-          className="min-w-16 flex-1 bg-transparent py-0.5 outline-none placeholder:text-slate-500"
+          className="h-6 min-w-16 flex-1 bg-transparent px-0.5 outline-none placeholder:text-muted"
           placeholder={selected.length ? "" : placeholder}
           value={needle}
           onFocus={() => {
@@ -151,7 +152,7 @@ export function MultiSelect({
         role="listbox"
         aria-multiselectable="true"
         hidden={!open}
-        className="absolute top-full right-0 left-0 z-[1100] mt-1 max-h-72 overflow-y-auto rounded-lg border border-slate-700 bg-slate-900 py-1 shadow-xl shadow-black/60"
+        className="float-card absolute top-full right-0 left-0 z-[1100] mt-1.5 max-h-72 overflow-y-auto bg-surface p-1"
         // Keep focus in the input so a click lands before the list closes.
         onMouseDown={(event) => event.preventDefault()}
       >
@@ -161,22 +162,22 @@ export function MultiSelect({
             id={`${id}-opt-${index}`}
             role="option"
             aria-selected={index === active}
-            className="cursor-pointer px-3 py-1.5 leading-tight hover:bg-slate-800 aria-selected:bg-slate-800"
+            className="cursor-pointer rounded-md px-2.5 py-1.5 text-[0.82rem] leading-tight text-fg hover:bg-surface-2 aria-selected:bg-surface-2"
             onClick={() => pick(value)}
           >
             {value}
             {shortForms[value] && (
-              <span className="block text-xs text-slate-500">{shortForms[value]}</span>
+              <span className="mt-0.5 block text-[0.7rem] text-muted">{shortForms[value]}</span>
             )}
           </li>
         ))}
         {!shown.length && (
-          <li className="px-3 py-1.5 text-sm text-slate-500">
+          <li className="px-2.5 py-2 text-[0.8rem] text-muted">
             {needle.trim() ? "No match" : "Nothing left to choose"}
           </li>
         )}
         {matches.length > shown.length && (
-          <li className="px-3 py-1.5 text-sm text-slate-500">
+          <li className="px-2.5 py-2 text-[0.75rem] text-muted">
             {formatInteger(matches.length - shown.length)} more — type to narrow
           </li>
         )}
