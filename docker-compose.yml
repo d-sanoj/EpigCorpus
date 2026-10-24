@@ -12,4 +12,9 @@ services:
       - "8000:8000"
     volumes:
       - ./data:/app/data
+    environment:
+      # CARTO's map tiles need a free API key: https://carto.com/basemaps/apikey
+      # Put EPIGCORPUS_CARTO_KEY=... in a .env file next to this one (never
+      # committed), or export it before `docker compose up`.
+      EPIGCORPUS_CARTO_KEY: ${EPIGCORPUS_CARTO_KEY:-}
     restart: unless-stopped

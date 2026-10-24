@@ -4,10 +4,11 @@
  * every marker sharing one canvas in a fixed draw order, which a declarative
  * wrapper would fight. React owns the page; this module owns the map element.
  *
- * The background is CARTO's dark basemap without labels, set up exactly as the
- * original Streamlit map on main set it up (src/edcs_streamlit_map.py). The
- * only names on the map are the EDCS province names, drawn in the colour of
- * the shading beneath them.
+ * The background is CARTO's dark basemap without labels, set up as the original
+ * Streamlit map on main set it up (src/edcs_streamlit_map.py), plus the API
+ * key CARTO now requires: the server hands over the tile URL with its key
+ * (GET /api/v1/map/layers/basemap). The only names on the map are the EDCS
+ * province names, drawn in the colour of the shading beneath them.
  *
  * Known places (about 22,000) are grouped into a grid of cells while zoomed
  * out, one dot per cell shaded by its inscriptions, and drawn one by one from
@@ -45,11 +46,12 @@ export const DETAIL_ZOOM = 7;
 const KNOWN_CAP = 1;
 // Grid cell size on screen while grouped, in pixels.
 const CELL_PX = 26;
-// CARTO's dark basemap without labels, as on main (CARTO_PLAIN there).
-const CARTO_URL = "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
-const CARTO_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
-  '&copy; <a href="https://carto.com/attributions">CARTO</a>';
+export interface BasemapConfig {
+  url: string;
+  subdomains: string;
+  max_zoom: number;
+  attribution: string;
+}
 
 export interface MapPlace {
   place: string;
@@ -126,7 +128,6 @@ export class EpigMap {
     this.pane("provincesPane", 400, false);
     this.pane("markersPane", 410, true);
     this.pane("labelsPane", 450, false);
-    this.addBasemap();
 
     this.markerRenderer = L.canvas({ pane: "markersPane", padding: 0.5, tolerance: 5 });
     this.layers = {
@@ -185,11 +186,11 @@ export class EpigMap {
 
   // ─── basemap ───────────────────────────────────────────────────────────────
 
-  private addBasemap() {
-    L.tileLayer(CARTO_URL, {
-      maxZoom: 19,
-      subdomains: "abcd",
-      attribution: CARTO_ATTRIBUTION,
+  setBasemap(config: BasemapConfig) {
+    L.tileLayer(config.url, {
+      maxZoom: config.max_zoom,
+      subdomains: config.subdomains,
+      attribution: config.attribution,
     }).addTo(this.map);
   }
 

@@ -8,6 +8,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed — CARTO's "API KEY REQUIRED" tiles (2026-10-24)
+
+- **Cause.** CARTO now serves its raster basemaps only with an API key.
+  Without one, every tile is an "API KEY REQUIRED" watermark. The original
+  map on main predates that rule.
+- **The key.** It is free at https://carto.com/basemaps/apikey (5M tiles a
+  month for non-commercial use). Set it as `EPIGCORPUS_CARTO_KEY`, from the
+  environment or a `.env` file that is never committed (see
+  `.env.example`).
+- **Tile URL.** The server adds the key to the tile URL and hands the map
+  its tile layer at `GET /api/v1/map/layers/basemap`, so changing the key
+  needs no rebuild. Without a key, the map says what to do.
+
 ### Changed — the CARTO basemap exactly as on main (2026-10-24)
 
 - **Setup.** The map's tiles are set up as the original Streamlit map on

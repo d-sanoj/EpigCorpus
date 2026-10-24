@@ -21,6 +21,8 @@ class ApiDeps:
     runs: PipelineRuns
     spec_path: Path
     static_dir: Path | None = None
+    # CARTO basemap API key (EPIGCORPUS_CARTO_KEY); None when not configured.
+    carto_key: str | None = None
 
 
 def get_deps(request: Request) -> ApiDeps:

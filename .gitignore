@@ -70,3 +70,6 @@ frontend/node_modules/
 frontend/dist/
 frontend/test-results/
 frontend/playwright-report/
+
+# Local settings, e.g. EPIGCORPUS_CARTO_KEY
+.env

@@ -8,6 +8,7 @@ when it is.
 
 from __future__ import annotations
 
+import os
 import threading
 from contextlib import asynccontextmanager
 from functools import partial
@@ -39,6 +40,7 @@ def build_deps() -> ApiDeps:
         runs=PipelineRuns(steps),
         spec_path=API_SPEC,
         static_dir=UI_STATIC_DIR if UI_STATIC_DIR.is_dir() else None,
+        carto_key=os.environ.get("EPIGCORPUS_CARTO_KEY", "").strip() or None,
     )
 
 

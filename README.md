@@ -9,6 +9,14 @@ The repository is designed as a practical, end-to-end workflow:
 
 ## Run it
 
+The map's background is CARTO's dark basemap, and CARTO's tiles need a free
+API key: get one at https://carto.com/basemaps/apikey (no account needed).
+Then:
+
+```bash
+cp .env.example .env             # and put the key in it: EPIGCORPUS_CARTO_KEY=...
+```
+
 With Docker (nothing else to install):
 
 ```bash
@@ -20,6 +28,7 @@ Or locally, with [uv](https://docs.astral.sh/uv/) and Node 22:
 ```bash
 cd frontend && npm ci && npm run build && cd ..          # the web UI, once
 cd backend && uv sync
+export EPIGCORPUS_CARTO_KEY=...                         # your CARTO key
 uv run uvicorn epigcorpus.api.server:app --port 8000     # http://127.0.0.1:8000
 ```
 

@@ -224,6 +224,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/map/layers/basemap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The basemap tile layer the web map draws
+         * @description CARTO's dark basemap without labels, the background of the original
+         *     map. CARTO serves its raster tiles only with an API key (free at
+         *     https://carto.com/basemaps/apikey); the server adds the key set in
+         *     `EPIGCORPUS_CARTO_KEY` to the URL. Without one, `key_configured` is
+         *     false and every tile is CARTO's "API KEY REQUIRED" watermark.
+         */
+        get: operations["getBasemap"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/map/layers/provinces": {
         parameters: {
             query?: never;
@@ -770,6 +794,16 @@ export interface components {
                 geometry: Record<string, never> | null;
                 properties: Record<string, never> | null;
             }[];
+        };
+        Basemap: {
+            /** @description Leaflet tile URL template ({s}, {z}, {x}, {y}, {r}). */
+            url: string;
+            subdomains: string;
+            max_zoom: number;
+            /** @description HTML, as Leaflet shows it. */
+            attribution: string;
+            /** @description Whether the server has a CARTO API key; without one the tiles are watermarked. */
+            key_configured: boolean;
         };
         ProvinceLabel: {
             /** @description The EDCS province, as the province filter uses it. */
@@ -1644,6 +1678,26 @@ export interface operations {
                             inscriptions: number;
                         };
                     };
+                };
+            };
+        };
+    };
+    getBasemap: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A Leaflet tile layer definition. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Basemap"];
                 };
             };
         };

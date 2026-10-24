@@ -5,10 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 import threading
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request, Response
 
-from epigcorpus.api.deps import CatalogDep
+from epigcorpus.api.deps import CatalogDep, Deps
 
 router = APIRouter(prefix="/map/layers", tags=["map"])
 
@@ -69,3 +70,27 @@ def cities(request: Request, catalog: CatalogDep):
         ]
 
     return _layer(request, catalog, "cities", points, "application/json")
+
+
+# CARTO's dark basemap without labels, as the original map on main used it.
+# Since 2025 CARTO serves these raster tiles only with an API key (free at
+# https://carto.com/basemaps/apikey); without one every tile is an
+# "API KEY REQUIRED" watermark.
+CARTO_TILES = "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+CARTO_ATTRIBUTION = (
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
+    '&copy; <a href="https://carto.com/attributions">CARTO</a>'
+)
+
+
+@router.get("/basemap", operation_id="getBasemap")
+def basemap(deps: Deps):
+    """The tile layer the web map draws under everything, with the server's key."""
+    key = deps.carto_key
+    return {
+        "url": f"{CARTO_TILES}?{urlencode({'key': key})}" if key else CARTO_TILES,
+        "subdomains": "abcd",
+        "max_zoom": 19,
+        "attribution": CARTO_ATTRIBUTION,
+        "key_configured": key is not None,
+    }
