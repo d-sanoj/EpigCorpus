@@ -80,6 +80,22 @@ def iter_latest_data() -> Iterator[pd.DataFrame]:
             yield chunk
 
 
+def cleaned_jsonl_text(cleaned: pd.DataFrame) -> str:
+    """A cleaned frame as JSON Lines, the cleaned corpus's on-disk form.
+
+    Timestamps (`retrieved_at`) are written as ISO 8601 in whole seconds,
+    `2026-08-19T16:32:11Z`, exactly as the scraper records them. pandas'
+    default, epoch milliseconds, is deprecated in pandas 3, and it turned the
+    scraper's timestamp into a bare number.
+    """
+    text = cleaned.to_json(
+        orient="records", lines=True, force_ascii=False, date_format="iso", date_unit="s"
+    )
+    if text and not text.endswith("\n"):
+        text += "\n"
+    return text
+
+
 class CleanedCorpusWriter:
     """Writes the cleaned corpus chunk by chunk, as JSONL plus a .gz copy.
 
@@ -106,10 +122,7 @@ class CleanedCorpusWriter:
     def write(self, cleaned: pd.DataFrame) -> None:
         # Chunk by chunk, to_json writes exactly the bytes it writes for the
         # whole frame (checked on the full corpus: same sha256).
-        text = cleaned.to_json(orient="records", lines=True, force_ascii=False)
-        if text and not text.endswith("\n"):
-            text += "\n"
-        data = text.encode("utf-8")
+        data = cleaned_jsonl_text(cleaned).encode("utf-8")
         self._plain.write(data)
         self._gz.write(data)
         self.rows += len(cleaned)

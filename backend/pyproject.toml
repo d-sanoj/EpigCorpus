@@ -42,6 +42,8 @@ ml = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q --strict-markers"
+# Fail on pandas 3 deprecations, so code that pandas 4 will break is caught here.
+filterwarnings = ["error::pandas.errors.Pandas4Warning"]
 
 [tool.ruff]
 line-length = 100

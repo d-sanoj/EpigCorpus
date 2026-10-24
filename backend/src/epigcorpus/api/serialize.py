@@ -1,9 +1,10 @@
 """Turn pandas rows into the JSON shapes in openapi.yaml.
 
 pandas reads missing values as NaN, years as floats once a column has a gap,
-lists as lists, and the cleaned corpus's `retrieved_at` as a timestamp (it was
-written as epoch milliseconds). The API answers with null, integers, lists and
-ISO 8601 strings.
+lists as lists, and the cleaned corpus's `retrieved_at` as a timestamp. The
+pipeline writes that column as ISO 8601; corpora cleaned before 2026-10-24
+hold epoch milliseconds, and both read back as timestamps. The API answers with
+null, integers, lists and ISO 8601 strings.
 """
 
 from __future__ import annotations

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import gzip
+import re
 import shutil
 
 import pandas as pd
@@ -27,15 +28,15 @@ def store(corpus_dir, tmp_path, monkeypatch):
 
 def test_streamed_output_equals_whole_frame_output(store):
     whole = pd.read_json(store, lines=True).rename(columns={"belege": "evidence"})
-    expected = clean_data(whole, verbose=False).to_json(
-        orient="records", lines=True, force_ascii=False
-    )
+    expected = corpus_files.cleaned_jsonl_text(clean_data(whole, verbose=False))
 
     rows = run_cleaning(corpus_files)
 
     assert rows == len(whole) > 7
     written = corpus_files.CLEANED_JSONL.read_text(encoding="utf-8")
-    assert written == (expected if expected.endswith("\n") else expected + "\n")
+    assert written == expected
+    # Timestamps as the scraper writes them, not epoch milliseconds.
+    assert re.search(r'"retrieved_at":"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ"', written)
     assert gzip.decompress(corpus_files.CLEANED_JSONL_GZ.read_bytes()).decode() == written
 
 

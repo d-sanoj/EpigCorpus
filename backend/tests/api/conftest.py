@@ -19,7 +19,7 @@ import pytest
 import yaml
 from fastapi.testclient import TestClient
 
-from epigcorpus.adapters import edcs_client, map_layers
+from epigcorpus.adapters import corpus_files, edcs_client, map_layers
 from epigcorpus.api.app import create_app
 from epigcorpus.api.deps import ApiDeps
 from epigcorpus.config.paths import API_SPEC
@@ -103,11 +103,12 @@ def corpus_dir(tmp_path_factory) -> Path:
     with gzip.open(raw_path, "wt", encoding="utf-8") as handle:
         for row in rows:
             handle.write(json.dumps(row, ensure_ascii=False) + "\n")
-    # As app/main.py: read the raw corpus, rename belege, clean, write JSONL.
+    # As the pipeline: read the raw corpus, rename belege, clean, write JSONL.
     raw = pd.read_json(raw_path, lines=True).rename(columns={"belege": "evidence"})
     cleaned = clean_data(raw, verbose=False)
-    cleaned.to_json(folder / "edcs_inscriptions_cleaned.jsonl", orient="records", lines=True,
-                    force_ascii=False)
+    (folder / "edcs_inscriptions_cleaned.jsonl").write_text(
+        corpus_files.cleaned_jsonl_text(cleaned), encoding="utf-8"
+    )
     (folder / "lookup.json").write_text(json.dumps(lookup, ensure_ascii=False), encoding="utf-8")
     return folder
 

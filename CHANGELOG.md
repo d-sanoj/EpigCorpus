@@ -8,6 +8,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — the cleaned corpus writes `retrieved_at` as ISO 8601 (2026-10-24)
+
+- **The change.** Cleaning wrote `retrieved_at` as epoch milliseconds
+  (`1787157131000`), pandas' default. That turned the scraper's ISO
+  timestamp into a bare number, contradicted `data/README.md`, and is
+  deprecated in pandas 3 (`Pandas4Warning`). It is now written as ISO 8601
+  in whole seconds, `2026-08-19T16:32:11Z`, exactly as the scraper records
+  it.
+- **Verified on the full corpus.** All 588,509 records are identical
+  except for that field, whose ISO value equals the old epoch value. The
+  new cleaned JSONL's sha256 is `36e4d626…8d92d3`; the old one was
+  `54b9ee37…79699`.
+- **Existing corpora.** The committed snapshot keeps the epoch form until
+  the next pipeline run. Both forms read back as timestamps, and the API
+  answers ISO 8601 for either.
+- **Tests.** The test suite now fails on any `Pandas4Warning`.
+
 ### Changed — an equal-area map with no edges; known places grouped when zoomed out (2026-10-24)
 
 - **Background.** The map's land is now the whole world from Natural Earth

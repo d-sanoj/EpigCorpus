@@ -114,7 +114,7 @@ only the child dies, and the run fails with a message that says so.
 | Outcome | `run_harvest` returns `complete`, `partial`, `incomplete`, `interrupted` or `already_complete`, shown as the harvest stage's `result`. |
 | Refreshing what is served | A run's `reload` stage swaps the new corpus in. No restart is needed. |
 | The bounding box | **Kept.** Search, list and places use the map's search frame, 568,560 of 588,509 rows; rows without coordinates are left out. Reading one record by id uses the full corpus. |
-| `retrieved_at` as epoch milliseconds | **Converted in the API** to ISO 8601. The cleaned corpus on disk is unchanged. |
+| `retrieved_at` as epoch milliseconds | The pipeline now writes it as ISO 8601 (`2026-08-19T16:32:11Z`), as the scraper does. The API answers ISO 8601 for both forms, since a corpus cleaned earlier still holds epoch milliseconds. |
 | Search TSV per monument | **Kept**, and documented. |
 | Cursor stability | Cursors carry an offset and a fingerprint of the query and the corpus snapshot. A stale cursor, including one from before a reload, is a `400`. |
 | Authentication | Declared, **not enforced**. See `docs/adr/0003-api-authentication.md`. Starting a pipeline run is the first thing to protect before exposing the server. |
