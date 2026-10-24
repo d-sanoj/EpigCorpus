@@ -8,6 +8,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Docs — data sources, credits and an architecture diagram in the README (2026-10-24)
+
+- **Citations.** Every citation from the original README is kept verbatim.
+  Two had been dropped in this branch and are restored: the EDCS
+  `/api/query` endpoint and Streamlit.
+- **Sources added from the code:**
+  - each EDCS `/data/` endpoint the harvest reads, and the image server the
+    records link to;
+  - OpenFreeMap, OpenMapTiles and OpenStreetMap (the basemaps);
+  - Natural Earth via world-atlas (land outlines);
+  - LaBerta (Riemenschneider and Frank, ACL 2023), fine-tuned in the
+    research's phase 5;
+  - the Inter typeface.
+- **Software list.** Extended to the libraries the backend, frontend, tests
+  and research use.
+- **Diagrams.** Two Mermaid diagrams: the architecture (browser, API,
+  services, adapters, data, EDCS, OpenFreeMap) and a pipeline run.
+- **Out of date.** Highlights and the web UI description updated: light and
+  dark themes, 4K export, results drawer.
+
 ### Added — 4K map export (2026-10-24)
 
 - **4K.** "Download the map as PNG" now gives a 4K image: 3,840 × 2,798
