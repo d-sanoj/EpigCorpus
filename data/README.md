@@ -1,20 +1,23 @@
 # Data directory
 
-Corpus exports, lookup tables, harvest metadata, base-map layers, research
-datasets and their results, grouped by role:
+Corpus exports, lookup tables, harvest metadata, base-map layers and research
+datasets, grouped by role:
 
 | Folder | Role |
 |---|---|
 | `raw/` | What the scraper fetched, untransformed; `raw/harvest/` holds its state |
 | `processed/` | Deterministic transforms of raw: the cleaned corpus and derived datasets |
 | `reference/` | Lookup tables and vendored third-party map layers |
-| `results/` | Analysis outputs |
-| `reports/` | Research reports |
 
-Every path is defined in `app/config/paths.py`. Files that lived in `data/`,
-`results/` and `reports/` before the `app/` restructure are mapped to their
-current location in `docs/refactor/path-map.tsv`; the reports keep their
-original wording, so use that table to follow a path they cite.
+Analysis outputs and research reports live in `research/results/` and
+`research/reports/`.
+
+Every path is defined in `backend/src/epigcorpus/config/paths.py`, and
+`EPIGCORPUS_DATA_DIR` moves the whole directory (the Docker image mounts it at
+`/app/data`). Files have moved twice. First into `app/data/`
+(`docs/refactor/path-map.tsv`), then to this top-level `data/` and to
+`research/` (`docs/refactor/path-map-backend.tsv`). The reports keep their
+original wording, so use those tables to follow a path they cite.
 
 **Current snapshot:** harvested 2026-08-19 against EDCS release
 `20260807-142626` — 542,854 monuments, 588,509 inscription rows, 0 failed
@@ -64,9 +67,14 @@ everyone, reviewers included.
 - The scraper writes plain `.jsonl`/`.tsv` during a harvest — appending to a
   gzip stream across a checkpointed resume is not safe — then compresses them
   automatically on completion.
-- `app/main.py` and the API read either form. pandas infers gzip from the
+- The pipeline and the API read either form. pandas infers gzip from the
   file extension; the loaders prefer a plain file when one exists and fall back
   to the `.gz` snapshot.
+- The server keeps a Parquet copy of the cleaned corpus,
+  `processed/edcs_inscriptions_cleaned.parquet`. It reads that copy in about a
+  second, where the JSONL takes most of a minute. The copy is tagged with the
+  JSONL's name, size and modification time, rebuilt whenever the JSONL
+  changes, and never committed.
 - `.gitignore` ships only the `.gz` and ignores the plain working copies.
 
 A fresh clone therefore contains only the compressed snapshot and runs
@@ -77,27 +85,25 @@ fresh `.gz` copies are regenerated for committing.
 
 ## Workflow
 
-```bash
-python -m app.main                  # harvest, clean, launch the map
-python -m app.cli.scrape            # harvest only
-python -m app.main --skip-scrape    # clean and launch from existing data
+The pipeline runs through the API: the **Pipeline** panel in the web UI, or
+`POST /api/v1/pipeline-runs` with a JSON body.
+
+```text
+{}                                   harvest, clean, reload the server's corpus
+{"harvest": false}                   clean and reload from existing raw data
+{"clean": false}                     harvest only
+{"limit": 500}                       smoke test on 500 monuments
+{"workers": 8}                       gentler on the server (default 16)
+{"refresh_index": true}              re-fetch the index; check if EDCS grew
+{"restart": true}                    DELETES existing output, re-harvests
 ```
 
-Scraper options:
+Harvesting against a completed corpus is safe: the stage reads the manifest,
+reports `already_complete`, and touches nothing. It also refuses to overwrite
+any non-empty output file unless `restart` is given.
 
-```bash
-python -m app.cli.scrape --limit 500      # smoke test on 500 monuments
-python -m app.cli.scrape --workers 8      # gentler on the server (default 16)
-python -m app.cli.scrape --refresh-index  # re-fetch the index; check if EDCS grew
-python -m app.cli.scrape --restart        # DELETES existing output, re-harvests
-```
-
-Running the scraper against a completed harvest is safe: it reads the manifest,
-reports the corpus is already complete, and exits without touching anything. It
-also refuses to overwrite any non-empty output file unless `--restart` is given.
-
-An interrupted harvest resumes from its checkpoint automatically — just run it
-again with no flags. Monuments that failed on an earlier run are retried before
+An interrupted or cancelled harvest resumes from its checkpoint automatically:
+start another run. Monuments that failed on an earlier run are retried before
 the harvest continues, and a harvest is never reported complete while
 `edcs_failed_ids.json` is non-empty.
 
@@ -209,7 +215,7 @@ Languages: Latin 540,410 · Greek 26,968 · indistinct 12,416 · Greek and Latin
 import pandas as pd
 
 # Works on either form — pandas infers gzip from the extension
-df = pd.read_json("app/data/raw/edcs_inscriptions.jsonl.gz", lines=True)
+df = pd.read_json("data/raw/edcs_inscriptions.jsonl.gz", lines=True)
 ```
 
 In the TSV, list-valued columns (`category`, `category_en`, `belege`, `status`,

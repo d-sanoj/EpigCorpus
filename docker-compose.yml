@@ -1,0 +1,14 @@
+# The API and the web UI on http://localhost:8000.
+#
+# data/ is mounted read-write: the server writes the Parquet snapshot of the
+# cleaned corpus there, and pipeline runs write the harvest and the cleaned
+# corpus. Cleaning the full corpus needs about 8 GB of memory.
+services:
+  epigcorpus:
+    build: .
+    image: epigcorpus:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

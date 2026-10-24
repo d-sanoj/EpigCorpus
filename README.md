@@ -7,15 +7,32 @@ The repository is designed as a practical, end-to-end workflow:
 2. Generate conservative and interpretive cleaned text.
 3. Explore and export results through an HTTP API and the web map built on it.
 
-## One-Command Launch
+## Run it
 
-Run the full pipeline with a single command:
+With Docker (nothing else to install):
 
 ```bash
-./epigcorpus.sh
+docker compose up --build        # http://localhost:8000
 ```
 
-This launcher handles environment checks and starts the project end-to-end.
+Or locally, with [uv](https://docs.astral.sh/uv/) and Node 22:
+
+```bash
+cd frontend && npm ci && npm run build && cd ..          # the web UI, once
+cd backend && uv sync
+uv run uvicorn epigcorpus.api.server:app --port 8000     # http://127.0.0.1:8000
+```
+
+The server answers from the cleaned corpus committed in `data/`. The first
+start converts it to a Parquet snapshot, which takes about a minute. After
+that it starts in a few seconds.
+
+To harvest from the EDCS, clean, and load the new corpus, use the
+**Pipeline** panel in the web UI, or the API:
+
+```bash
+curl -X POST localhost:8000/api/v1/pipeline-runs -H 'content-type: application/json' -d '{}'
+```
 
 ## Author
 
@@ -39,8 +56,8 @@ Doddapaneni, S. (n.d.). EpigCorpus: A reproducible Latin epigraphy pipeline for 
   search results on top. No place names on the background.
 - Search across raw and cleaned text.
 - TSV download and publication-style PNG map export.
-- A versioned HTTP API (`/v1`, OpenAPI 3.1) for search, records, cleaned
-  variants, places, downloads, lookups and background harvests.
+- A versioned HTTP API (`/api/v1`, OpenAPI 3.1) for search, records, cleaned
+  variants, places (also as GeoJSON), downloads, lookups and pipeline runs.
 
 ## Example PNG Export (term: viator)
 
@@ -50,170 +67,98 @@ Doddapaneni, S. (n.d.). EpigCorpus: A reproducible Latin epigraphy pipeline for 
 
 ```text
 EpigCorpus/
-├── app/
-│   ├── main.py            # pipeline entry: python -m app.main
-│   ├── config/            # paths.py and settings.py: the only place paths are defined
-│   ├── models/            # the inscription column schema
-│   ├── core/              # pure helpers: cleaning rules, EDCS parsing, search
-│   ├── adapters/          # EDCS HTTP client, harvest and corpus files, map layers
-│   ├── services/          # use cases: scrape, cleaning, search, map data (+ ports.py)
-│   ├── api/               # HTTP API (FastAPI) and its contract, openapi.yaml
-│   ├── ui/static/         # the web map: HTML/CSS/JS, a client of the API
-│   ├── cli/               # command-line parsing and launchers
-│   ├── scripts/           # one-off research scripts (not part of the package)
-│   ├── tests/
-│   └── data/
-│       ├── raw/           # edcs_inscriptions.jsonl.gz / .tsv.gz, harvest/ state
-│       ├── processed/     # edcs_inscriptions_cleaned.jsonl.gz, derived/ datasets
-│       ├── reference/     # edcs_lookup.json, map_layers/
-│       ├── results/       # analysis outputs and model cells
-│       └── reports/       # research reports
-├── docs/                  # audits, ADRs, API notes, refactor records, img/
-├── epigcorpus.sh
-├── pyproject.toml
-└── README.md
+├── backend/               # the epigcorpus Python package (uv project)
+│   ├── src/epigcorpus/
+│   │   ├── config/        # paths (overridable by environment) and settings
+│   │   ├── models/        # the inscription column schema
+│   │   ├── core/          # pure rules: cleaning, EDCS parsing, search semantics
+│   │   ├── adapters/      # EDCS HTTP client, corpus and harvest files, map layers
+│   │   ├── services/      # use cases: harvest, clean, catalog, pipeline runs (+ ports.py)
+│   │   └── api/           # FastAPI under /api/v1 and its contract, openapi.yaml
+│   └── tests/
+├── frontend/              # React + TypeScript + Vite + Tailwind + Leaflet
+│   ├── src/api/           # typed client; schema.d.ts is generated from openapi.yaml
+│   ├── src/features/      # search (sidebar), map, results (table), pipeline
+│   └── e2e/               # Playwright tests against the running app
+├── data/                  # raw/, processed/, reference/ (see data/README.md)
+├── research/              # the abbreviation study: scripts/, reports/, results/
+├── docs/                  # ADRs, API and data notes, refactor records
+├── Dockerfile, docker-compose.yml
+└── .github/workflows/ci.yml
 ```
 
-Dependencies point one way: the API and CLI call services, the web UI calls the API;
-services reach adapters only through the interfaces in
-`app/services/ports.py`. See `docs/adr/0001-layered-app-layout.md`.
-`app/tests/test_layering.py` enforces it.
+Dependencies point one way. The web UI calls the API, and the API calls
+services. Services reach adapters only through the interfaces in
+`services/ports.py`; `backend/tests/test_layering.py` enforces this. See
+`docs/adr/0001-layered-app-layout.md` and
+`docs/adr/0005-backend-frontend-split.md`.
 
-## Requirements
-
-- Python 3.13+
-- Dependencies managed in pyproject.toml
-
-Core packages:
-- fastapi and uvicorn (the API and web server)
-- geopandas
-- matplotlib
-- pandas
-- requests
-
-## Installation
-
-Using uv (recommended):
+## Development
 
 ```bash
-uv sync
+# backend
+cd backend
+uv run pytest                        # unit, contract and layering tests
+uv run ruff check src tests
+
+# frontend: Vite on :5173, forwarding /api to the backend on :8000
+cd frontend
+npm run dev
+npm test                             # vitest
+npm run typecheck
+npm run gen:api                      # regenerate API types after editing openapi.yaml
+npm run e2e                          # Playwright, against a server on :8000 (E2E_BASE_URL)
 ```
 
-Using pip:
-
-```bash
-pip install fastapi uvicorn geopandas matplotlib pandas requests
-```
-
-## Quick Start
-
-One-command launcher:
-
-```bash
-./epigcorpus.sh
-```
-
-Recommended for first-time and daily use.
-
-The launcher:
-1. Uses local .venv if available.
-2. Installs or uses uv when needed.
-3. Ensures a compatible Python runtime.
-4. Runs the full pipeline.
-
-## Run Modes
-
-Run from the repository root. Full pipeline:
-
-```bash
-python -m app.main
-```
-
-Skip scrape (use latest local JSONL):
-
-```bash
-python -m app.main --skip-scrape
-```
-
-Skip launching the web app:
-
-```bash
-python -m app.main --skip-map
-```
-
-Run components directly:
-
-```bash
-python -m app.cli.scrape            # same flags as before: --limit, --workers, --restart, --refresh-index
-python -m app.cli.serve             # API + web map on http://127.0.0.1:8000/ (--host, --port)
-```
-
-The server loads the corpus in the background at startup (about 20 seconds)
-and the page waits for it. The API is under `/v1`; its contract is
-`app/api/openapi.yaml`, also served at `/v1/openapi.yaml`. See
-`app/api/README.md`.
-
-`python main.py` and `python src/edcs_scraper.py` were replaced by these module
-commands when the code moved under `app/`; the flags are unchanged. A plain
-`data/edcs_inscriptions.jsonl` left from before the move is no longer read:
-move it to `app/data/raw/`.
+Research scripts import the package:
+`uv run --project backend python research/scripts/<name>.py`.
 
 ## Data Products
 
-Generated under app/data/ (paths are defined in app/config/paths.py):
+Under `data/` (paths are defined in `backend/src/epigcorpus/config/paths.py`):
 
-- raw/edcs_inscriptions.jsonl
-  - canonical machine-readable inscription export
-  - one JSON record per line
-- raw/edcs_inscriptions.tsv
-  - tabular export for spreadsheets and SQL-style workflows
-- reference/edcs_lookup.json
-  - lookup dictionary used to decode controlled vocabulary fields
-- raw/harvest/edcs_checkpoint.json
-  - temporary resume checkpoint used during scraping
-- processed/edcs_inscriptions_cleaned.jsonl
-  - cleaned dataset served by the API and searched by the web map
+- `raw/edcs_inscriptions.jsonl[.gz]`, `raw/edcs_inscriptions.tsv[.gz]`: the
+  harvested corpus, one inscription per row.
+- `raw/harvest/`: the harvest's checkpoint, manifest and failure list.
+- `reference/edcs_lookup.json`: the EDCS code tables; `reference/map_layers/`:
+  the vendored map layers.
+- `processed/edcs_inscriptions_cleaned.jsonl[.gz]`: the cleaned corpus, which
+  the API serves. Its Parquet snapshot
+  (`processed/edcs_inscriptions_cleaned.parquet`) is rebuilt automatically
+  and not committed.
 
-For detailed data documentation and schema notes, see app/data/README.md.
+See data/README.md for schemas.
 
 ## Pipeline Details
 
-### 1) Scraping
+A pipeline run (`POST /api/v1/pipeline-runs`) has three stages:
 
-Implemented in app/services/scrape.py (HTTP in app/adapters/edcs_client.py):
-- Uses EDCS API endpoint queries.
-- Supports resume via checkpoint.
-- Appends only unseen records in incremental mode.
+1. **Harvest**: `services/scrape.py`, over `adapters/edcs_client.py`.
+   It is incremental and resumable from a checkpoint. A cancelled run resumes
+   where it stopped.
+2. **Clean**: `core/cleaning.py` holds the rules and `services/cleaning.py`
+   applies them. Each inscription gets a conservative and an interpretive
+   variant.
+3. **Reload**: the running server loads the new cleaned corpus and swaps it
+   in without a restart.
 
-### 2) Cleaning
+The web UI is a client of the API:
 
-Implemented in app/core/cleaning.py (rules) and app/services/cleaning.py:
-- Applies a staged text cleaning pipeline.
-- Produces conservative and interpretive cleaned variants.
-
-### 3) API and interactive exploration
-
-The API (app/api, on app/services/catalog.py and app/services/search.py)
-serves search, records, cleaned variants, places, map layers, downloads,
-lookups and asynchronous scrape jobs. The web map (app/ui/static) is a
-client of it:
-- Search modes: Raw inscriptions, Interpretive Cleaned Inscriptions, Conservative Cleaned Inscriptions.
-- Interactive Leaflet map with layer toggles, hover tooltips and result popups.
-- TSV export for result tables.
-- Multi-select filters for material, category, language, province and place,
-  combinable with the keyword search.
-- PNG export in the map's own dark palette, always available: it carries the
-  title, the search term, every active filter, the result count, search mode,
-  data source and the attribution footer.
-- The submitted search is kept in the address bar, so a search can be shared
-  as a link.
+- Search modes: Raw inscriptions, Interpretive Cleaned Inscriptions,
+  Conservative Cleaned Inscriptions.
+- Filters for language, province, place, category and material, combinable
+  with the keyword.
+- A Leaflet map with layer toggles, tooltips and result popups.
+- A results table, a page at a time.
+- TSV export of the results, and a PNG export of the map.
+- The search is kept in the address bar, so it can be shared as a link.
 
 ## Data and Software References
 
 ### Primary Data Sources
 
 1. Clauss, M., Kolb, A., Slaby, W. A., and Woitas, B. Epigraphik-Datenbank Clauss / Slaby (EDCS). Universitat Zurich and Katholische Universitat Eichstatt-Ingolstadt. https://edcs.hist.uzh.ch/ (accessed 2026-06-03).
-2. EDCS API endpoint used by this scraper: https://edcs.hist.uzh.ch/api/query (accessed 2026-06-03).
+2. EDCS static data endpoints used by the harvest: https://edcs.hist.uzh.ch/data/ (see docs/EDCS_API.md).
 3. Hanson, J. W. (2016). Cities Database (OXREP Databases), Version 1.0. Oxford Roman Economy Project. DOI: https://doi.org/10.5287/bodleian:eqapevAn8. URL: http://oxrep.classics.ox.ac.uk/databases/cities/.
 
 ### Historical GIS Layers
@@ -235,6 +180,9 @@ client of it:
 5. Leaflet. https://leafletjs.com/
 6. Requests. https://requests.readthedocs.io/
 7. FastAPI. https://fastapi.tiangolo.com/
+8. React. https://react.dev/
+9. Vite. https://vite.dev/
+10. Tailwind CSS. https://tailwindcss.com/
 
 ## Reproducibility Notes
 

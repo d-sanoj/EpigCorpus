@@ -1,6 +1,6 @@
 # ADR 0004 — Replace the Streamlit app with a web UI on the API
 
-- **Status:** Accepted
+- **Status:** Accepted; point 2 superseded by ADR 0005 (React frontend)
 - **Date:** 2026-10-23
 - **Supersedes:** the "UI frozen" constraint of ADR 0001, and the "later" in ADR 0002's "the UI will later become a client of this API"
 - **Relates to:** ADR 0002 (API-first design)

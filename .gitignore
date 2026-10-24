@@ -60,9 +60,10 @@ data/processed/derived/*.tsv
 !data/processed/derived/**/*.tsv.gz
 !data/processed/derived/*.tsv.gz
 
-# Search index: built from the cleaned corpus by the pipeline (or at server
-# start when missing or older than the corpus). Regenerable, so not versioned.
+# Parquet snapshot of the cleaned corpus: rebuilt from the JSONL whenever the
+# JSONL changes, so not versioned.
 data/processed/*.parquet
+data/processed/*.parquet.partial
 
 # Frontend dependencies and build output
 frontend/node_modules/

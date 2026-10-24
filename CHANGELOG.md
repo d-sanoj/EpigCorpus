@@ -8,6 +8,36 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — backend/frontend split; the pipeline runs through the API (2026-10-24)
+
+- **Layout.** The code is the installable package `backend/src/epigcorpus`,
+  the web UI is `frontend/`, and data and research material moved to the root
+  `data/` and `research/`. Every file moved with its history and an unchanged
+  checksum (`docs/refactor/path-map-backend.tsv`). See
+  `docs/adr/0005-backend-frontend-split.md`.
+- **No command line.** `epigcorpus.sh`, `python -m app.main` and
+  `app.cli.*` are removed. Start the server with
+  `uv run uvicorn epigcorpus.api.server:app` (from `backend/`) or
+  `docker compose up`.
+- **Pipeline runs.** `POST /api/v1/pipeline-runs` harvests, cleans and then
+  reloads the corpus into the running server, with no restart. Runs can be
+  polled, listed and cancelled. `/v1/scrape-jobs` is gone. A clean-only run
+  on the full corpus writes a cleaned JSONL byte-identical to the baseline
+  (sha256 `54b9ee37…79699`).
+- **API under `/api/v1`** (was `/v1`). New: `GET /api/v1/places.geojson` and
+  `/places/known.geojson`, the map's places as GeoJSON.
+- **Faster start.** The server reads the cleaned corpus from a Parquet
+  snapshot, rebuilt automatically when the JSONL changes. It now starts in
+  about 5 s and 1.6 GB, down from about 70 s and 8 GB. Search results are
+  unchanged: the snapshot reads back identical to the JSONL.
+- **React web UI.** It is built with TypeScript, Vite, Tailwind and Leaflet,
+  in a sidebar / map / table layout, with a pipeline panel. It has the same
+  map, filters, downloads and shareable links. Leaflet is bundled, so the
+  UI no longer needs unpkg.
+- **Docker and CI.** A multi-stage `Dockerfile` and `docker-compose.yml`,
+  plus GitHub Actions. CI runs backend lint and tests; frontend type check,
+  unit tests and build; Playwright end-to-end; and a Docker build.
+
 ### Changed — known places can be shown under search results (2026-10-23)
 
 - During a search the "Known places" layer is no longer disabled: it starts
