@@ -1,6 +1,19 @@
-# EpigCorpus
+<p align="center">
+  <img src="frontend/public/epigcorpus-logo.svg" width="112" alt="EpigCorpus logo" />
+</p>
 
-![EpigCorpus logo](frontend/public/epigcorpus-logo.png)
+<h1 align="center">EpigCorpus</h1>
+
+<p align="center">A reproducible Latin epigraphy pipeline for extracting, cleaning, and exploring EDCS inscriptions.</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg" /></a>
+  <img alt="Python 3.13+" src="https://img.shields.io/badge/Python-3.13%2B-3776AB?logo=python&logoColor=white" />
+  <img alt="React 19" src="https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white" />
+  <img alt="FastAPI" src="https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white" />
+</p>
+
+---
 
 EpigCorpus is a reproducible Latin epigraphy pipeline for extracting inscriptions from the Epigraphik-Datenbank Clauss / Slaby (EDCS), cleaning inscription text into research-ready variants, and exploring results on an interactive Roman Empire map.
 
