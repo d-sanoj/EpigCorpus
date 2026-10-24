@@ -1,5 +1,6 @@
 import L from "leaflet";
-import { groupIntoCells, lighten, radiusFor, withoutLabels } from "./epigMap";
+import { groupIntoCells, lighten, radiusFor, withoutLabels, type LayerState } from "./epigMap";
+import { withLayers } from "./MapView";
 
 describe("map styling", () => {
   it("sizes places on a log scale, with a floor for empty ones", () => {
@@ -50,5 +51,25 @@ describe("the basemap style", () => {
     };
     expect(withoutLabels(style).layers.map((layer) => layer.id)).toEqual(["background", "water"]);
     expect(style.layers).toHaveLength(4); // the original is left alone
+  });
+});
+
+describe("the PNG download link", () => {
+  const state = (on: string[]) =>
+    Object.fromEntries(
+      ["all", "search", "provinces", "roads", "cities"].map((key) => [
+        key,
+        { available: true, on: on.includes(key) },
+      ]),
+    ) as LayerState;
+
+  it("names the layers switched on, as the export calls them", () => {
+    expect(withLayers("/x.png?q=viator", state(["search", "all", "provinces"]))).toBe(
+      "/x.png?q=viator&layer=provinces&layer=known&layer=results",
+    );
+  });
+
+  it("leaves the export to its defaults before any layer has loaded", () => {
+    expect(withLayers("/x.png?q=viator", state([]))).toBe("/x.png?q=viator");
   });
 });

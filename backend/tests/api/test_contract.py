@@ -510,3 +510,27 @@ def test_unknown_api_paths_stay_404_problems(client):
     assert response.status_code == 404
     assert response.headers["content-type"].startswith("application/problem+json")
 
+
+
+def test_map_png_draws_only_the_layers_asked_for(client, validate):
+    params = {"q": "vixit"}
+    default = client.get("/api/v1/exports/map.png", params=params)
+    explicit = client.get(
+        "/api/v1/exports/map.png",
+        params={**params, "layer": ["provinces", "roads", "cities", "results"]},
+    )
+    bare = client.get("/api/v1/exports/map.png", params={**params, "layer": ["results"]})
+    with_known = client.get(
+        "/api/v1/exports/map.png", params={**params, "layer": ["results", "known"]}
+    )
+    for response in (default, explicit, bare, with_known):
+        validate(response, "/api/v1/exports/map.png")
+        assert response.status_code == 200
+    # No `layer` is the default set: the same image as naming it.
+    assert default.content == explicit.content
+    assert bare.content != default.content
+    assert with_known.content != bare.content
+
+    bad = client.get("/api/v1/exports/map.png", params={"layer": "nonsense"})
+    validate(bad, "/api/v1/exports/map.png")
+    assert bad.status_code == 422

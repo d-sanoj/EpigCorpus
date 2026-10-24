@@ -728,6 +728,12 @@ paths:
         roads, cities, size legend, footer and citation, as the old map's
         export. The file name follows the query: `edcs_map_<term>.png`,
         `edcs_map_filtered.png` or `edcs_map_all_known_places.png`.
+
+        `layer` draws only the map layers switched on in the web map, which
+        sends its layer menu's state. Without it the export draws provinces,
+        roads, cities and the results (or, with no query, the known places).
+        With a query, `known` adds every known place in teal under the
+        results. Title, subtitle and footer do not change.
       parameters:
         - $ref: '#/components/parameters/QOptional'
         - $ref: '#/components/parameters/SearchIn'
@@ -736,9 +742,18 @@ paths:
         - $ref: '#/components/parameters/Language'
         - $ref: '#/components/parameters/Province'
         - $ref: '#/components/parameters/Place'
+        - name: layer
+          in: query
+          required: false
+          description: A map layer to draw; repeat for each one switched on. Omitted, the default set.
+          schema:
+            type: array
+            items: {type: string, enum: [provinces, roads, cities, known, results]}
+          style: form
+          explode: true
       responses:
         '200':
-          description: The PNG (11.8 x 8.6 in at 180 dpi).
+          description: The PNG (11.8 x 8.6 in at 180 dpi, 2124 x 1548 pixels).
           headers:
             Content-Disposition:
               schema:

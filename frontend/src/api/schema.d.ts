@@ -443,6 +443,12 @@ export interface paths {
          *     roads, cities, size legend, footer and citation, as the old map's
          *     export. The file name follows the query: `edcs_map_<term>.png`,
          *     `edcs_map_filtered.png` or `edcs_map_all_known_places.png`.
+         *
+         *     `layer` draws only the map layers switched on in the web map, which
+         *     sends its layer menu's state. Without it the export draws provinces,
+         *     roads, cities and the results (or, with no query, the known places).
+         *     With a query, `known` adds every known place in teal under the
+         *     results. Title, subtitle and footer do not change.
          */
         get: operations["exportMapPng"];
         put?: never;
@@ -1921,6 +1927,8 @@ export interface operations {
                  *     ]
                  */
                 place?: components["parameters"]["Place"];
+                /** @description A map layer to draw; repeat for each one switched on. Omitted, the default set. */
+                layer?: ("provinces" | "roads" | "cities" | "known" | "results")[];
             };
             header?: never;
             path?: never;
@@ -1928,7 +1936,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The PNG (11.8 x 8.6 in at 180 dpi). */
+            /** @description The PNG (11.8 x 8.6 in at 180 dpi, 2124 x 1548 pixels). */
             200: {
                 headers: {
                     /** @example attachment; filename="edcs_map_viator.png" */

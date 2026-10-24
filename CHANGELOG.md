@@ -8,6 +8,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — the PNG download follows the map's layers (2026-10-24)
+
+- **Layers.** "Download the map as PNG" now draws the layers switched on in
+  the map's layers menu: provinces, roads, cities, known places and
+  results. With a query and known places switched on, the known places are
+  drawn small and faint in teal under the results.
+- **Unchanged.** The title, subtitle (the query and its filters), footer,
+  legend style and size are the same. The legend lists only the layers
+  drawn. The export is still 11.8 × 8.6 in at 180 dpi, 2,124 × 1,548 px.
+- **API.** `GET /api/v1/exports/map.png` takes `layer=` (repeated).
+  Without it, the export is byte-identical to before.
+
 ### Changed — a redesigned interface, light and dark (2026-10-24)
 
 - **Design.** The UI is redesigned from scratch: Inter type, warm neutrals,

@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import gzip
 from collections.abc import Iterator
+from enum import StrEnum
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Query, Request, Response
 from fastapi.responses import FileResponse, StreamingResponse
 
 from epigcorpus.api.deps import (
@@ -103,14 +105,24 @@ def search_tsv(
     )
 
 
+class MapLayer(StrEnum):
+    provinces = "provinces"
+    roads = "roads"
+    cities = "cities"
+    known = "known"
+    results = "results"
+
+
 @router.get("/map.png", operation_id="exportMapPng")
 def map_png(
     catalog: CatalogDep,
     filters: FilterParams,
     q: OptionalQueryText = None,
     search_in: SearchInParam = SearchIn.raw,
+    layer: Annotated[list[MapLayer] | None, Query()] = None,
 ):
     selections = filters.selections()
     term = q or ""
-    png = catalog.export_png(term, SEARCH_MODES[search_in], selections)
+    layers = frozenset(item.value for item in layer) if layer is not None else None
+    png = catalog.export_png(term, SEARCH_MODES[search_in], selections, layers)
     return Response(png.content, media_type="image/png", headers=_attachment(png.filename))

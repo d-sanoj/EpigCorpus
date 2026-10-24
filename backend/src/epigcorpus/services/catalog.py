@@ -221,12 +221,23 @@ class Catalog:
 
     # ─── PNG export ────────────────────────────────────────────────────────────
 
-    def export_png(self, term: str, search_mode: str, selections: Selections) -> PngExport:
+    def export_png(
+        self,
+        term: str,
+        search_mode: str,
+        selections: Selections,
+        layers: frozenset[str] | None = None,
+    ) -> PngExport:
         """The map's "Download as PNG": the query's results, or every known place.
 
         Title, subtitle, footer, colours and file name are composed exactly as
-        the Streamlit app composed them.
+        the Streamlit app composed them. `layers` names the map layers switched
+        on (map_png.LAYERS); None draws what the export always drew: provinces,
+        roads, cities, and the results or, with no query, the known places.
         """
+        query = is_query(term, selections)
+        if layers is None:
+            layers = frozenset({"provinces", "roads", "cities", "results" if query else "known"})
 
         def compute() -> PngExport:
             filters = {column: list(values) for column, values in selections}
@@ -254,6 +265,14 @@ class Catalog:
                 )
                 png_colors = (map_png.KNOWN_COLOR, map_png.PRINT_KNOWN_EDGE, "inscriptions")
                 file_stem = "all_known_places"
+            main_layer = "results" if query else "known"
+            if main_layer not in layers:
+                png_places = png_places.iloc[:0]
+            background = (
+                self.known_places()[["place", "latitude", "longitude", "count"]]
+                if query and "known" in layers
+                else None
+            )
             content = map_png.build_png_bytes(
                 png_places[["place", "latitude", "longitude", "count"]],
                 heading,
@@ -263,10 +282,14 @@ class Catalog:
                 load_provinces=self.provinces,
                 load_roads=self.roads,
                 load_cities=self.cities,
+                show_provinces="provinces" in layers,
+                show_roads="roads" in layers,
+                show_cities="cities" in layers,
+                background_places=background,
             )
             return PngExport(content, f"edcs_map_{file_stem}.png")
 
-        return self._pngs.get((term, search_mode, selections), compute)
+        return self._pngs.get((term, search_mode, selections, layers), compute)
 
 
 class CatalogSlot:

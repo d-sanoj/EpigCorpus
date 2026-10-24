@@ -51,6 +51,25 @@ function Swatch({ kind }: { kind: string }) {
   return <span className={cx("swatch", kind)} />;
 }
 
+// The map's layer keys, as the PNG export names them.
+const EXPORT_LAYERS: Record<LayerKey, string> = {
+  provinces: "provinces",
+  roads: "roads",
+  cities: "cities",
+  all: "known",
+  search: "results",
+};
+
+/** The PNG download draws what the map shows: the layers switched on. */
+export function withLayers(href: string, layers: LayerState): string {
+  const params = (Object.keys(EXPORT_LAYERS) as LayerKey[])
+    .filter((key) => layers[key]?.on)
+    .map((key) => `layer=${EXPORT_LAYERS[key]}`);
+  // Nothing loaded yet: leave the export to its defaults.
+  if (!params.length) return href;
+  return `${href}${href.includes("?") ? "&" : "?"}${params.join("&")}`;
+}
+
 function ControlGroup({ children }: { children: ReactNode }) {
   return <div className="float-card flex flex-col p-1">{children}</div>;
 }
@@ -108,6 +127,7 @@ export function MapView({ known, results, theme, pngHref, bottomBar, children }:
   }, [map, known, results]);
 
   const activeLayers = layers ? TOGGLES.filter(({ key }) => layers[key]?.on).length : 0;
+  const downloadHref = layers ? withLayers(pngHref, layers) : pngHref;
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -191,7 +211,7 @@ export function MapView({ known, results, theme, pngHref, bottomBar, children }:
 
         <ControlGroup>
           <a
-            href={pngHref}
+            href={downloadHref}
             download
             aria-label="Download the map as PNG"
             title="Download the map as PNG"

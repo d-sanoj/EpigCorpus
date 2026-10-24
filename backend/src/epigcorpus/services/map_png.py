@@ -78,6 +78,10 @@ PRINT_CITY_COLOR = "#c084fc"
 PRINT_ROAD_COLOR = "#64748b"
 
 
+# The layers a PNG can draw, as the web map's layer menu names them.
+LAYERS = frozenset({"provinces", "roads", "cities", "known", "results"})
+
+
 def build_png_bytes(
     result_places: pd.DataFrame,
     heading: str,
@@ -90,6 +94,10 @@ def build_png_bytes(
     load_provinces: Callable[[], gpd.GeoDataFrame],
     load_roads: Callable[[], gpd.GeoDataFrame],
     load_cities: Callable[[], gpd.GeoDataFrame],
+    show_provinces: bool = True,
+    show_roads: bool = True,
+    show_cities: bool = True,
+    background_places: pd.DataFrame | None = None,
 ) -> bytes:
     """Publication-style PNG using the same symbology as the web map.
 
@@ -97,6 +105,10 @@ def build_png_bytes(
     query can now be a keyword, a set of filters, or both. The subtitle names
     every active filter directly under the title. The layer loaders are
     passed in so callers can share their cached layers with the web map.
+
+    The `show_*` flags and `background_places` (known places drawn in teal
+    under a query's results) follow the layers switched on in the web map.
+    The frame is always the empire's, whichever layers are drawn.
     """
     subtitle_lines = [subtitle] if subtitle.strip() else []
     provinces = load_provinces().reset_index(drop=True).copy()
@@ -124,24 +136,47 @@ def build_png_bytes(
     map_top = 0.88 - 0.022 * len(subtitle_lines)
     fig.subplots_adjust(left=0.06, right=0.94, top=map_top, bottom=map_bottom)
 
-    provinces_proj.plot(
-        ax=ax,
-        color=provinces_proj["_color"],
-        edgecolor="#cbd5e1",
-        linewidth=0.4,
-        alpha=0.3,
-        zorder=1,
-    )
-    roads_proj.plot(ax=ax, color=PRINT_ROAD_COLOR, linewidth=0.35, alpha=0.75, zorder=2)
-    cities_proj.plot(
-        ax=ax,
-        color="none",
-        markersize=4,
-        edgecolor=PRINT_CITY_COLOR,
-        linewidth=0.5,
-        alpha=0.85,
-        zorder=3,
-    )
+    if show_provinces:
+        provinces_proj.plot(
+            ax=ax,
+            color=provinces_proj["_color"],
+            edgecolor="#cbd5e1",
+            linewidth=0.4,
+            alpha=0.3,
+            zorder=1,
+        )
+    if show_roads:
+        roads_proj.plot(ax=ax, color=PRINT_ROAD_COLOR, linewidth=0.35, alpha=0.75, zorder=2)
+    if show_cities:
+        cities_proj.plot(
+            ax=ax,
+            color="none",
+            markersize=4,
+            edgecolor=PRINT_CITY_COLOR,
+            linewidth=0.5,
+            alpha=0.85,
+            zorder=3,
+        )
+
+    if background_places is not None and not background_places.empty:
+        known_geo = gpd.GeoDataFrame(
+            background_places.copy(),
+            geometry=gpd.points_from_xy(
+                background_places["longitude"], background_places["latitude"]
+            ),
+            crs="EPSG:4326",
+        ).to_crs(epsg=3857)
+        # Context under the results: smaller and fainter, so the results read.
+        known_sizes = [(radius_for_count(int(c)) * 1.1) ** 2 / 4 for c in known_geo["count"]]
+        known_geo.plot(
+            ax=ax,
+            color=KNOWN_COLOR,
+            markersize=known_sizes,
+            alpha=0.35,
+            edgecolor=PRINT_KNOWN_EDGE,
+            linewidth=0.25,
+            zorder=3.5,
+        )
 
     if not result_places.empty:
         places_geo = gpd.GeoDataFrame(
@@ -183,13 +218,24 @@ def build_png_bytes(
             color="#9fb3c8",
         )
 
-    legend_handles = [
-        Line2D([0], [0], color=PRINT_ROAD_COLOR, lw=1.4, label="Roads"),
-        Line2D(
-            [0], [0], marker="o", color="none", markerfacecolor="none",
-            markeredgecolor=PRINT_CITY_COLOR, markersize=5, label="Cities",
-        ),
-    ]
+    legend_handles = []
+    if show_roads:
+        legend_handles.append(Line2D([0], [0], color=PRINT_ROAD_COLOR, lw=1.4, label="Roads"))
+    if show_cities:
+        legend_handles.append(
+            Line2D(
+                [0], [0], marker="o", color="none", markerfacecolor="none",
+                markeredgecolor=PRINT_CITY_COLOR, markersize=5, label="Cities",
+            )
+        )
+    if background_places is not None and not background_places.empty:
+        legend_handles.append(
+            Line2D(
+                [0], [0], marker="o", color="none", markerfacecolor=KNOWN_COLOR,
+                markeredgecolor=PRINT_KNOWN_EDGE, markersize=5, alpha=0.7,
+                label="Known places",
+            )
+        )
     legend_handles += [
         Line2D(
             [0],
@@ -202,6 +248,7 @@ def build_png_bytes(
             label=f"{stop:,} {marker_label}",
         )
         for stop in LEGEND_STOPS
+        if not result_places.empty
     ]
     legend = ax.legend(
         handles=legend_handles,
