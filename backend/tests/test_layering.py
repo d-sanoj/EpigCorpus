@@ -32,14 +32,14 @@ COMPOSITION_ROOTS = {
 
 # Third-party packages that belong to one layer only.
 FRAMEWORK_ONLY = {
-    "streamlit": set(),  # removed; the UI is app/ui/static, served by the API
+    "streamlit": set(),  # removed; the UI is frontend/, a client of the API
     "fastapi": {"api"},
     "starlette": {"api"},
     "pydantic": {"api"},
     "uvicorn": set(),  # started from outside: uvicorn epigcorpus.api.server:app
 }
 
-NOT_CHECKED = {"ui"}  # static files only
+NOT_CHECKED: set[str] = set()
 
 
 def _modules():

@@ -66,4 +66,4 @@ SCRIPTS_DIR = RESEARCH_DIR / "scripts"
 
 # ─── API and web UI ───────────────────────────────────────────────────────────
 API_SPEC = PACKAGE_DIR / "api" / "openapi.yaml"
-UI_STATIC_DIR = Path(os.environ.get("EPIGCORPUS_STATIC_DIR", PACKAGE_DIR / "ui" / "static"))
+UI_STATIC_DIR = Path(os.environ.get("EPIGCORPUS_STATIC_DIR", ROOT_DIR / "frontend" / "dist"))

@@ -91,9 +91,10 @@ paths:
       operationId: getHealth
       summary: Liveness, and whether the corpus is loaded
       description: |
-        The server loads the corpus in the background at startup (about a
-        minute for the full snapshot). Until `ready` is true, read operations
-        wait for the load to finish rather than failing.
+        The server loads the corpus in the background at startup: a few
+        seconds from its Parquet snapshot, about a minute when the snapshot
+        has to be rebuilt from the cleaned JSONL. Until `ready` is true, read
+        operations wait for the load to finish rather than failing.
       responses:
         '200':
           description: The server is up.
@@ -429,6 +430,7 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/PlaceFeatureCollection'
                   - type: object
+                    required: [summary]
                     properties:
                       summary:
                         type: object
@@ -458,6 +460,7 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/PlaceFeatureCollection'
                   - type: object
+                    required: [summary]
                     properties:
                       summary:
                         type: object
@@ -1803,7 +1806,8 @@ components:
       required: [type, features, summary]
       properties:
         type: {const: FeatureCollection}
-        summary: {type: object}
+        summary:
+          description: The paged endpoint's summary; each operation gives its shape.
         features:
           type: array
           items:

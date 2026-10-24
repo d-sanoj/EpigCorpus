@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+/* Dark throughout, as the earlier UI. */
+:root {
+  color-scheme: dark;
+  --known: #2dd4bf;
+  --search: #f97316;
+  --city: #facc15;
+  --edge: #0b0f17;
+}
+
+body {
+  margin: 0;
+  background: #000;
+  color: #e5e7eb;
+  font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer components {
+  .field {
+    @apply min-h-10 w-full rounded-lg border border-slate-700 bg-[#1a1f2b] px-3 py-2 text-slate-100;
+  }
+  .field:focus,
+  .field:focus-within {
+    @apply border-orange-500 outline-none;
+  }
+  .button {
+    @apply inline-flex min-h-10 w-full cursor-pointer items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-slate-100 no-underline;
+  }
+  .button:hover {
+    @apply border-orange-500 text-white;
+  }
+  .button-primary {
+    @apply inline-flex min-h-10 w-full cursor-pointer items-center justify-center rounded-lg border border-orange-500 bg-orange-500/90 font-semibold text-black;
+  }
+  .button-primary:hover {
+    @apply bg-orange-400;
+  }
+  .button:disabled,
+  .button[aria-disabled="true"],
+  .button-primary:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+  .map-panel {
+    @apply rounded-lg border border-slate-400/30 bg-slate-900/90 text-[0.82rem] text-slate-200 shadow-md shadow-black/50;
+  }
+  .swatch {
+    @apply block size-3 flex-none rounded-full border border-[#0b0f17];
+  }
+  .swatch-known {
+    background: var(--known);
+  }
+  .swatch-search {
+    background: var(--search);
+  }
+  .swatch-cities {
+    background: var(--city);
+    @apply mx-[1.5px] size-[9px];
+  }
+  .swatch-roads {
+    @apply h-[3px] w-3 rounded-sm border-0 bg-slate-200;
+  }
+  .swatch-provinces {
+    @apply rounded-sm;
+    background: linear-gradient(90deg, #5b4b8a 0 25%, #3f6b8f 25% 50%, #4f7a4a 50% 75%, #8a7440 75% 100%);
+  }
+}
+
+th {
+  @apply sticky top-0 bg-slate-900 px-2.5 py-1.5 text-left font-semibold whitespace-nowrap text-slate-400;
+}
+td {
+  @apply border-b border-slate-800 px-2.5 py-1.5 align-top;
+}
+
+/* ─── Leaflet chrome on the dark map ─────────────────────────────────────── */
+.leaflet-container {
+  font-family: inherit;
+  background: #0b0f17;
+}
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background: #111827;
+  color: #e5e7eb;
+  border-bottom-color: rgba(148, 163, 184, 0.25);
+}
+.leaflet-bar {
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+}
+.leaflet-control-attribution {
+  background: rgba(17, 24, 39, 0.82) !important;
+  color: #94a3b8;
+}
+.leaflet-control-attribution a {
+  color: #cbd5e1;
+}
+.leaflet-tooltip {
+  background: rgba(17, 24, 39, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #e5e7eb;
+  box-shadow: none;
+}
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(148, 163, 184, 0.5);
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #111827;
+  color: #e5e7eb;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+}
+.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+}
+.overview-map-reset button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111827;
+  border: 0;
+  cursor: pointer;
+  color: #e5e7eb;
+}
+/* Province names, coloured like the shading beneath them (set inline). */
+.province-label {
+  overflow: visible;
+}
+.province-label span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 3px #000, 0 0 2px #000, 0 0 1px #000;
+}
+.overview-popup h4 {
+  margin: 0 0 0.3rem;
+  font-size: 0.85rem;
+  color: var(--search);
+}
+.overview-popup ul {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  list-style: disc;
+}
+.overview-popup .more {
+  margin-top: 0.3rem;
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
