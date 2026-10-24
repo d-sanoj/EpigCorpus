@@ -37,12 +37,13 @@ export function MapView({ known, results }: Props) {
   const [layers, setLayers] = useState<LayerState | null>(null);
 
   useEffect(() => {
-    const instance = new EpigMap(element.current!);
+    const instance = new EpigMap(element.current!, () =>
+      getJson<GeoJSON.GeoJsonObject>("/map/layers/land"),
+    );
     setMap(instance);
     const unsubscribe = instance.onLayersChange(setLayers);
     // Overlays are optional: a layer that fails to load keeps its toggle off.
     const ignore = () => {};
-    getJson<GeoJSON.GeoJsonObject>("/map/layers/land").then((d) => instance.setLand(d), ignore);
     getJson<GeoJSON.GeoJsonObject>("/map/layers/provinces").then(
       (d) => instance.setProvinces(d),
       ignore,

@@ -4,13 +4,12 @@
  * every marker sharing one canvas in a fixed draw order, which a declarative
  * wrapper would fight. React owns the page; this module owns the map element.
  *
- * There is no tile basemap. The background is Natural Earth land served by the
- * API (/api/v1/map/layers/land), so it needs no tile service, no key and no
- * network, and carries no labels. The only names on the map are the EDCS
- * province names, drawn in the colour of the shading beneath them.
- *
- * Being all vector data, the map uses an equal-area projection (crs.ts)
- * rather than Web Mercator, so regions keep their true relative size.
+ * The background is CARTO's dark basemap without labels. If its tiles cannot
+ * be had (no network, or CARTO answering with its "API KEY REQUIRED" image),
+ * the map switches to Natural Earth land served by the API
+ * (/api/v1/map/layers/land), so it never shows a broken or black background.
+ * The only names on the map are the EDCS province names, drawn in the colour
+ * of the shading beneath them.
  *
  * Known places (about 22,000) are grouped into a grid of cells while zoomed
  * out, one dot per cell shaded by its inscriptions, and drawn one by one from
@@ -18,7 +17,6 @@
  */
 import L from "leaflet";
 import type { CityPoint, ProvinceLabel } from "../../api/client";
-import { EqualArea, unproject } from "./crs";
 import { formatInteger, plural } from "../../lib/format";
 
 // Solid markers in bright, well-separated hues over muted province fills.
@@ -51,15 +49,13 @@ export const DETAIL_ZOOM = 7;
 const KNOWN_CAP = 1;
 // Grid cell size on screen while grouped, in pixels.
 const CELL_PX = 26;
-// How far the view may pan: the empire's extent in the projected plane
-// (x -2,100…2,700 km, y -1,600…2,000 km) with a 1,500 km margin. Leaflet
-// takes bounds as two corners in latitude and longitude and projects them, so
-// the corners are the projected rectangle's own, unprojected; a plain
-// latitude/longitude box would come out skewed, as meridians converge here.
-const VIEW_LIMIT = L.latLngBounds(
-  unproject(-3_600_000, -3_100_000),
-  unproject(4_200_000, 3_500_000),
-);
+// CARTO's dark basemap without labels (free with attribution, no key).
+const CARTO_URL = "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
+const CARTO_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
+  '&copy; <a href="https://carto.com/attributions">CARTO</a>';
+// Failed tiles tolerated before switching to the built-in land.
+const TILE_ERRORS_BEFORE_FALLBACK = 4;
 
 export interface MapPlace {
   place: string;
@@ -121,17 +117,21 @@ export class EpigMap {
   private knownDrawnAt: number | null = null;
   private listeners = new Set<(state: LayerState) => void>();
 
-  constructor(element: HTMLElement) {
+  private readonly loadLand: () => Promise<GeoJSON.GeoJsonObject>;
+  private tiles: L.TileLayer | null = null;
+  private fellBack = false;
+
+  /** `loadLand` fetches the fallback background, used only if CARTO fails. */
+  constructor(element: HTMLElement, loadLand: () => Promise<GeoJSON.GeoJsonObject>) {
+    this.loadLand = loadLand;
     // Half-step zoom lets a query's results fill the pane more closely than
     // whole steps do; the buttons and wheel still move a whole step.
     const map = L.map(element, {
-      crs: EqualArea,
       preferCanvas: true,
+      worldCopyJump: true,
       zoomSnap: 0.5,
       minZoom: 3,
-      maxZoom: 12,
-      maxBounds: VIEW_LIMIT,
-      maxBoundsViscosity: 0.9,
+      maxZoom: 14,
     }).setView(CENTER, ZOOM);
     this.map = map;
 
@@ -145,7 +145,7 @@ export class EpigMap {
     this.pane("provincesPane", 400, false);
     this.pane("markersPane", 410, true);
     this.pane("labelsPane", 450, false);
-    map.attributionControl.addAttribution("Land: Natural Earth");
+    this.addBasemap();
 
     this.markerRenderer = L.canvas({ pane: "markersPane", padding: 0.5, tolerance: 5 });
     this.layers = {
@@ -202,7 +202,55 @@ export class EpigMap {
 
   // ─── data ──────────────────────────────────────────────────────────────────
 
-  setLand(data: GeoJSON.GeoJsonObject) {
+  // ─── basemap ───────────────────────────────────────────────────────────────
+
+  private addBasemap() {
+    const tiles = L.tileLayer(CARTO_URL, {
+      attribution: CARTO_ATTRIBUTION,
+      subdomains: "abcd",
+      maxZoom: 20,
+      // CORS, so a loaded tile can be read back and checked (below).
+      crossOrigin: "anonymous",
+    });
+    let errors = 0;
+    let checked = 0;
+    const seen = new Map<string, number>();
+    tiles.on("tileerror", () => {
+      errors += 1;
+      if (errors >= TILE_ERRORS_BEFORE_FALLBACK) this.fallBackToLand();
+    });
+    tiles.on("tileload", (event: L.TileEvent) => {
+      // Check the first tiles. CARTO's "API KEY REQUIRED" image is one
+      // picture served for every tile; real tiles differ, except open sea,
+      // which is a single flat colour.
+      if (checked >= 16) return;
+      checked += 1;
+      const sample = sampleTile(event.tile);
+      if (!sample) return;
+      if (isMostlyBright(sample.rgba)) return this.fallBackToLand();
+      if (sample.flat) return;
+      const repeats = (seen.get(sample.signature) ?? 0) + 1;
+      seen.set(sample.signature, repeats);
+      if (repeats >= 3) this.fallBackToLand();
+    });
+    tiles.addTo(this.map);
+    this.tiles = tiles;
+  }
+
+  /** CARTO is not usable here: draw Natural Earth land from the API instead. */
+  private fallBackToLand() {
+    if (this.fellBack) return;
+    this.fellBack = true;
+    if (this.tiles) this.map.removeLayer(this.tiles);
+    this.tiles = null;
+    this.loadLand().then(
+      (data) => this.setLand(data),
+      () => {}, // without land the markers still draw on the dark sea
+    );
+  }
+
+  private setLand(data: GeoJSON.GeoJsonObject) {
+    this.map.attributionControl.addAttribution("Land: Natural Earth");
     L.geoJSON(data, {
       pane: "land",
       interactive: false,
@@ -583,4 +631,49 @@ export function groupIntoCells(
     }))
     // Fullest cells last, so they draw on top.
     .sort((a, b) => a.inscriptions - b.inscriptions);
+}
+
+/** A loaded tile scaled down to 32 × 32: its pixels, a signature of them, and
+ *  whether it is a single flat colour. null when it cannot be read (no CORS):
+ *  such tiles get the benefit of the doubt. */
+export function sampleTile(
+  tile: HTMLImageElement,
+): { rgba: Uint8ClampedArray; signature: string; flat: boolean } | null {
+  try {
+    const size = 32;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext("2d");
+    if (!context) return null;
+    context.drawImage(tile, 0, 0, size, size);
+    const rgba = context.getImageData(0, 0, size, size).data;
+    return { rgba, ...describePixels(rgba) };
+  } catch {
+    return null;
+  }
+}
+
+export function describePixels(rgba: ArrayLike<number>): { signature: string; flat: boolean } {
+  let hash = 5381;
+  let lo = 255;
+  let hi = 0;
+  for (let i = 0; i < rgba.length; i += 4) {
+    const luminance = 0.2126 * rgba[i] + 0.7152 * rgba[i + 1] + 0.0722 * rgba[i + 2];
+    lo = Math.min(lo, luminance);
+    hi = Math.max(hi, luminance);
+    hash = ((hash * 33) ^ (rgba[i] + 7 * rgba[i + 1] + 13 * rgba[i + 2])) >>> 0;
+  }
+  return { signature: hash.toString(36), flat: hi - lo < 6 };
+}
+
+/** More than 3% of pixels brighter than any dark-basemap colour. */
+export function isMostlyBright(rgba: ArrayLike<number>): boolean {
+  let bright = 0;
+  const pixels = rgba.length / 4;
+  for (let i = 0; i < rgba.length; i += 4) {
+    const luminance = 0.2126 * rgba[i] + 0.7152 * rgba[i + 1] + 0.0722 * rgba[i + 2];
+    if (luminance > 120) bright += 1;
+  }
+  return bright / pixels > 0.03;
 }

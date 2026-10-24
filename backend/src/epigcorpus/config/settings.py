@@ -41,10 +41,3 @@ BACKOFF_BASE = 2.0
 # Britannia in the north-west through Aegyptus and Mesopotamia in the south-east.
 ROMAN_BOUNDS = (20.0, 62.0, -12.0, 50.0)  # (min_lat, max_lat, min_lon, max_lon)
 
-# The web map's projection: Lambert azimuthal equal-area centred on the
-# Mediterranean, so areas are true across the empire (no Mercator stretch).
-# The frontend's map uses the same centre (frontend/src/features/map/crs.ts).
-MAP_CENTER = (40.0, 15.0)  # (lat, lon)
-# Land is drawn out to this angular distance from the centre (about 11,000 km),
-# far past any view the map allows; beyond it the projection degenerates.
-LAND_RADIUS_DEGREES = 100.0

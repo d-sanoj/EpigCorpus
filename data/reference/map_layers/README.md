@@ -20,7 +20,7 @@ licence, which applies to code only. Each carries its own terms.
 | Roman provinces, AD 117 | `roman_empire_ad_117/` | 111 polygons | Ancient World Mapping Center (AWMC), UNC Chapel Hill |
 | Roman roads | `ba_roads/` | 3,166 linestrings | AWMC, digitised from the *Barrington Atlas* |
 | Cities | `Hanson2016_Cities_OxREP.csv` | 1,388 points | Hanson 2016, Oxford Roman Economy Project |
-| Land (map background) | `natural_earth_land_50m.geojson` | 1 multipolygon (1,419 parts) | Natural Earth 1:50m land, the whole world, public domain, via `world-atlas` 2.0.2 (ISC), converted from TopoJSON with `topojson-client`. The API cuts it to a circle around the map centre at load |
+| Land (map background) | `natural_earth_land_50m.geojson` | 1 multipolygon (1,419 parts) | Natural Earth 1:50m land, the whole world, public domain, via `world-atlas` 2.0.2 (ISC), converted from TopoJSON with `topojson-client`. The web map's fallback background, when CARTO's tiles cannot be loaded; the API splits polygons that cross the antimeridian |
 
 Each shapefile ships the full component set (`.shp`, `.shx`, `.dbf`, `.prj`,
 plus `.sbn`/`.sbx` indexes). All are read as EPSG:4326.
@@ -69,8 +69,6 @@ Anything published from these layers should state the following.
 - **The province layer is a fixed AD 117 frame.** The corpus spans roughly
   500 BC to AD 700, so for most inscriptions these boundaries are a *reference
   frame, not a contemporaneous basemap*. A date filter is planned (T13).
-- **The web map is equal-area** (Lambert azimuthal, centred at 40°N 15°E), so
-  areas there compare fairly across the empire.
 - **PNG export currently uses EPSG:3857.** Area distortion grows with latitude
   across a map spanning ~24–56°N, so apparent density is not comparable between
   north and south. An equal-area projection is planned (T12).

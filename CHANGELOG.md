@@ -8,6 +8,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — CARTO basemap again, with a built-in fallback (2026-10-24)
+
+- **CARTO tiles.** The map is drawn on CARTO's `dark_nolabels` tiles again,
+  in Web Mercator. The equal-area projection added earlier today is removed.
+- **Fallback.** The map switches to Natural Earth land from the API in
+  either of two cases:
+  - four tiles fail to load;
+  - CARTO answers with its "API KEY REQUIRED" image. That is detected as the
+    same non-flat picture served for three different tiles; real tiles
+    differ, apart from flat open sea.
+
+  So the background is never broken or black. All three cases (tiles load,
+  key image, offline) were checked in the browser.
+- **Fallback land fixed.** Natural Earth's Afro-Eurasia polygon crosses the
+  antimeridian at the Bering Strait and was drawn as huge diagonal slivers.
+  Polygons that cross ±180° are now split there, and Antarctica is left out.
+- **No pan limit.** The view no longer has a limit, which made panning feel
+  stuck.
+- **Unchanged.** The grouping of known places when zoomed out stays.
+
 ### Changed — the cleaned corpus writes `retrieved_at` as ISO 8601 (2026-10-24)
 
 - **The change.** Cleaning wrote `retrieved_at` as epoch milliseconds

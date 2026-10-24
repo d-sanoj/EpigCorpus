@@ -273,14 +273,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Land outlines, the map's background
-         * @description Natural Earth 1:50m land: the whole world's land within 100° of the
-         *     map centre (latitude 40, longitude 15), cut along that circle rather
-         *     than a meridian or parallel, so no straight edge shows at any zoom.
-         *     It is simplified to 1.5 km. The web map draws it, in a Lambert
-         *     azimuthal equal-area projection on the same centre, instead of a tile
-         *     basemap. So the background needs no tile service, no API key and no
-         *     network, and carries no labels. Static: send `If-None-Match`.
+         * Land outlines, the map's fallback background
+         * @description Natural Earth 1:50m land, the whole world except Antarctica,
+         *     simplified to 0.02°. Polygons that cross the antimeridian
+         *     (Afro-Eurasia at the Bering Strait among them) are split at ±180°, so
+         *     a flat map draws no slivers across the world. The web map draws CARTO
+         *     tiles; it falls back to this layer when they cannot be loaded or come
+         *     back as CARTO's "API KEY REQUIRED" image. Static: send
+         *     `If-None-Match`.
          */
         get: operations["getLandLayer"];
         put?: never;

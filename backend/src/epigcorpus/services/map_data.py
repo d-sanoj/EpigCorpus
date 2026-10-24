@@ -7,16 +7,14 @@ loaders stay shared with the PNG export.
 from __future__ import annotations
 
 import json
-import math
 import warnings
 from collections.abc import Callable
 from typing import Any
 
 import geopandas as gpd
 import pandas as pd
-from shapely.geometry import Point
-
-from epigcorpus.config.settings import LAND_RADIUS_DEGREES, MAP_CENTER
+from shapely.affinity import translate
+from shapely.geometry import Polygon, box
 
 
 def _province_palette() -> list[str]:
@@ -122,43 +120,60 @@ def province_labels(inscriptions: pd.DataFrame, load_provinces: Callable[[], Any
 
 
 def land_geojson(load_land: Callable[[], Any]) -> dict:
-    """Land outlines as GeoJSON: the map's background, drawn instead of map tiles.
+    """Land outlines as GeoJSON: the map's fallback background.
 
-    The whole world's land, cut to a circle LAND_RADIUS_DEGREES around
-    MAP_CENTER in the map's own equal-area projection. Nothing is cut along a
-    meridian or parallel, so no straight edge or empty band shows at any zoom.
-    Polygons are simplified to 1.5 km, finer than the map ever draws.
+    The web map draws CARTO's dark tiles; when those cannot be loaded it draws
+    this instead. It is the whole world's land, so no cut edge shows at any
+    zoom. Natural Earth draws a few polygons straight across the antimeridian
+    (Afro-Eurasia itself, at the Bering Strait), and a flat map would draw
+    each of those as a sliver across the whole world. They are split at ±180°;
+    Antarctica, which wraps the pole, is left out.
     """
-    lat0, lon0 = MAP_CENTER
-    laea = f"+proj=laea +lat_0={lat0} +lon_0={lon0} +R={EARTH_RADIUS_M} +units=m +no_defs"
     land = load_land().explode(index_parts=False).reset_index(drop=True)
-
-    def near(polygon) -> bool:
-        # Project only what lies on the near side: points close to the
-        # antipode have no usable position in an azimuthal projection.
-        distances = [
-            _angular_distance(lat0, lon0, lat, lon) for lon, lat in polygon.exterior.coords
-        ]
-        return min(distances) <= LAND_RADIUS_DEGREES and max(distances) < 170
-
-    land = land[land.geometry.map(near)].to_crs(laea)
-    radius = 2 * EARTH_RADIUS_M * math.sin(math.radians(LAND_RADIUS_DEGREES) / 2)
-    disk = Point(0, 0).buffer(radius, 256)
-    land["geometry"] = land.geometry.intersection(disk).simplify(1500)
-    land = land[~land.geometry.is_empty].to_crs(epsg=4326)
-    return json.loads(land[["geometry"]].to_json())
+    parts = []
+    for polygon in land.geometry:
+        if not _crosses_antimeridian(polygon):
+            parts.append(polygon)
+        elif polygon.bounds[3] > -60:  # not Antarctica
+            parts.extend(_split_at_antimeridian(polygon))
+    frame = gpd.GeoDataFrame(geometry=parts, crs="EPSG:4326")
+    frame["geometry"] = frame.geometry.simplify(0.02, preserve_topology=True)
+    frame = frame[~frame.geometry.is_empty]
+    return json.loads(frame[["geometry"]].to_json())
 
 
-EARTH_RADIUS_M = 6371008.8
+def _crosses_antimeridian(polygon) -> bool:
+    xs = polygon.exterior.coords.xy[0]
+    return any(abs(a - b) > 180 for a, b in zip(xs, xs[1:], strict=False))
 
 
-def _angular_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Great-circle distance in degrees."""
-    p1, p2 = math.radians(lat1), math.radians(lat2)
-    cosine = math.sin(p1) * math.sin(p2) + math.cos(p1) * math.cos(p2) * math.cos(
-        math.radians(lon2 - lon1)
-    )
-    return math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
+def _split_at_antimeridian(polygon) -> list:
+    """Unwrap a ring that jumps across ±180°, then cut it back into the world."""
+
+    def unwrap(ring) -> list[tuple[float, float]]:
+        coords = list(ring.coords)
+        out = [coords[0]]
+        shift = 0.0
+        for (x0, _), (x1, y1) in zip(coords, coords[1:], strict=False):
+            if x1 - x0 > 180:
+                shift -= 360
+            elif x0 - x1 > 180:
+                shift += 360
+            out.append((x1 + shift, y1))
+        return out
+
+    unwrapped = Polygon(unwrap(polygon.exterior), [unwrap(r) for r in polygon.interiors])
+    unwrapped = unwrapped.buffer(0)
+    pieces = []
+    for offset in (-360, 0, 360):
+        window = box(-180 - offset, -90, 180 - offset, 90)
+        piece = unwrapped.intersection(window)
+        if not piece.is_empty:
+            pieces.append(translate(piece, xoff=offset))
+    out = []
+    for piece in pieces:
+        out.extend(getattr(piece, "geoms", [piece]))
+    return [p for p in out if p.geom_type == "Polygon" and not p.is_empty]
 
 
 def roads_geojson(load_roads: Callable[[], Any]) -> dict:
