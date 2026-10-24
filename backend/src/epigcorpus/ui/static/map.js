@@ -3,7 +3,7 @@
  * Ported from the Streamlit app's Leaflet template: same colours,
  * log-scaled radius, zoom scaling, shared marker canvas, layer control, reset
  * control, legend and popups. There is no tile basemap: the background is
- * Natural Earth land outlines served by the API (/v1/map/layers/land), so it
+ * Natural Earth land outlines served by the API (/api/v1/map/layers/land), so it
  * needs no tile service, no key and no network, and carries no labels. The
  * only names on the map are the EDCS province names, drawn with the "Roman
  * provinces" layer in the colour of the shading beneath them. The difference is where the

@@ -1,4 +1,4 @@
-"""Historical map layers. Static per process, so each is serialised once and served with an ETag."""
+"""Historical map layers, serialised once per corpus snapshot and served with an ETag."""
 
 from __future__ import annotations
 
@@ -8,16 +8,19 @@ import threading
 
 from fastapi import APIRouter, Request, Response
 
-from epigcorpus.api.deps import Deps
+from epigcorpus.api.deps import CatalogDep
 
-router = APIRouter(prefix="/v1/map/layers", tags=["map"])
+router = APIRouter(prefix="/map/layers", tags=["map"])
 
-_cache: dict[tuple[int, str], tuple[bytes, str]] = {}
+# (corpus fingerprint, layer) -> (body, etag). Only province labels depend on
+# the corpus, but keying every layer by it keeps the rule simple; a reload
+# drops the previous snapshot's entries.
+_cache: dict[tuple[str, str], tuple[bytes, str]] = {}
 _lock = threading.Lock()
 
 
-def _layer(request: Request, deps, name: str, produce, media_type: str) -> Response:
-    key = (id(deps.catalog), name)
+def _layer(request: Request, catalog, name: str, produce, media_type: str) -> Response:
+    key = (catalog.fingerprint(), name)
     with _lock:
         cached = _cache.get(key)
     if cached is None:
@@ -25,6 +28,8 @@ def _layer(request: Request, deps, name: str, produce, media_type: str) -> Respo
         etag = '"' + hashlib.sha256(body).hexdigest()[:16] + '"'
         cached = (body, etag)
         with _lock:
+            for stale in [k for k in _cache if k[0] != key[0]]:
+                del _cache[stale]
             _cache[key] = cached
     body, etag = cached
     headers = {"ETag": etag, "Cache-Control": "public, max-age=3600"}
@@ -34,33 +39,33 @@ def _layer(request: Request, deps, name: str, produce, media_type: str) -> Respo
 
 
 @router.get("/provinces", operation_id="getProvincesLayer")
-def provinces(request: Request, deps: Deps):
-    produce = deps.catalog.provinces_geojson
-    return _layer(request, deps, "provinces", produce, "application/geo+json")
+def provinces(request: Request, catalog: CatalogDep):
+    produce = catalog.provinces_geojson
+    return _layer(request, catalog, "provinces", produce, "application/geo+json")
 
 
 @router.get("/roads", operation_id="getRoadsLayer")
-def roads(request: Request, deps: Deps):
-    return _layer(request, deps, "roads", deps.catalog.roads_geojson, "application/geo+json")
+def roads(request: Request, catalog: CatalogDep):
+    return _layer(request, catalog, "roads", catalog.roads_geojson, "application/geo+json")
 
 
 @router.get("/land", operation_id="getLandLayer")
-def land(request: Request, deps: Deps):
-    return _layer(request, deps, "land", deps.catalog.land_geojson, "application/geo+json")
+def land(request: Request, catalog: CatalogDep):
+    return _layer(request, catalog, "land", catalog.land_geojson, "application/geo+json")
 
 
 @router.get("/province-labels", operation_id="getProvinceLabels")
-def province_labels(request: Request, deps: Deps):
-    produce = deps.catalog.province_labels
-    return _layer(request, deps, "province-labels", produce, "application/json")
+def province_labels(request: Request, catalog: CatalogDep):
+    produce = catalog.province_labels
+    return _layer(request, catalog, "province-labels", produce, "application/json")
 
 
 @router.get("/cities", operation_id="getCitiesLayer")
-def cities(request: Request, deps: Deps):
+def cities(request: Request, catalog: CatalogDep):
     def points():
         return [
             {"latitude": lat, "longitude": lon, "label": label}
-            for lat, lon, label in deps.catalog.cities_points()
+            for lat, lon, label in catalog.cities_points()
         ]
 
-    return _layer(request, deps, "cities", points, "application/json")
+    return _layer(request, catalog, "cities", points, "application/json")

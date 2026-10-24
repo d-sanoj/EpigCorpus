@@ -3,7 +3,8 @@
 The 50 captured monuments go through the real lookup builder, parser and
 cleaner, are written with the pipeline's own to_json call and read back with
 pandas, so the API sees exactly the column types it sees in production. The
-map layers are the vendored ones. Scrape jobs run a fake harvest.
+map layers are the vendored ones. Pipeline runs use a fake harvest and clean
+and the real catalog reload.
 """
 
 from __future__ import annotations
@@ -23,9 +24,9 @@ from epigcorpus.api.app import create_app
 from epigcorpus.api.deps import ApiDeps
 from epigcorpus.config.paths import API_SPEC
 from epigcorpus.core.edcs_parsing import parse_monument
-from epigcorpus.services.catalog import Catalog
+from epigcorpus.services.catalog import Catalog, CatalogSlot
 from epigcorpus.services.cleaning import clean_data
-from epigcorpus.services.jobs import ScrapeJobs
+from epigcorpus.services.pipeline import PipelineRuns, PipelineSteps
 from epigcorpus.services.scrape import COMPLETE, INTERRUPTED
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
@@ -136,6 +137,25 @@ class FakeHarvest:
         return COMPLETE
 
 
+class FakeClean:
+    """Stands in for run_cleaning: optionally waits to be released, or fails."""
+
+    def __init__(self):
+        self.release = threading.Event()
+        self.release.set()
+        self.started = threading.Event()
+        self.calls = 0
+        self.error: Exception | None = None
+
+    def __call__(self) -> int:
+        self.calls += 1
+        self.started.set()
+        self.release.wait(5)
+        if self.error is not None:
+            raise self.error
+        return 42
+
+
 @pytest.fixture(scope="session")
 def catalog(reader) -> Catalog:
     return Catalog(reader, map_layers)
@@ -147,14 +167,27 @@ def harvest() -> FakeHarvest:
 
 
 @pytest.fixture()
-def client(catalog, reader, harvest, tmp_path) -> TestClient:
+def cleaner() -> FakeClean:
+    return FakeClean()
+
+
+@pytest.fixture()
+def catalogs(catalog) -> CatalogSlot:
+    # Reloads hand back the session catalog: the tests check the swap, not a
+    # second load of the same fixture corpus.
+    return CatalogSlot(lambda: catalog)
+
+
+@pytest.fixture()
+def client(catalogs, reader, harvest, cleaner, tmp_path) -> TestClient:
     static = tmp_path / "static"
     static.mkdir()
     (static / "index.html").write_text("<!doctype html><title>EpigCorpus</title>", encoding="utf-8")
+    steps = PipelineSteps(harvest=harvest, clean=cleaner, reload=catalogs.reload)
     deps = ApiDeps(
-        catalog=catalog,
+        catalogs=catalogs,
         exports=reader,
-        jobs=ScrapeJobs(harvest),
+        runs=PipelineRuns(steps),
         spec_path=API_SPEC,
         static_dir=static,
     )

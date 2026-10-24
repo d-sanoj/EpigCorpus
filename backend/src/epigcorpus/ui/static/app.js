@@ -1,5 +1,5 @@
 /* EpigCorpus web UI: the controls, the summary, the map and the results,
- * all driven by the HTTP API under /v1 (see app/api/openapi.yaml).
+ * all driven by the HTTP API under /api/v1.
  *
  * Behaviour carried over from the Streamlit app:
  * - a query is a keyword, any filter, or both; nothing runs until Search is
@@ -13,7 +13,7 @@
 (function () {
   "use strict";
 
-  var API = "/v1";
+  var API = "/api/v1";
   var FILTERS = ["language", "province", "place", "category", "material"];
   var MODE_COLUMNS = {
     raw: { field: "inscription_text", heading: "Raw inscription" },

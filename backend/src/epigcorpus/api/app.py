@@ -1,18 +1,28 @@
 """Build the FastAPI application from already-wired dependencies.
 
 The contract is the hand-written backend/src/epigcorpus/api/openapi.yaml, served at
-/v1/openapi.yaml. FastAPI's generated schema is switched off so there is
+/api/v1/openapi.yaml. FastAPI's generated schema is switched off so there is
 only one description of the API.
 """
 
 from __future__ import annotations
 
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 
 from epigcorpus.api import problems
 from epigcorpus.api.deps import ApiDeps
-from epigcorpus.api.routes import exports, inscriptions, jobs, lookups, map, meta, places
+from epigcorpus.api.routes import (
+    exports,
+    inscriptions,
+    lookups,
+    map,
+    meta,
+    pipeline_runs,
+    places,
+)
+from epigcorpus.api.spa import SinglePageApp
+
+API_PREFIX = "/api/v1"
 
 
 def create_app(deps: ApiDeps, lifespan=None) -> FastAPI:
@@ -26,10 +36,10 @@ def create_app(deps: ApiDeps, lifespan=None) -> FastAPI:
     )
     app.state.deps = deps
     problems.install(app)
-    for module in (meta, inscriptions, places, map, exports, lookups, jobs):
-        app.include_router(module.router)
+    for module in (meta, inscriptions, places, map, exports, lookups, pipeline_runs):
+        app.include_router(module.router, prefix=API_PREFIX)
     if deps.static_dir is not None:
-        # The web UI: plain files, a client of the routes above. Mounted last so
-        # every /v1 route wins.
-        app.mount("/", StaticFiles(directory=deps.static_dir, html=True), name="ui")
+        # The built web UI (frontend/dist), a client of the routes above.
+        # Mounted last so every API route wins.
+        app.mount("/", SinglePageApp(directory=deps.static_dir), name="ui")
     return app

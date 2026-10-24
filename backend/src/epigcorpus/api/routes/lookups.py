@@ -6,7 +6,7 @@ from enum import StrEnum
 
 from fastapi import APIRouter
 
-from epigcorpus.api.deps import Deps
+from epigcorpus.api.deps import CatalogDep
 from epigcorpus.api.problems import Problem
 
 router = APIRouter(tags=["lookups"])
@@ -31,8 +31,8 @@ FACET_NAMES = {
 }
 
 
-def _lookup(deps) -> dict:
-    lookup = deps.catalog.lookup()
+def _lookup(catalog) -> dict:
+    lookup = catalog.lookup()
     if lookup is None:
         raise Problem(
             503,
@@ -43,20 +43,20 @@ def _lookup(deps) -> dict:
     return lookup
 
 
-@router.get("/v1/lookups", operation_id="getLookups")
-def get_lookups(deps: Deps):
-    return _lookup(deps)
+@router.get("/lookups", operation_id="getLookups")
+def get_lookups(catalog: CatalogDep):
+    return _lookup(catalog)
 
 
-@router.get("/v1/lookups/{table}", operation_id="getLookupTable")
-def get_lookup_table(deps: Deps, table: Table):
-    return {"table": table.value, "entries": _lookup(deps).get(table.value) or {}}
+@router.get("/lookups/{table}", operation_id="getLookupTable")
+def get_lookup_table(catalog: CatalogDep, table: Table):
+    return {"table": table.value, "entries": _lookup(catalog).get(table.value) or {}}
 
 
-@router.get("/v1/facets", operation_id="getFacets")
-def get_facets(deps: Deps):
-    options = deps.catalog.filter_options()
-    forms = deps.catalog.short_forms()
+@router.get("/facets", operation_id="getFacets")
+def get_facets(catalog: CatalogDep):
+    options = catalog.filter_options()
+    forms = catalog.short_forms()
     return {
         "values": {FACET_NAMES[column]: values for column, values in options.items()},
         "short_forms": {FACET_NAMES[column]: mapping for column, mapping in forms.items()},

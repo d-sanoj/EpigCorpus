@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 
 from epigcorpus.api.deps import (
     SEARCH_MODES,
+    CatalogDep,
     Deps,
     FilterParams,
     OptionalQueryText,
@@ -20,7 +21,7 @@ from epigcorpus.api.deps import (
 from epigcorpus.api.problems import Problem, invalid
 from epigcorpus.services import search
 
-router = APIRouter(prefix="/v1/exports", tags=["exports"])
+router = APIRouter(prefix="/exports", tags=["exports"])
 
 JSONL = "application/x-ndjson"
 TSV = "text/tab-separated-values"
@@ -86,15 +87,15 @@ def cleaned_jsonl(request: Request, deps: Deps):
 
 @router.get("/search.tsv", operation_id="exportSearchTsv")
 def search_tsv(
-    deps: Deps,
+    catalog: CatalogDep,
     filters: FilterParams,
     q: OptionalQueryText = None,
     search_in: SearchInParam = SearchIn.raw,
 ):
     if not q and not filters.any():
         raise invalid("q", "give a keyword, a filter, or both")
-    rows = deps.catalog.rows(q or "", SEARCH_MODES[search_in], filters.selections())
-    table = deps.catalog.results_table(rows)
+    rows = catalog.rows(q or "", SEARCH_MODES[search_in], filters.selections())
+    table = catalog.results_table(rows)
     return Response(
         search.results_tsv(table),
         media_type=TSV,
@@ -104,12 +105,12 @@ def search_tsv(
 
 @router.get("/map.png", operation_id="exportMapPng")
 def map_png(
-    deps: Deps,
+    catalog: CatalogDep,
     filters: FilterParams,
     q: OptionalQueryText = None,
     search_in: SearchInParam = SearchIn.raw,
 ):
     selections = filters.selections()
     term = q or ""
-    png = deps.catalog.export_png(term, SEARCH_MODES[search_in], selections)
+    png = catalog.export_png(term, SEARCH_MODES[search_in], selections)
     return Response(png.content, media_type="image/png", headers=_attachment(png.filename))

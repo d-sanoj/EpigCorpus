@@ -266,3 +266,29 @@ class Catalog:
             return PngExport(content, f"edcs_map_{file_stem}.png")
 
         return self._pngs.get((term, search_mode, selections), compute)
+
+
+class CatalogSlot:
+    """The catalog the server currently answers from, replaceable while it runs.
+
+    A pipeline run's reload builds a new catalog over the freshly cleaned
+    corpus, warms it while the old one keeps answering, then swaps it in.
+    Requests already holding the old catalog finish on it.
+    """
+
+    def __init__(self, build: Callable[[], Catalog]):
+        self._build = build
+        self._current = build()
+        self._reload_lock = threading.Lock()
+
+    @property
+    def current(self) -> Catalog:
+        return self._current
+
+    def reload(self) -> str:
+        """Load the corpus on disk into a new catalog, swap it in, return its fingerprint."""
+        with self._reload_lock:
+            fresh = self._build()
+            fresh.warm()
+            self._current = fresh
+            return fresh.fingerprint()

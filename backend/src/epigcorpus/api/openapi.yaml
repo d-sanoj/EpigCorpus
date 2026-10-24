@@ -6,15 +6,16 @@ info:
   description: |
     The EpigCorpus HTTP API. This document is the contract: it was written
     before the implementation (`docs/adr/0002-api-first-design.md`), the
-    implementation in `app/api` is tested against it
-    (`app/tests/api/test_contract.py`), and the server returns it at
-    `/v1/openapi.yaml`. Every operation maps onto a use case in
-    `app/services`; `app/api/README.md` lists which one. The web UI served at
-    `/` is a client of this API.
+    implementation in `backend/src/epigcorpus/api` is tested against it
+    (`backend/tests/api/test_contract.py`), and the server returns it at
+    `/api/v1/openapi.yaml`. Every operation maps onto a use case in
+    `epigcorpus.services`; `backend/src/epigcorpus/api/README.md` lists which
+    one. The web UI in `frontend/` is a client of this API, and its
+    TypeScript types are generated from this file.
 
     ## Conventions
 
-    - **Versioning.** Every path starts with `/v1`. Breaking changes get `/v2`;
+    - **Versioning.** Every path starts with `/api/v1`. Breaking changes get `/api/v2`;
       additive changes (new optional fields, parameters, operations) do not.
     - **Pagination** is cursor-based. List operations take `limit` (1–500,
       default 50; up to 25,000 for places) and an opaque `cursor`, and return `page.next_cursor`
@@ -24,7 +25,7 @@ info:
     - **Errors** are `application/problem+json` (RFC 9457) with `type`,
       `title`, `status`, `detail`, `instance`; validation errors add `errors[]`.
     - **Search semantics** are exactly those of the existing map search
-      (`app/core/search.py`):
+      (`epigcorpus.core.search`):
       - `q` is a case-insensitive **substring** match — not a regular
         expression, not tokenised — against the text column selected by
         `search_in`: `raw` → `inscription_text`, `interpretive` →
@@ -42,14 +43,14 @@ info:
         (latitude 20–62, longitude −12–50), 568,560 of the 588,509 rows in
         the current snapshot. Reading one inscription by id uses the full
         corpus. Whether the API should keep the bounding box is an open
-        question recorded in `app/api/README.md`.
+        question recorded in `backend/src/epigcorpus/api/README.md`.
 
     ## Authentication
 
     The API will be protected with **OAuth 2.0 / OpenID Connect**. Which flows
     are offered (for example authorization code with PKCE for the browser UI,
     client credentials for automation) and which scopes guard which
-    operations (starting and cancelling scrape jobs at minimum) are not
+    operations (starting and cancelling pipeline runs at minimum) are not
     decided here; that decision is open in
     `docs/adr/0003-api-authentication.md` (status: proposed). The
     `openIdConnect` scheme below is declared so tooling can see it, but no
@@ -63,7 +64,7 @@ info:
 
 servers:
   - url: http://127.0.0.1:8000
-    description: Local server (python -m app.cli.serve)
+    description: Local server (uv run uvicorn epigcorpus.api.server:app, from backend/)
 
 tags:
   - name: meta
@@ -80,11 +81,11 @@ tags:
     description: Whole-corpus and search-result downloads.
   - name: lookups
     description: EDCS code tables and the filter values present in the corpus.
-  - name: scrape-jobs
-    description: Asynchronous harvests from the EDCS.
+  - name: pipeline-runs
+    description: Harvest from the EDCS, clean, and reload the corpus, in the background.
 
 paths:
-  /v1/health:
+  /api/v1/health:
     get:
       tags: [meta]
       operationId: getHealth
@@ -106,14 +107,14 @@ paths:
                 ready:
                   value: {status: ok, ready: true}
 
-  /v1/inscriptions:
+  /api/v1/inscriptions:
     get:
       tags: [inscriptions]
       operationId: listInscriptions
       summary: List inscriptions, optionally filtered
       description: |
         Pages through the search frame, narrowed by the attribute filters.
-        No keyword: use `/v1/inscriptions/search` for text search. With no
+        No keyword: use `/api/v1/inscriptions/search` for text search. With no
         filters this pages through every inscription in the frame.
       parameters:
         - $ref: '#/components/parameters/Material'
@@ -161,7 +162,7 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationFailed'
 
-  /v1/inscriptions/search:
+  /api/v1/inscriptions/search:
     get:
       tags: [inscriptions]
       operationId: searchInscriptions
@@ -218,7 +219,7 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationFailed'
 
-  /v1/inscriptions/{record_id}:
+  /api/v1/inscriptions/{record_id}:
     get:
       tags: [inscriptions]
       operationId: getInscription
@@ -239,7 +240,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /v1/inscriptions/{record_id}/variants:
+  /api/v1/inscriptions/{record_id}/variants:
     get:
       tags: [variants]
       operationId: getInscriptionVariants
@@ -248,7 +249,7 @@ paths:
         `conservative` approximates what is carved on the stone (expansions
         dropped, inscribed letters kept where the editors corrected them);
         `interpretive` is the editors' reading (expansions kept, corrections
-        applied). Produced by the cleaning rules in `app/core/cleaning.py`.
+        applied). Produced by the cleaning rules in `epigcorpus.core.cleaning`.
         A variant that cleans to nothing is `null`.
       parameters:
         - $ref: '#/components/parameters/RecordId'
@@ -271,7 +272,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /v1/inscriptions/{record_id}/variants/{variant}:
+  /api/v1/inscriptions/{record_id}/variants/{variant}:
     get:
       tags: [variants]
       operationId: getInscriptionVariant
@@ -302,7 +303,7 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationFailed'
 
-  /v1/places:
+  /api/v1/places:
     get:
       tags: [places]
       operationId: listResultPlaces
@@ -359,7 +360,7 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationFailed'
 
-  /v1/places/known:
+  /api/v1/places/known:
     get:
       tags: [places]
       operationId: listKnownPlaces
@@ -400,7 +401,72 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /v1/map/layers/provinces:
+  /api/v1/places.geojson:
+    get:
+      tags: [places]
+      operationId: getResultPlacesGeoJson
+      summary: Places matching a query, as GeoJSON
+      description: |
+        The same places as `GET /api/v1/places`, all of them in one GeoJSON
+        FeatureCollection rather than paged: what a map needs to draw the
+        result layer in one request. Each feature's properties are `place`,
+        `count` and `examples`; the query's summary rides along as the
+        foreign member `summary`.
+      parameters:
+        - $ref: '#/components/parameters/QOptional'
+        - $ref: '#/components/parameters/SearchIn'
+        - $ref: '#/components/parameters/Material'
+        - $ref: '#/components/parameters/Category'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Province'
+        - $ref: '#/components/parameters/Place'
+      responses:
+        '200':
+          description: Every matching place.
+          content:
+            application/geo+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PlaceFeatureCollection'
+                  - type: object
+                    properties:
+                      summary:
+                        type: object
+                        required: [inscriptions, places, title, subtitle]
+                        properties:
+                          inscriptions: {type: integer}
+                          places: {type: integer}
+                          title: {type: string}
+                          subtitle: {type: string}
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+
+  /api/v1/places/known.geojson:
+    get:
+      tags: [places]
+      operationId: getKnownPlacesGeoJson
+      summary: Every known place, as GeoJSON
+      description: |
+        The same places as `GET /api/v1/places/known`, all of them in one
+        GeoJSON FeatureCollection. Properties are `place` and `count`.
+      responses:
+        '200':
+          description: Every known place.
+          content:
+            application/geo+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PlaceFeatureCollection'
+                  - type: object
+                    properties:
+                      summary:
+                        type: object
+                        required: [places, inscriptions]
+                        properties:
+                          places: {type: integer}
+                          inscriptions: {type: integer}
+
+  /api/v1/map/layers/provinces:
     get:
       tags: [map]
       operationId: getProvincesLayer
@@ -432,7 +498,7 @@ paths:
         '304':
           $ref: '#/components/responses/NotModified'
 
-  /v1/map/layers/roads:
+  /api/v1/map/layers/roads:
     get:
       tags: [map]
       operationId: getRoadsLayer
@@ -462,7 +528,7 @@ paths:
         '304':
           $ref: '#/components/responses/NotModified'
 
-  /v1/map/layers/land:
+  /api/v1/map/layers/land:
     get:
       tags: [map]
       operationId: getLandLayer
@@ -497,7 +563,7 @@ paths:
         '304':
           $ref: '#/components/responses/NotModified'
 
-  /v1/map/layers/province-labels:
+  /api/v1/map/layers/province-labels:
     get:
       tags: [map]
       operationId: getProvinceLabels
@@ -540,7 +606,7 @@ paths:
         '304':
           $ref: '#/components/responses/NotModified'
 
-  /v1/map/layers/cities:
+  /api/v1/map/layers/cities:
     get:
       tags: [map]
       operationId: getCitiesLayer
@@ -569,7 +635,7 @@ paths:
         '304':
           $ref: '#/components/responses/NotModified'
 
-  /v1/exports/corpus.jsonl:
+  /api/v1/exports/corpus.jsonl:
     get:
       tags: [exports]
       operationId: exportCorpusJsonl
@@ -582,7 +648,7 @@ paths:
         '200':
           $ref: '#/components/responses/JsonlDownload'
 
-  /v1/exports/corpus.tsv:
+  /api/v1/exports/corpus.tsv:
     get:
       tags: [exports]
       operationId: exportCorpusTsv
@@ -595,7 +661,7 @@ paths:
         '200':
           $ref: '#/components/responses/TsvDownload'
 
-  /v1/exports/cleaned.jsonl:
+  /api/v1/exports/cleaned.jsonl:
     get:
       tags: [exports]
       operationId: exportCleanedJsonl
@@ -608,7 +674,7 @@ paths:
         '200':
           $ref: '#/components/responses/JsonlDownload'
 
-  /v1/exports/search.tsv:
+  /api/v1/exports/search.tsv:
     get:
       tags: [exports]
       operationId: exportSearchTsv
@@ -646,7 +712,7 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationFailed'
 
-  /v1/exports/map.png:
+  /api/v1/exports/map.png:
     get:
       tags: [exports]
       operationId: exportMapPng
@@ -682,16 +748,16 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationFailed'
 
-  /v1/lookups:
+  /api/v1/lookups:
     get:
       tags: [lookups]
       operationId: getLookups
       summary: All EDCS code tables
       description: |
         The flattened code tables saved by the last harvest
-        (`app/data/reference/edcs_lookup.json`): materials, categories,
+        (`data/reference/edcs_lookup.json`): materials, categories,
         provinces, languages, places and citation sources. About 3 MB; prefer
-        `/v1/lookups/{table}` for one table.
+        `/api/v1/lookups/{table}` for one table.
       responses:
         '200':
           description: Every table.
@@ -713,7 +779,7 @@ paths:
         '503':
           $ref: '#/components/responses/LookupUnavailable'
 
-  /v1/lookups/{table}:
+  /api/v1/lookups/{table}:
     get:
       tags: [lookups]
       operationId: getLookupTable
@@ -747,7 +813,7 @@ paths:
         '503':
           $ref: '#/components/responses/LookupUnavailable'
 
-  /v1/facets:
+  /api/v1/facets:
     get:
       tags: [lookups]
       operationId: getFacets
@@ -777,56 +843,66 @@ paths:
                       category: {emperor/emperess: Augusti/Augustae, epigrammes: carmina}
                       language: {Etruscan: et, Greek: gr}
 
-  /v1/scrape-jobs:
+  /api/v1/pipeline-runs:
     post:
-      tags: [scrape-jobs]
-      operationId: startScrapeJob
-      summary: Start a harvest (asynchronous)
+      tags: [pipeline-runs]
+      operationId: startPipelineRun
+      summary: Start a pipeline run (asynchronous)
       description: |
-        Starts a harvest from the EDCS and returns at once with `202` and the
-        job's URL in `Location`; poll `GET /v1/scrape-jobs/{job_id}`. The
-        body mirrors the scraper's command line (`--limit`, `--workers`,
-        `--restart`, `--refresh-index`) with the same defaults.
+        Starts the pipeline in the background and returns at once with `202`
+        and the run's URL in `Location`; poll `GET /api/v1/pipeline-runs/{run_id}`.
+        A run has up to three stages, in this order:
 
-        A harvest is incremental and resumable: without `restart` it resumes
-        from the checkpoint, and if the corpus is already complete the job
-        succeeds with outcome `already_complete` without touching it.
-        `restart: true` **deletes** the existing corpus output first.
+        1. `harvest` fetches monuments from the EDCS into the raw corpus.
+           It is incremental and resumable: without `restart` it resumes
+           from the checkpoint, and an already complete corpus ends the stage
+           with result `already_complete` without touching it.
+           `restart: true` **deletes** the existing raw output first.
+        2. `clean` derives the conservative and interpretive variants from
+           the newest raw corpus and saves the cleaned corpus.
+        3. `reload` loads the cleaned corpus into a fresh catalog and swaps
+           it in while the server keeps answering. Every later request reads
+           the new corpus; cursors issued before the swap become invalid.
 
-        Only one harvest can run at a time (there is one checkpoint), so a
-        second start while one is queued or running is a `409`.
+        `harvest: false` cleans the corpus already on disk; `clean: false`
+        only harvests. `reload` always follows `clean`. Only one run can be
+        active at a time (there is one checkpoint and one corpus), so a second
+        start while one is queued or running is a `409`.
       requestBody:
         required: false
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ScrapeJobRequest'
+              $ref: '#/components/schemas/PipelineRunRequest'
             examples:
               smokeTest:
-                summary: First 500 monuments, gently
+                summary: Harvest the first 500 monuments gently, then clean and reload
                 value: {limit: 500, workers: 8}
-              resume:
-                summary: Resume or complete the full harvest with defaults
+              cleanOnly:
+                summary: Re-clean the raw corpus on disk and reload
+                value: {harvest: false}
+              full:
+                summary: Resume or complete the full harvest, clean, reload
                 value: {}
       responses:
         '202':
-          description: The job was accepted.
+          description: The run was accepted.
           headers:
             Location:
-              description: URL of the new job.
+              description: URL of the new run.
               schema:
                 type: string
                 format: uri-reference
-              example: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+              example: /api/v1/pipeline-runs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScrapeJob'
+                $ref: '#/components/schemas/PipelineRun'
               examples:
                 queued:
-                  $ref: '#/components/examples/ScrapeJobQueued'
+                  $ref: '#/components/examples/PipelineRunQueued'
         '409':
-          description: A harvest is already queued or running.
+          description: A run is already queued or running.
           content:
             application/problem+json:
               schema:
@@ -834,66 +910,87 @@ paths:
               examples:
                 busy:
                   value:
-                    type: https://epigcorpus.example/problems/scrape-job-running
-                    title: A harvest is already running
+                    type: https://epigcorpus.example/problems/pipeline-run-active
+                    title: A pipeline run is already in progress
                     status: 409
-                    detail: Job 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10 is running; cancel it or wait for it to finish.
-                    instance: /v1/scrape-jobs
-                    running_job: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+                    detail: Run 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10 is running; cancel it or wait for it to finish.
+                    instance: /api/v1/pipeline-runs
+                    running_run: /api/v1/pipeline-runs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
         '422':
           $ref: '#/components/responses/ValidationFailed'
-
-  /v1/scrape-jobs/{job_id}:
     get:
-      tags: [scrape-jobs]
-      operationId: getScrapeJob
-      summary: Status and progress of a harvest
-      parameters:
-        - $ref: '#/components/parameters/JobId'
+      tags: [pipeline-runs]
+      operationId: listPipelineRuns
+      summary: Recent pipeline runs, newest first
+      description: |
+        The runs this server process remembers: the active one, if any, and
+        up to the 20 most recent finished ones. A restart forgets them.
       responses:
         '200':
-          description: The job.
+          description: The runs.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScrapeJob'
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: {$ref: '#/components/schemas/PipelineRun'}
+
+  /api/v1/pipeline-runs/{run_id}:
+    get:
+      tags: [pipeline-runs]
+      operationId: getPipelineRun
+      summary: Status, stages and progress of a run
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200':
+          description: The run.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipelineRun'
               examples:
-                running:
-                  $ref: '#/components/examples/ScrapeJobRunning'
-                incomplete:
-                  $ref: '#/components/examples/ScrapeJobIncomplete'
+                harvesting:
+                  $ref: '#/components/examples/PipelineRunHarvesting'
+                succeeded:
+                  $ref: '#/components/examples/PipelineRunSucceeded'
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /v1/scrape-jobs/{job_id}/cancel:
+  /api/v1/pipeline-runs/{run_id}/cancel:
     post:
-      tags: [scrape-jobs]
-      operationId: cancelScrapeJob
-      summary: Ask a harvest to stop (asynchronous)
+      tags: [pipeline-runs]
+      operationId: cancelPipelineRun
+      summary: Ask a run to stop (asynchronous)
       description: |
-        Requests a stop. The harvest finishes its current chunk, flushes the
-        output, writes the checkpoint and the failure list, and ends with
-        status `cancelled` — the same path as Ctrl+C or SIGTERM on the
-        command line, so a later job resumes where it stopped. Returns `202`
-        with the job in status `cancelling`; poll it for the final state.
-        Cancelling a finished job is a `409`; cancelling a cancelling job is
+        Requests a stop and returns `202` with the run in status `cancelling`;
+        poll it for the final state. A harvest finishes its current chunk,
+        flushes its output and writes the checkpoint, so a later run resumes
+        where it stopped. Stages that have not started are skipped. Cleaning
+        cannot be interrupted, and once it has saved the cleaned corpus the
+        reload still runs, so the server never answers from an older corpus
+        than the one on disk; such a run ends `succeeded`.
+        Cancelling a finished run is a `409`; cancelling a cancelling run is
         a no-op `202`.
       parameters:
-        - $ref: '#/components/parameters/JobId'
+        - $ref: '#/components/parameters/RunId'
       responses:
         '202':
           description: Stop requested.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScrapeJob'
+                $ref: '#/components/schemas/PipelineRun'
               examples:
                 cancelling:
-                  $ref: '#/components/examples/ScrapeJobCancelling'
+                  $ref: '#/components/examples/PipelineRunCancelling'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: The job has already finished.
+          description: The run has already finished.
           content:
             application/problem+json:
               schema:
@@ -901,11 +998,11 @@ paths:
               examples:
                 finished:
                   value:
-                    type: https://epigcorpus.example/problems/scrape-job-finished
-                    title: The job has already finished
+                    type: https://epigcorpus.example/problems/pipeline-run-finished
+                    title: The run has already finished
                     status: 409
-                    detail: Job 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10 ended with status succeeded.
-                    instance: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
+                    detail: Run 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10 ended with status succeeded.
+                    instance: /api/v1/pipeline-runs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
 
 components:
   securitySchemes:
@@ -1045,8 +1142,8 @@ components:
       schema:
         $ref: '#/components/schemas/RecordId'
       example: EDCS-00000001-0
-    JobId:
-      name: job_id
+    RunId:
+      name: run_id
       in: path
       required: true
       schema:
@@ -1059,7 +1156,7 @@ components:
       description: RFC 8288 link to the next page, when there is one.
       schema:
         type: string
-      example: </v1/inscriptions/search?q=viator&limit=50&cursor=eyJvIjo1MCwicSI6IjlmMWUifQ>; rel="next"
+      example: </api/v1/inscriptions/search?q=viator&limit=50&cursor=eyJvIjo1MCwicSI6IjlmMWUifQ>; rel="next"
     ETag:
       description: Validator for a static resource.
       schema:
@@ -1080,7 +1177,7 @@ components:
                 title: Cursor does not belong to this query
                 status: 400
                 detail: The cursor was issued for different filters. Restart from the first page.
-                instance: /v1/inscriptions/search?q=viator&cursor=eyJvIjo1MCwicSI6ImFhYWEifQ
+                instance: /api/v1/inscriptions/search?q=viator&cursor=eyJvIjo1MCwicSI6ImFhYWEifQ
     ValidationFailed:
       description: A parameter or body field is invalid.
       content:
@@ -1094,7 +1191,7 @@ components:
                 title: Invalid request
                 status: 422
                 detail: 1 parameter is invalid.
-                instance: /v1/inscriptions/search?q=viator&search_in=diplomatic
+                instance: /api/v1/inscriptions/search?q=viator&search_in=diplomatic
                 errors:
                   - in: query
                     name: search_in
@@ -1112,7 +1209,7 @@ components:
                 title: Not found
                 status: 404
                 detail: No inscription EDCS-99999999-0 in the corpus.
-                instance: /v1/inscriptions/EDCS-99999999-0
+                instance: /api/v1/inscriptions/EDCS-99999999-0
     NotModified:
       description: The cached copy is current.
     LookupUnavailable:
@@ -1127,8 +1224,8 @@ components:
                 type: https://epigcorpus.example/problems/lookup-unavailable
                 title: Lookup table not available
                 status: 503
-                detail: app/data/reference/edcs_lookup.json does not exist; run a harvest.
-                instance: /v1/lookups
+                detail: data/reference/edcs_lookup.json does not exist; run a harvest.
+                instance: /api/v1/lookups
     JsonlDownload:
       description: JSON Lines download.
       headers:
@@ -1204,25 +1301,32 @@ components:
         inscription_text_interpretive: Caius Trebonius II vir et praefectus iure dicundo civitatis Agunti
         is_unreadable: false
         is_forged: false
-    ScrapeJobQueued:
+    PipelineRunQueued:
       value:
         id: 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
         status: queued
-        request: {limit: 500, workers: 8, restart: false, refresh_index: false}
+        request: {harvest: true, clean: true, limit: 500, workers: 8, restart: false, refresh_index: false}
+        stages:
+          - {name: harvest, status: pending, started_at: null, finished_at: null, result: null}
+          - {name: clean, status: pending, started_at: null, finished_at: null, result: null}
+          - {name: reload, status: pending, started_at: null, finished_at: null, result: null}
         created_at: '2026-10-23T18:00:00Z'
         started_at: null
         finished_at: null
         progress: null
-        outcome: null
         error: null
         links:
-          self: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
-          cancel: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
-    ScrapeJobRunning:
+          self: /api/v1/pipeline-runs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+          cancel: /api/v1/pipeline-runs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
+    PipelineRunHarvesting:
       value:
         id: 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
         status: running
-        request: {limit: null, workers: 16, restart: false, refresh_index: false}
+        request: {harvest: true, clean: true, limit: null, workers: 16, restart: false, refresh_index: false}
+        stages:
+          - {name: harvest, status: running, started_at: '2026-10-23T18:00:01Z', finished_at: null, result: null}
+          - {name: clean, status: pending, started_at: null, finished_at: null, result: null}
+          - {name: reload, status: pending, started_at: null, finished_at: null, result: null}
         created_at: '2026-10-23T18:00:00Z'
         started_at: '2026-10-23T18:00:01Z'
         finished_at: null
@@ -1234,38 +1338,36 @@ components:
           failed: 12
           rate_per_second: 41.7
           index_fetched_at: '2026-10-23T18:00:04Z'
-        outcome: null
         error: null
         links:
-          self: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
-          cancel: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
-    ScrapeJobIncomplete:
-      summary: Finished, but some monuments could not be fetched
+          self: /api/v1/pipeline-runs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+          cancel: /api/v1/pipeline-runs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
+    PipelineRunSucceeded:
+      summary: Cleaned the corpus on disk and reloaded it
       value:
-        id: 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+        id: 9b2d7e04-51c3-4f8a-8d6e-2a7c0e9f3b51
         status: succeeded
-        request: {limit: null, workers: 16, restart: false, refresh_index: false}
+        request: {harvest: false, clean: true, limit: null, workers: 16, restart: false, refresh_index: false}
+        stages:
+          - {name: clean, status: succeeded, started_at: '2026-10-23T18:00:01Z', finished_at: '2026-10-23T18:04:37Z', result: 588509}
+          - {name: reload, status: succeeded, started_at: '2026-10-23T18:04:37Z', finished_at: '2026-10-23T18:05:41Z', result: 280c43b158664eea}
         created_at: '2026-10-23T18:00:00Z'
         started_at: '2026-10-23T18:00:01Z'
-        finished_at: '2026-10-23T21:37:12Z'
-        progress:
-          cursor: 542854
-          total: 542854
-          monuments_done: 542852
-          rows_written: 588507
-          failed: 2
-          rate_per_second: 41.6
-          index_fetched_at: '2026-10-23T18:00:04Z'
-        outcome: incomplete
+        finished_at: '2026-10-23T18:05:41Z'
+        progress: null
         error: null
         links:
-          self: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+          self: /api/v1/pipeline-runs/9b2d7e04-51c3-4f8a-8d6e-2a7c0e9f3b51
           cancel: null
-    ScrapeJobCancelling:
+    PipelineRunCancelling:
       value:
         id: 3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
         status: cancelling
-        request: {limit: null, workers: 16, restart: false, refresh_index: false}
+        request: {harvest: true, clean: true, limit: null, workers: 16, restart: false, refresh_index: false}
+        stages:
+          - {name: harvest, status: running, started_at: '2026-10-23T18:00:01Z', finished_at: null, result: null}
+          - {name: clean, status: pending, started_at: null, finished_at: null, result: null}
+          - {name: reload, status: pending, started_at: null, finished_at: null, result: null}
         created_at: '2026-10-23T18:00:00Z'
         started_at: '2026-10-23T18:00:01Z'
         finished_at: null
@@ -1277,11 +1379,10 @@ components:
           failed: 12
           rate_per_second: 41.7
           index_fetched_at: '2026-10-23T18:00:04Z'
-        outcome: null
         error: null
         links:
-          self: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
-          cancel: /v1/scrape-jobs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
+          self: /api/v1/pipeline-runs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10
+          cancel: /api/v1/pipeline-runs/3f6c1a52-8e7b-4d0e-9a51-0c2f1f4e7b10/cancel
 
   schemas:
     RecordId:
@@ -1319,7 +1420,7 @@ components:
           description: Pass as `cursor` for the next page; `null` on the last page.
 
     InscriptionSummary:
-      description: The columns the search frame carries (`REQUIRED_COLS` in app/models/inscription.py).
+      description: The columns the search frame carries (`REQUIRED_COLS` in epigcorpus.models.inscription).
       type: object
       required: [record_id, edcs_id, latitude, longitude, inscription_text]
       properties:
@@ -1342,7 +1443,7 @@ components:
 
     Inscription:
       description: |
-        Every column of the cleaned corpus (see app/data/README.md for the
+        Every column of the cleaned corpus (see data/README.md for the
         schema). One row per inscription; a monument may carry several.
         Unlike the search frame, the full corpus has rows without
         coordinates.
@@ -1591,49 +1692,69 @@ components:
             category: {type: object, additionalProperties: {type: string}}
             language: {type: object, additionalProperties: {type: string}}
 
-    ScrapeJobRequest:
+    PipelineRunRequest:
       type: object
       additionalProperties: false
+      description: At least one of `harvest` and `clean` must be true.
       properties:
+        harvest:
+          type: boolean
+          default: true
+          description: Run the harvest stage.
+        clean:
+          type: boolean
+          default: true
+          description: Run the clean stage, then reload the corpus.
         limit:
           type: [integer, 'null']
           minimum: 1
           default: null
-          description: Only harvest the first N monuments (smoke test). `--limit`.
+          description: Only harvest the first N monuments (a smoke test).
         workers:
           type: integer
           minimum: 1
           maximum: 32
           default: 16
-          description: Concurrent requests to the EDCS. `--workers`.
+          description: Concurrent requests to the EDCS during the harvest.
         restart:
           type: boolean
           default: false
-          description: Discard existing output and checkpoint, then start over. `--restart`. Destructive.
+          description: Discard the raw output and checkpoint, then harvest from the start. Destructive.
         refresh_index:
           type: boolean
           default: false
-          description: Re-fetch the corpus index instead of using the cache. `--refresh-index`.
+          description: Re-fetch the EDCS corpus index instead of using the cached one.
 
-    ScrapeJobStatus:
+    PipelineRunStatus:
       type: string
       enum: [queued, running, cancelling, succeeded, cancelled, failed]
       description: |
-        `succeeded` means the job ran to its end; read `outcome` for whether
-        the corpus is complete. `cancelled` jobs are resumable. `failed` means
-        the job could not run (index or lookup fetch failed, output refused).
+        `succeeded`: every stage ran to its end; read the harvest stage's
+        `result` for whether the corpus is complete. `cancelled`: stopped on
+        request; a harvest resumes from its checkpoint next time. `failed`: a
+        stage raised; `error` says which and why.
 
-    ScrapeJobOutcome:
-      type: [string, 'null']
-      enum: [complete, incomplete, partial, already_complete, null]
-      description: |
-        `complete`: every monument harvested, outputs compressed, manifest
-        written. `incomplete`: the index was walked but some monuments failed
-        (listed in the failure file; a new job retries them first).
-        `partial`: a `limit` stopped the walk early. `already_complete`: the
-        manifest showed a finished corpus and nothing was done.
+    PipelineStage:
+      type: object
+      required: [name, status, started_at, finished_at, result]
+      properties:
+        name: {type: string, enum: [harvest, clean, reload]}
+        status:
+          type: string
+          enum: [pending, running, succeeded, skipped, cancelled, failed]
+        started_at: {type: [string, 'null'], format: date-time}
+        finished_at: {type: [string, 'null'], format: date-time}
+        result:
+          type: [string, integer, 'null']
+          description: |
+            harvest: its outcome. `complete`: every monument harvested,
+            outputs compressed, manifest written. `incomplete`: the index was
+            walked but some monuments failed (a later run retries them first).
+            `partial`: `limit` stopped the walk early. `already_complete`:
+            nothing to do. clean: the rows written. reload: the new corpus
+            fingerprint.
 
-    ScrapeJobProgress:
+    HarvestProgress:
       type: object
       properties:
         cursor: {type: integer, description: 'Monuments walked so far in the index.'}
@@ -1644,30 +1765,74 @@ components:
         rate_per_second: {type: number}
         index_fetched_at: {type: string, format: date-time}
 
-    ScrapeJob:
+    PipelineRun:
       type: object
-      required: [id, status, request, created_at, links]
+      required: [id, status, request, stages, created_at, started_at, finished_at, progress, error, links]
       properties:
         id: {type: string, format: uuid}
-        status: {$ref: '#/components/schemas/ScrapeJobStatus'}
-        request: {$ref: '#/components/schemas/ScrapeJobRequest'}
+        status: {$ref: '#/components/schemas/PipelineRunStatus'}
+        request: {$ref: '#/components/schemas/PipelineRunRequest'}
+        stages:
+          type: array
+          items: {$ref: '#/components/schemas/PipelineStage'}
         created_at: {type: string, format: date-time}
         started_at: {type: [string, 'null'], format: date-time}
         finished_at: {type: [string, 'null'], format: date-time}
         progress:
+          description: The harvest's latest progress report, once it has sent one.
           oneOf:
-            - $ref: '#/components/schemas/ScrapeJobProgress'
+            - $ref: '#/components/schemas/HarvestProgress'
             - type: 'null'
-        outcome: {$ref: '#/components/schemas/ScrapeJobOutcome'}
         error:
           oneOf:
             - $ref: '#/components/schemas/Problem'
             - type: 'null'
         links:
           type: object
+          required: [self, cancel]
           properties:
             self: {type: string, format: uri-reference}
             cancel: {type: [string, 'null'], format: uri-reference}
+
+    PlaceFeatureCollection:
+      description: |
+        Places as a GeoJSON FeatureCollection (RFC 7946, WGS 84): one Point
+        per place, in the order of the paged endpoint. `summary` is a foreign
+        member with the paged endpoint's summary.
+      type: object
+      required: [type, features, summary]
+      properties:
+        type: {const: FeatureCollection}
+        summary: {type: object}
+        features:
+          type: array
+          items:
+            type: object
+            required: [type, geometry, properties]
+            properties:
+              type: {const: Feature}
+              geometry:
+                type: object
+                required: [type, coordinates]
+                properties:
+                  type: {const: Point}
+                  coordinates:
+                    description: '[longitude, latitude], rounded to 5 decimals.'
+                    type: array
+                    minItems: 2
+                    maxItems: 2
+                    items: {type: number}
+              properties:
+                type: object
+                required: [place, count]
+                properties:
+                  place: {type: string}
+                  count: {type: integer, minimum: 0}
+                  examples:
+                    description: Result places only; as in ResultPlace.
+                    type: array
+                    maxItems: 8
+                    items: {type: string}
 
     Problem:
       description: RFC 9457 problem details. Extension members are allowed.

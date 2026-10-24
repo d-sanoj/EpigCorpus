@@ -9,16 +9,16 @@ from typing import Annotated
 
 from fastapi import Depends, Query, Request
 
-from epigcorpus.services.catalog import Catalog, Selections, selections_from
-from epigcorpus.services.jobs import ScrapeJobs
+from epigcorpus.services.catalog import Catalog, CatalogSlot, Selections, selections_from
+from epigcorpus.services.pipeline import PipelineRuns
 from epigcorpus.services.ports import ExportSource
 
 
 @dataclass(frozen=True)
 class ApiDeps:
-    catalog: Catalog
+    catalogs: CatalogSlot
     exports: ExportSource
-    jobs: ScrapeJobs
+    runs: PipelineRuns
     spec_path: Path
     static_dir: Path | None = None
 
@@ -28,6 +28,15 @@ def get_deps(request: Request) -> ApiDeps:
 
 
 Deps = Annotated[ApiDeps, Depends(get_deps)]
+
+
+def get_catalog(deps: Deps) -> Catalog:
+    """The catalog for one request: fixed when the request starts, so a reload
+    swapping in a new corpus mid-request cannot mix rows from both."""
+    return deps.catalogs.current
+
+
+CatalogDep = Annotated[Catalog, Depends(get_catalog)]
 
 
 class SearchIn(StrEnum):

@@ -124,3 +124,26 @@ def place(row, with_examples: bool) -> dict:
 
 def places(frame: pd.DataFrame, with_examples: bool) -> list[dict]:
     return [place(row, with_examples) for _, row in frame.iterrows()]
+
+
+def place_collection(frame: pd.DataFrame, with_examples: bool, summary: dict) -> dict:
+    """Places as a GeoJSON FeatureCollection (RFC 7946): one Point per place.
+
+    Each feature's properties are the place object of the paged endpoints
+    without its coordinates, which move into the geometry. `summary` is
+    carried as a foreign member, as RFC 7946 section 6.1 allows.
+    """
+    columns = [frame["place"], frame["latitude"], frame["longitude"], frame["count"]]
+    if with_examples:
+        columns.append(frame["items"] if "items" in frame.columns else [None] * len(frame))
+    features = []
+    for name, lat, lon, count, *items in zip(*columns, strict=True):
+        properties = {"place": str(name), "count": int(count)}
+        if with_examples:
+            properties["examples"] = [str(item) for item in (items[0] or [])]
+        features.append({
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [float(lon), float(lat)]},
+            "properties": properties,
+        })
+    return {"type": "FeatureCollection", "summary": summary, "features": features}
