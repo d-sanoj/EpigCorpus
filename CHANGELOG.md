@@ -8,6 +8,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — an equal-area map with no edges; known places grouped when zoomed out (2026-10-24)
+
+- **Background.** The map's land is now the whole world from Natural Earth
+  1:50m. It was a rectangle cut at longitude −35…80 and latitude 0…75, whose
+  straight edges showed as boxes and bands when zoomed out.
+- **Projection.** The map is drawn in a Lambert azimuthal equal-area
+  projection centred on the Mediterranean (40°N 15°E), replacing Web
+  Mercator.
+  - Regions keep their true relative size: Britannia and Germania are no
+    longer inflated next to Africa and Aegyptus.
+  - Tile basemaps such as CARTO only exist in Web Mercator. The map draws
+    only vector data, so it can use the projection that suits it.
+  - Zoom levels keep the old scale at 40°N.
+  - The view is held to the Roman world with a margin.
+- **Known places.** While zoomed out (below zoom 7), the 22,000 known places
+  are grouped into a grid: one dot per area, larger and brighter with more
+  inscriptions. Hovering shows the area's places and inscriptions, and a
+  click zooms in. From zoom 7 places are drawn one by one, at their
+  default-zoom size. Search results are always drawn one by one.
+- **Legend.** The legend can be collapsed.
+- **Compression.** API responses are gzip-compressed, which cuts the land
+  layer from 1.2 MB to 0.4 MB.
+
 ### Fixed — pipeline runs no longer exhaust memory ("Load failed") (2026-10-24)
 
 - **Symptom.** A pipeline run's clean stage could kill the server in a

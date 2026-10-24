@@ -8,9 +8,17 @@
  * API (/api/v1/map/layers/land), so it needs no tile service, no key and no
  * network, and carries no labels. The only names on the map are the EDCS
  * province names, drawn in the colour of the shading beneath them.
+ *
+ * Being all vector data, the map uses an equal-area projection (crs.ts)
+ * rather than Web Mercator, so regions keep their true relative size.
+ *
+ * Known places (about 22,000) are grouped into a grid of cells while zoomed
+ * out, one dot per cell shaded by its inscriptions, and drawn one by one from
+ * DETAIL_ZOOM in. Search results are always drawn one by one.
  */
 import L from "leaflet";
 import type { CityPoint, ProvinceLabel } from "../../api/client";
+import { EqualArea, unproject } from "./crs";
 import { formatInteger, plural } from "../../lib/format";
 
 // Solid markers in bright, well-separated hues over muted province fills.
@@ -37,6 +45,21 @@ const EMPTY_RADIUS = 1.5;
 export const LEGEND_STOPS = [1, 10, 100, 1000];
 const CENTER: L.LatLngTuple = [41.9028, 12.4964]; // Rome, as EDCS
 const ZOOM = 4;
+// Known places are drawn one by one from this zoom in, grouped below it.
+export const DETAIL_ZOOM = 7;
+// Known places drawn one by one never grow past their default-zoom size.
+const KNOWN_CAP = 1;
+// Grid cell size on screen while grouped, in pixels.
+const CELL_PX = 26;
+// How far the view may pan: the empire's extent in the projected plane
+// (x -2,100…2,700 km, y -1,600…2,000 km) with a 1,500 km margin. Leaflet
+// takes bounds as two corners in latitude and longitude and projects them, so
+// the corners are the projected rectangle's own, unprojected; a plain
+// latitude/longitude box would come out skewed, as meridians converge here.
+const VIEW_LIMIT = L.latLngBounds(
+  unproject(-3_600_000, -3_100_000),
+  unproject(4_200_000, 3_500_000),
+);
 
 export interface MapPlace {
   place: string;
@@ -78,7 +101,8 @@ export class EpigMap {
   private readonly map: L.Map;
   private readonly markerRenderer: L.Canvas;
   private readonly layers: Record<LayerKey | "provinceLabels", L.LayerGroup>;
-  private scaled: { marker: L.CircleMarker; base: number }[] = [];
+  // Markers whose radius follows the zoom; `cap` limits how far they grow.
+  private scaled: { marker: L.CircleMarker; base: number; cap?: number }[] = [];
   private labelMarkers: L.Marker[] = [];
   private available: Record<LayerKey, boolean> = {
     all: false, search: false, provinces: false, roads: false, cities: false,
@@ -93,15 +117,21 @@ export class EpigMap {
   private mode: "known" | "results" = "known";
   private knownWanted = { known: true, results: false };
   private knownPlaces: MapPlace[] | null = null;
+  // The zoom the known-places layer was last drawn for (null: redraw).
+  private knownDrawnAt: number | null = null;
   private listeners = new Set<(state: LayerState) => void>();
 
   constructor(element: HTMLElement) {
     // Half-step zoom lets a query's results fill the pane more closely than
     // whole steps do; the buttons and wheel still move a whole step.
     const map = L.map(element, {
+      crs: EqualArea,
       preferCanvas: true,
-      worldCopyJump: true,
       zoomSnap: 0.5,
+      minZoom: 3,
+      maxZoom: 12,
+      maxBounds: VIEW_LIMIT,
+      maxBoundsViscosity: 0.9,
     }).setView(CENTER, ZOOM);
     this.map = map;
 
@@ -127,7 +157,10 @@ export class EpigMap {
       provinceLabels: L.layerGroup(),
     };
 
-    map.on("zoomend", () => this.applyZoomScale());
+    map.on("zoomend", () => {
+      this.applyZoomScale();
+      this.drawKnown();
+    });
     map.on("zoomend moveend", () => this.declutter());
     this.addResetControl();
   }
@@ -182,9 +215,9 @@ export class EpigMap {
   /** Every known place, built once; usable with or without a query. */
   setKnown(places: MapPlace[]) {
     if (this.knownPlaces === places) return;
-    this.forget(this.layers.all);
-    for (const place of places) this.knownMarker(place).addTo(this.layers.all);
     this.knownPlaces = places;
+    this.knownDrawnAt = null;
+    this.drawKnown();
     this.available.all = places.length > 0;
     this.applyMode();
     this.restackAbove("all");
@@ -304,7 +337,9 @@ export class EpigMap {
 
   private applyZoomScale() {
     const factor = this.zoomScale();
-    for (const entry of this.scaled) entry.marker.setRadius(entry.base * factor);
+    for (const entry of this.scaled) {
+      entry.marker.setRadius(entry.base * Math.min(entry.cap ?? Infinity, factor));
+    }
   }
 
   private forget(group: L.LayerGroup) {
@@ -377,18 +412,69 @@ export class EpigMap {
     }
   }
 
+  /** (Re)build the known-places layer for the current zoom: one dot per place
+   *  from DETAIL_ZOOM in, one dot per grid cell below it. */
+  private drawKnown() {
+    const places = this.knownPlaces;
+    if (!places) return;
+    const zoom = this.map.getZoom();
+    const detailed = zoom >= DETAIL_ZOOM;
+    const drawn = this.knownDrawnAt;
+    if (drawn !== null && (detailed ? drawn >= DETAIL_ZOOM : drawn === zoom)) return;
+    this.knownDrawnAt = zoom;
+
+    this.forget(this.layers.all);
+    if (detailed) {
+      for (const place of places) this.knownMarker(place).addTo(this.layers.all);
+    } else {
+      for (const cell of groupIntoCells(places, (p) => this.map.project([p.latitude, p.longitude], zoom))) {
+        this.cellMarker(cell).addTo(this.layers.all);
+      }
+    }
+    // New paths go to the top of the shared canvas: put the layers that
+    // belong above known places back above them.
+    if (this.map.hasLayer(this.layers.all)) this.restackAbove("all");
+  }
+
+  private cellMarker(cell: Cell): L.CircleMarker {
+    const intensity = cell.intensity;
+    const marker = L.circleMarker(cell.center, {
+      renderer: this.markerRenderer,
+      radius: CELL_PX * (0.12 + 0.28 * intensity),
+      color: COLORS.edge,
+      weight: 0.6,
+      opacity: 0.8,
+      fillColor: cell.inscriptions > 0 ? COLORS.known : COLORS.empty,
+      fillOpacity: 0.3 + 0.6 * intensity,
+      fill: true,
+    });
+    marker.bindTooltip(
+      `${plural(cell.places, "place", "places")} · ` +
+        `${plural(cell.inscriptions, "inscription", "inscriptions")}` +
+        '<br><span class="tooltip-hint">Click or zoom in to see each place</span>',
+      { direction: "top", sticky: true },
+    );
+    marker.on("click", () => {
+      const target = Math.min(DETAIL_ZOOM, this.map.getZoom() + 2);
+      this.map.setView(cell.center, target);
+    });
+    return marker;
+  }
+
   private knownMarker(place: MapPlace): L.CircleMarker {
     const { count } = place;
     const hasInscriptions = count > 0;
     const base = radiusFor(count);
     const marker = L.circleMarker([place.latitude, place.longitude], {
       renderer: this.markerRenderer,
-      radius: base * this.zoomScale(),
+      // Zoomed in this far, places are many and close: they keep their
+      // default-zoom size rather than growing with the zoom.
+      radius: base * Math.min(KNOWN_CAP, this.zoomScale()),
       color: COLORS.edge,
       weight: 0.8,
       opacity: 0.9,
       fillColor: hasInscriptions ? COLORS.known : COLORS.empty,
-      fillOpacity: hasInscriptions ? 0.9 : 0.7,
+      fillOpacity: hasInscriptions ? 0.75 : 0.6,
       fill: true,
     });
     const name = escapeHtml(place.place || "?");
@@ -398,7 +484,7 @@ export class EpigMap {
         : `${name} · no inscriptions in this corpus`,
       { direction: "top", sticky: true },
     );
-    this.scaled.push({ marker, base });
+    this.scaled.push({ marker, base, cap: KNOWN_CAP });
     return marker;
   }
 
@@ -448,4 +534,53 @@ export class EpigMap {
     };
     reset.addTo(this.map);
   }
+}
+
+export interface Cell {
+  center: L.LatLng;
+  places: number;
+  inscriptions: number;
+  /** 0..1: log of the cell's inscriptions against the fullest cell's. */
+  intensity: number;
+}
+
+/** Group places into square screen-space cells of CELL_PX at one zoom.
+ *  A cell sits at the inscription-weighted centre of its places. */
+export function groupIntoCells(
+  places: MapPlace[],
+  toPixel: (place: MapPlace) => L.Point,
+  cellPx = CELL_PX,
+): Cell[] {
+  const cells = new Map<string, { lat: number; lon: number; weight: number; places: number; inscriptions: number }>();
+  for (const place of places) {
+    const pixel = toPixel(place);
+    const key = `${Math.floor(pixel.x / cellPx)}:${Math.floor(pixel.y / cellPx)}`;
+    const weight = Math.max(1, place.count);
+    const cell = cells.get(key);
+    if (cell) {
+      cell.lat += place.latitude * weight;
+      cell.lon += place.longitude * weight;
+      cell.weight += weight;
+      cell.places += 1;
+      cell.inscriptions += place.count;
+    } else {
+      cells.set(key, {
+        lat: place.latitude * weight,
+        lon: place.longitude * weight,
+        weight,
+        places: 1,
+        inscriptions: place.count,
+      });
+    }
+  }
+  const largest = Math.max(1, ...[...cells.values()].map((cell) => cell.inscriptions));
+  return [...cells.values()]
+    .map((cell) => ({
+      center: L.latLng(cell.lat / cell.weight, cell.lon / cell.weight),
+      places: cell.places,
+      inscriptions: cell.inscriptions,
+      intensity: Math.log1p(cell.inscriptions) / Math.log1p(largest),
+    }))
+    // Fullest cells last, so they draw on top.
+    .sort((a, b) => a.inscriptions - b.inscriptions);
 }

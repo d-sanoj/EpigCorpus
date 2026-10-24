@@ -274,11 +274,13 @@ export interface paths {
         };
         /**
          * Land outlines, the map's background
-         * @description Natural Earth 1:50m land, clipped to the Roman world (longitude
-         *     −35 to 80, latitude 0 to 75) and simplified (tolerance 0.02°). The
-         *     web map draws it instead of a tile basemap, so the background needs no
-         *     tile service, no API key and no network, and carries no labels.
-         *     Static: send `If-None-Match`.
+         * @description Natural Earth 1:50m land: the whole world's land within 100° of the
+         *     map centre (latitude 40, longitude 15), cut along that circle rather
+         *     than a meridian or parallel, so no straight edge shows at any zoom.
+         *     It is simplified to 1.5 km. The web map draws it, in a Lambert
+         *     azimuthal equal-area projection on the same centre, instead of a tile
+         *     basemap. So the background needs no tile service, no API key and no
+         *     network, and carries no labels. Static: send `If-None-Match`.
          */
         get: operations["getLandLayer"];
         put?: never;

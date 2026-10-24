@@ -8,6 +8,7 @@ only one description of the API.
 from __future__ import annotations
 
 from fastapi import FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 
 from epigcorpus.api import problems
 from epigcorpus.api.deps import ApiDeps
@@ -36,6 +37,8 @@ def create_app(deps: ApiDeps, lifespan=None) -> FastAPI:
     )
     app.state.deps = deps
     problems.install(app)
+    # The map layers and place collections are JSON of up to a few MB.
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
     for module in (meta, inscriptions, places, map, exports, lookups, pipeline_runs):
         app.include_router(module.router, prefix=API_PREFIX)
     if deps.static_dir is not None:

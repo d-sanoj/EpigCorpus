@@ -108,8 +108,13 @@ export function MapView({ known, results }: Props) {
         })}
       </fieldset>
 
-      <div className="map-panel absolute right-2.5 bottom-6 z-[1000] hidden px-3 py-2.5 leading-snug sm:block">
-        <div className="mb-1.5 font-semibold">Inscriptions per place</div>
+      <details
+        open
+        className="map-panel group absolute right-2.5 bottom-6 z-[1000] hidden px-3 py-2 leading-snug sm:block"
+      >
+        <summary className="cursor-pointer font-semibold select-none group-open:mb-1.5">
+          Legend
+        </summary>
         <div className="mb-2 grid grid-cols-[12px_auto] items-center gap-x-1.5 gap-y-1 text-xs text-slate-300">
           <span className="swatch swatch-known" />
           <span>Known places</span>
@@ -117,6 +122,11 @@ export function MapView({ known, results }: Props) {
           <span>Search results</span>
           <span className="swatch swatch-cities" />
           <span>Cities</span>
+        </div>
+        <div className="mb-1 text-xs text-slate-300">Inscriptions per place</div>
+        <div className="mb-1 max-w-44 text-[0.7rem] leading-tight text-slate-400">
+          Zoomed out, known places are grouped: each dot is an area, darker with more
+          inscriptions.
         </div>
         {LEGEND_STOPS.map((stop) => {
           const diameter = Math.max(6, radiusFor(stop) * 2);
@@ -132,7 +142,7 @@ export function MapView({ known, results }: Props) {
             </div>
           );
         })}
-      </div>
+      </details>
     </div>
   );
 }

@@ -100,6 +100,10 @@ td {
   color: #e5e7eb;
   box-shadow: none;
 }
+.leaflet-tooltip .tooltip-hint {
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
 .leaflet-tooltip-top:before {
   border-top-color: rgba(148, 163, 184, 0.5);
 }

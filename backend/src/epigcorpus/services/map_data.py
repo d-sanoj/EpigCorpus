@@ -7,12 +7,16 @@ loaders stay shared with the PNG export.
 from __future__ import annotations
 
 import json
+import math
 import warnings
 from collections.abc import Callable
 from typing import Any
 
 import geopandas as gpd
 import pandas as pd
+from shapely.geometry import Point
+
+from epigcorpus.config.settings import LAND_RADIUS_DEGREES, MAP_CENTER
 
 
 def _province_palette() -> list[str]:
@@ -118,10 +122,43 @@ def province_labels(inscriptions: pd.DataFrame, load_provinces: Callable[[], Any
 
 
 def land_geojson(load_land: Callable[[], Any]) -> dict:
-    """Land outlines as GeoJSON: the map's background, drawn instead of map tiles."""
-    land = load_land().copy()
-    land["geometry"] = land.geometry.simplify(0.02, preserve_topology=True)
+    """Land outlines as GeoJSON: the map's background, drawn instead of map tiles.
+
+    The whole world's land, cut to a circle LAND_RADIUS_DEGREES around
+    MAP_CENTER in the map's own equal-area projection. Nothing is cut along a
+    meridian or parallel, so no straight edge or empty band shows at any zoom.
+    Polygons are simplified to 1.5 km, finer than the map ever draws.
+    """
+    lat0, lon0 = MAP_CENTER
+    laea = f"+proj=laea +lat_0={lat0} +lon_0={lon0} +R={EARTH_RADIUS_M} +units=m +no_defs"
+    land = load_land().explode(index_parts=False).reset_index(drop=True)
+
+    def near(polygon) -> bool:
+        # Project only what lies on the near side: points close to the
+        # antipode have no usable position in an azimuthal projection.
+        distances = [
+            _angular_distance(lat0, lon0, lat, lon) for lon, lat in polygon.exterior.coords
+        ]
+        return min(distances) <= LAND_RADIUS_DEGREES and max(distances) < 170
+
+    land = land[land.geometry.map(near)].to_crs(laea)
+    radius = 2 * EARTH_RADIUS_M * math.sin(math.radians(LAND_RADIUS_DEGREES) / 2)
+    disk = Point(0, 0).buffer(radius, 256)
+    land["geometry"] = land.geometry.intersection(disk).simplify(1500)
+    land = land[~land.geometry.is_empty].to_crs(epsg=4326)
     return json.loads(land[["geometry"]].to_json())
+
+
+EARTH_RADIUS_M = 6371008.8
+
+
+def _angular_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Great-circle distance in degrees."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    cosine = math.sin(p1) * math.sin(p2) + math.cos(p1) * math.cos(p2) * math.cos(
+        math.radians(lon2 - lon1)
+    )
+    return math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
 
 
 def roads_geojson(load_roads: Callable[[], Any]) -> dict:
