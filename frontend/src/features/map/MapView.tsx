@@ -214,7 +214,7 @@ export function MapView({ known, results, theme, pngHref, bottomBar, children }:
             href={downloadHref}
             download
             aria-label="Download the map as PNG"
-            title="Download the map as PNG"
+            title="Download the map as a 4K PNG (3840 × 2798)"
             className="inline-flex size-8 items-center justify-center rounded-lg text-fg-2 transition-colors hover:bg-surface-2 hover:text-fg"
           >
             <Download className="size-4" />

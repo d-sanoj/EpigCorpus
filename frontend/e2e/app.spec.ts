@@ -89,7 +89,10 @@ test("a keyword search fills the map, the drawer and the address bar", async ({ 
   await page.locator('label:has([data-map-layer="all"])').click();
   await expect(layer(page, "all")).toBeChecked();
   // The PNG download follows the layers switched on.
-  await expect(png).toHaveAttribute("href", /q=viator.*layer=provinces.*layer=known.*layer=results/);
+  await expect(png).toHaveAttribute(
+    "href",
+    /q=viator.*resolution=4k.*layer=provinces.*layer=known.*layer=results/,
+  );
 });
 
 test("filters alone are a query", async ({ page }) => {

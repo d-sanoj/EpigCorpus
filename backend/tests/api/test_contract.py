@@ -9,6 +9,7 @@ from __future__ import annotations
 import gzip
 import io
 import json
+import struct
 import time
 
 import pandas as pd
@@ -534,3 +535,15 @@ def test_map_png_draws_only_the_layers_asked_for(client, validate):
     bad = client.get("/api/v1/exports/map.png", params={"layer": "nonsense"})
     validate(bad, "/api/v1/exports/map.png")
     assert bad.status_code == 422
+
+
+def test_map_png_in_4k(client, validate):
+    response = client.get("/api/v1/exports/map.png", params={"q": "vixit", "resolution": "4k"})
+    validate(response, "/api/v1/exports/map.png")
+    assert response.status_code == 200
+    width, height = struct.unpack(">II", response.content[16:24])
+    assert (width, height) == (3840, 2798)
+    assert 'filename="edcs_map_vixit_4k.png"' in response.headers["content-disposition"]
+
+    standard = client.get("/api/v1/exports/map.png", params={"q": "vixit"})
+    assert struct.unpack(">II", standard.content[16:24]) == (2124, 1548)

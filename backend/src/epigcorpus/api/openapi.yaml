@@ -751,9 +751,20 @@ paths:
             items: {type: string, enum: [provinces, roads, cities, known, results]}
           style: form
           explode: true
+        - name: resolution
+          in: query
+          required: false
+          description: |
+            `standard`: 2124 x 1548 pixels (180 dpi). `4k`: 3840 x 2798, the
+            UHD width at the same proportions, with "_4k" in the file name.
+            The picture is the same; only the sharpness differs.
+          schema:
+            type: string
+            enum: [standard, 4k]
+            default: standard
       responses:
         '200':
-          description: The PNG (11.8 x 8.6 in at 180 dpi, 2124 x 1548 pixels).
+          description: The PNG (11.8 x 8.6 in; 2124 x 1548 pixels, or 3840 x 2798 at 4k).
           headers:
             Content-Disposition:
               schema:

@@ -227,6 +227,7 @@ class Catalog:
         search_mode: str,
         selections: Selections,
         layers: frozenset[str] | None = None,
+        resolution: str = "standard",
     ) -> PngExport:
         """The map's "Download as PNG": the query's results, or every known place.
 
@@ -234,6 +235,8 @@ class Catalog:
         the Streamlit app composed them. `layers` names the map layers switched
         on (map_png.LAYERS); None draws what the export always drew: provinces,
         roads, cities, and the results or, with no query, the known places.
+        `resolution` is a key of map_png.RESOLUTIONS; "4k" adds "_4k" to the
+        file name.
         """
         query = is_query(term, selections)
         if layers is None:
@@ -286,10 +289,12 @@ class Catalog:
                 show_roads="roads" in layers,
                 show_cities="cities" in layers,
                 background_places=background,
+                resolution=resolution,
             )
-            return PngExport(content, f"edcs_map_{file_stem}.png")
+            suffix = "" if resolution == "standard" else f"_{resolution}"
+            return PngExport(content, f"edcs_map_{file_stem}{suffix}.png")
 
-        return self._pngs.get((term, search_mode, selections, layers), compute)
+        return self._pngs.get((term, search_mode, selections, layers, resolution), compute)
 
 
 class CatalogSlot:

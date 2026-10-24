@@ -1929,6 +1929,12 @@ export interface operations {
                 place?: components["parameters"]["Place"];
                 /** @description A map layer to draw; repeat for each one switched on. Omitted, the default set. */
                 layer?: ("provinces" | "roads" | "cities" | "known" | "results")[];
+                /**
+                 * @description `standard`: 2124 x 1548 pixels (180 dpi). `4k`: 3840 x 2798, the
+                 *     UHD width at the same proportions, with "_4k" in the file name.
+                 *     The picture is the same; only the sharpness differs.
+                 */
+                resolution?: "standard" | "4k";
             };
             header?: never;
             path?: never;
@@ -1936,7 +1942,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The PNG (11.8 x 8.6 in at 180 dpi, 2124 x 1548 pixels). */
+            /** @description The PNG (11.8 x 8.6 in; 2124 x 1548 pixels, or 3840 x 2798 at 4k). */
             200: {
                 headers: {
                     /** @example attachment; filename="edcs_map_viator.png" */

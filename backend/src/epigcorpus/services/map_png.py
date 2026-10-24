@@ -81,6 +81,13 @@ PRINT_ROAD_COLOR = "#64748b"
 # The layers a PNG can draw, as the web map's layer menu names them.
 LAYERS = frozenset({"provinces", "roads", "cities", "known", "results"})
 
+# The figure, in inches. Text, lines and markers are sized in points, so a
+# higher resolution draws the same picture, only sharper.
+FIGURE_SIZE = (11.8, 8.6)
+# Pixel width per resolution: standard is 180 dpi (2124 x 1548); 4k is
+# 3840 wide, the UHD width, keeping the figure's proportions (3840 x 2798).
+RESOLUTIONS = {"standard": 2124, "4k": 3840}
+
 
 def build_png_bytes(
     result_places: pd.DataFrame,
@@ -98,6 +105,7 @@ def build_png_bytes(
     show_roads: bool = True,
     show_cities: bool = True,
     background_places: pd.DataFrame | None = None,
+    resolution: str = "standard",
 ) -> bytes:
     """Publication-style PNG using the same symbology as the web map.
 
@@ -126,7 +134,8 @@ def build_png_bytes(
 
     # The export carries the same palette as the interactive map rather than
     # sitting on white paper.
-    fig, ax = plt.subplots(figsize=(11.8, 8.6), dpi=180)
+    dpi = 180 if resolution == "standard" else RESOLUTIONS[resolution] / FIGURE_SIZE[0]
+    fig, ax = plt.subplots(figsize=FIGURE_SIZE, dpi=dpi)
     fig.patch.set_facecolor(MAP_BACKGROUND)
     ax.set_facecolor(MAP_BACKGROUND)
     # The footer grows a line per active filter, so the map area has to yield

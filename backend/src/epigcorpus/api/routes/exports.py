@@ -113,6 +113,11 @@ class MapLayer(StrEnum):
     results = "results"
 
 
+class Resolution(StrEnum):
+    standard = "standard"
+    uhd = "4k"
+
+
 @router.get("/map.png", operation_id="exportMapPng")
 def map_png(
     catalog: CatalogDep,
@@ -120,9 +125,10 @@ def map_png(
     q: OptionalQueryText = None,
     search_in: SearchInParam = SearchIn.raw,
     layer: Annotated[list[MapLayer] | None, Query()] = None,
+    resolution: Resolution = Resolution.standard,
 ):
     selections = filters.selections()
     term = q or ""
     layers = frozenset(item.value for item in layer) if layer is not None else None
-    png = catalog.export_png(term, SEARCH_MODES[search_in], selections, layers)
+    png = catalog.export_png(term, SEARCH_MODES[search_in], selections, layers, resolution.value)
     return Response(png.content, media_type="image/png", headers=_attachment(png.filename))

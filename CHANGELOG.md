@@ -8,6 +8,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added — 4K map export (2026-10-24)
+
+- **4K.** "Download the map as PNG" now gives a 4K image: 3,840 × 2,798
+  pixels (the UHD width, in the map's own proportions), about 2–3 MB,
+  named `edcs_map_<query>_4k.png`.
+- **Same picture.** Title, subtitle, footer, legend and layers are the
+  same; text, lines and markers are sized in points, so they only get
+  sharper.
+- **API.** `GET /api/v1/exports/map.png?resolution=4k`. Without it, the
+  export is the standard 2,124 × 1,548, unchanged.
+
 ### Changed — the PNG download follows the map's layers (2026-10-24)
 
 - **Layers.** "Download the map as PNG" now draws the layers switched on in

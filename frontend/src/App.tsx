@@ -173,7 +173,8 @@ export function App() {
   const pipeline = usePipeline(onCorpusReloaded);
 
   const hasResults = shown.results !== null && shown.inscriptions > 0;
-  const pngHref = `${API}/exports/map.png?${queryParams(shown.query)}`;
+  // 4K: 3840 x 2798, the same picture as the standard export, sharper.
+  const pngHref = `${API}/exports/map.png?${queryParams(shown.query, { resolution: "4k" })}`;
 
   return (
     <div className="flex h-full flex-col bg-bg text-fg">
