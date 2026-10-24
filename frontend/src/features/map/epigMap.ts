@@ -4,12 +4,10 @@
  * every marker sharing one canvas in a fixed draw order, which a declarative
  * wrapper would fight. React owns the page; this module owns the map element.
  *
- * The background is CARTO's dark basemap without labels. If its tiles cannot
- * be had (no network, or CARTO answering with its "API KEY REQUIRED" image),
- * the map switches to Natural Earth land served by the API
- * (/api/v1/map/layers/land), so it never shows a broken or black background.
- * The only names on the map are the EDCS province names, drawn in the colour
- * of the shading beneath them.
+ * The background is CARTO's dark basemap without labels, set up exactly as the
+ * original Streamlit map on main set it up (src/edcs_streamlit_map.py). The
+ * only names on the map are the EDCS province names, drawn in the colour of
+ * the shading beneath them.
  *
  * Known places (about 22,000) are grouped into a grid of cells while zoomed
  * out, one dot per cell shaded by its inscriptions, and drawn one by one from
@@ -28,8 +26,6 @@ export const COLORS = {
   search: "#f97316", // orange: search results
   road: "#e2e8f0",
   edge: "#0b0f17",
-  land: "#1e2633",
-  landEdge: "#3b475c",
   labelFallback: "#cbd5e1",
 };
 const PROVINCE_FILL_OPACITY = 0.6;
@@ -49,13 +45,11 @@ export const DETAIL_ZOOM = 7;
 const KNOWN_CAP = 1;
 // Grid cell size on screen while grouped, in pixels.
 const CELL_PX = 26;
-// CARTO's dark basemap without labels (free with attribution, no key).
+// CARTO's dark basemap without labels, as on main (CARTO_PLAIN there).
 const CARTO_URL = "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
 const CARTO_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
   '&copy; <a href="https://carto.com/attributions">CARTO</a>';
-// Failed tiles tolerated before switching to the built-in land.
-const TILE_ERRORS_BEFORE_FALLBACK = 4;
 
 export interface MapPlace {
   place: string;
@@ -117,22 +111,10 @@ export class EpigMap {
   private knownDrawnAt: number | null = null;
   private listeners = new Set<(state: LayerState) => void>();
 
-  private readonly loadLand: () => Promise<GeoJSON.GeoJsonObject>;
-  private tiles: L.TileLayer | null = null;
-  private fellBack = false;
-
-  /** `loadLand` fetches the fallback background, used only if CARTO fails. */
-  constructor(element: HTMLElement, loadLand: () => Promise<GeoJSON.GeoJsonObject>) {
-    this.loadLand = loadLand;
-    // Half-step zoom lets a query's results fill the pane more closely than
-    // whole steps do; the buttons and wheel still move a whole step.
-    const map = L.map(element, {
-      preferCanvas: true,
-      worldCopyJump: true,
-      zoomSnap: 0.5,
-      minZoom: 3,
-      maxZoom: 14,
-    }).setView(CENTER, ZOOM);
+  constructor(element: HTMLElement) {
+    // The same map options as main: whole zoom steps, so tiles are always
+    // drawn at their own size.
+    const map = L.map(element, { preferCanvas: true, worldCopyJump: true }).setView(CENTER, ZOOM);
     this.map = map;
 
     // Stacking, bottom to top: land, provinces (the base), known places, roads,
@@ -141,7 +123,6 @@ export class EpigMap {
     // hovered. Places, roads, cities and results therefore share one canvas,
     // where stacking follows draw order (LAYER_ORDER); roads are drawn there as
     // non-interactive lines, so hovering passes through them.
-    this.pane("land", 200, false);
     this.pane("provincesPane", 400, false);
     this.pane("markersPane", 410, true);
     this.pane("labelsPane", 450, false);
@@ -205,58 +186,10 @@ export class EpigMap {
   // ─── basemap ───────────────────────────────────────────────────────────────
 
   private addBasemap() {
-    const tiles = L.tileLayer(CARTO_URL, {
-      attribution: CARTO_ATTRIBUTION,
+    L.tileLayer(CARTO_URL, {
+      maxZoom: 19,
       subdomains: "abcd",
-      maxZoom: 20,
-      // CORS, so a loaded tile can be read back and checked (below).
-      crossOrigin: "anonymous",
-    });
-    let errors = 0;
-    let checked = 0;
-    const seen = new Map<string, number>();
-    tiles.on("tileerror", () => {
-      errors += 1;
-      if (errors >= TILE_ERRORS_BEFORE_FALLBACK) this.fallBackToLand();
-    });
-    tiles.on("tileload", (event: L.TileEvent) => {
-      // Check the first tiles. CARTO's "API KEY REQUIRED" image is one
-      // picture served for every tile; real tiles differ, except open sea,
-      // which is a single flat colour.
-      if (checked >= 16) return;
-      checked += 1;
-      const sample = sampleTile(event.tile);
-      if (!sample) return;
-      if (isMostlyBright(sample.rgba)) return this.fallBackToLand();
-      if (sample.flat) return;
-      const repeats = (seen.get(sample.signature) ?? 0) + 1;
-      seen.set(sample.signature, repeats);
-      if (repeats >= 3) this.fallBackToLand();
-    });
-    tiles.addTo(this.map);
-    this.tiles = tiles;
-  }
-
-  /** CARTO is not usable here: draw Natural Earth land from the API instead. */
-  private fallBackToLand() {
-    if (this.fellBack) return;
-    this.fellBack = true;
-    if (this.tiles) this.map.removeLayer(this.tiles);
-    this.tiles = null;
-    this.loadLand().then(
-      (data) => this.setLand(data),
-      () => {}, // without land the markers still draw on the dark sea
-    );
-  }
-
-  private setLand(data: GeoJSON.GeoJsonObject) {
-    this.map.attributionControl.addAttribution("Land: Natural Earth");
-    L.geoJSON(data, {
-      pane: "land",
-      interactive: false,
-      style: () => ({
-        fillColor: COLORS.land, fillOpacity: 1, color: COLORS.landEdge, weight: 0.7, opacity: 1,
-      }),
+      attribution: CARTO_ATTRIBUTION,
     }).addTo(this.map);
   }
 
@@ -631,49 +564,4 @@ export function groupIntoCells(
     }))
     // Fullest cells last, so they draw on top.
     .sort((a, b) => a.inscriptions - b.inscriptions);
-}
-
-/** A loaded tile scaled down to 32 × 32: its pixels, a signature of them, and
- *  whether it is a single flat colour. null when it cannot be read (no CORS):
- *  such tiles get the benefit of the doubt. */
-export function sampleTile(
-  tile: HTMLImageElement,
-): { rgba: Uint8ClampedArray; signature: string; flat: boolean } | null {
-  try {
-    const size = 32;
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    const context = canvas.getContext("2d");
-    if (!context) return null;
-    context.drawImage(tile, 0, 0, size, size);
-    const rgba = context.getImageData(0, 0, size, size).data;
-    return { rgba, ...describePixels(rgba) };
-  } catch {
-    return null;
-  }
-}
-
-export function describePixels(rgba: ArrayLike<number>): { signature: string; flat: boolean } {
-  let hash = 5381;
-  let lo = 255;
-  let hi = 0;
-  for (let i = 0; i < rgba.length; i += 4) {
-    const luminance = 0.2126 * rgba[i] + 0.7152 * rgba[i + 1] + 0.0722 * rgba[i + 2];
-    lo = Math.min(lo, luminance);
-    hi = Math.max(hi, luminance);
-    hash = ((hash * 33) ^ (rgba[i] + 7 * rgba[i + 1] + 13 * rgba[i + 2])) >>> 0;
-  }
-  return { signature: hash.toString(36), flat: hi - lo < 6 };
-}
-
-/** More than 3% of pixels brighter than any dark-basemap colour. */
-export function isMostlyBright(rgba: ArrayLike<number>): boolean {
-  let bright = 0;
-  const pixels = rgba.length / 4;
-  for (let i = 0; i < rgba.length; i += 4) {
-    const luminance = 0.2126 * rgba[i] + 0.7152 * rgba[i + 1] + 0.0722 * rgba[i + 2];
-    if (luminance > 120) bright += 1;
-  }
-  return bright / pixels > 0.03;
 }

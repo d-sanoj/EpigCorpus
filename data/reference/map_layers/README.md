@@ -20,7 +20,7 @@ licence, which applies to code only. Each carries its own terms.
 | Roman provinces, AD 117 | `roman_empire_ad_117/` | 111 polygons | Ancient World Mapping Center (AWMC), UNC Chapel Hill |
 | Roman roads | `ba_roads/` | 3,166 linestrings | AWMC, digitised from the *Barrington Atlas* |
 | Cities | `Hanson2016_Cities_OxREP.csv` | 1,388 points | Hanson 2016, Oxford Roman Economy Project |
-| Land (map background) | `natural_earth_land_50m.geojson` | 1 multipolygon (1,419 parts) | Natural Earth 1:50m land, the whole world, public domain, via `world-atlas` 2.0.2 (ISC), converted from TopoJSON with `topojson-client`. The web map's fallback background, when CARTO's tiles cannot be loaded; the API splits polygons that cross the antimeridian |
+| Land (map background) | `natural_earth_land_50m.geojson` | 1 multipolygon (1,419 parts) | Natural Earth 1:50m land, the whole world, public domain, via `world-atlas` 2.0.2 (ISC), converted from TopoJSON with `topojson-client`. Served at /api/v1/map/layers/land, split at the antimeridian; the web map uses CARTO tiles instead |
 
 Each shapefile ships the full component set (`.shp`, `.shx`, `.dbf`, `.prj`,
 plus `.sbn`/`.sbx` indexes). All are read as EPSG:4326.

@@ -8,6 +8,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed — the CARTO basemap exactly as on main (2026-10-24)
+
+- **Setup.** The map's tiles are set up as the original Streamlit map on
+  `main` set them up (`src/edcs_streamlit_map.py`):
+  - `L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_nolabels/…",
+    { maxZoom: 19, subdomains: "abcd", attribution })`;
+  - on a map with `{ preferCanvas: true, worldCopyJump: true }`, centred on
+    Rome at zoom 4.
+- **Removed, because each could distort or replace the CARTO background:**
+  - `crossOrigin` on the tiles, which makes them fail without CORS
+    headers;
+  - the tile check and the fallback to land outlines;
+  - half-step zoom, which stretches tiles between zoom levels.
+
 ### Changed — CARTO basemap again, with a built-in fallback (2026-10-24)
 
 - **CARTO tiles.** The map is drawn on CARTO's `dark_nolabels` tiles again,

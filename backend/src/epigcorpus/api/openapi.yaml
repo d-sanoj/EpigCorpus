@@ -535,15 +535,14 @@ paths:
     get:
       tags: [map]
       operationId: getLandLayer
-      summary: Land outlines, the map's fallback background
+      summary: Land outlines (not used by the web map)
       description: |
         Natural Earth 1:50m land, the whole world except Antarctica,
         simplified to 0.02°. Polygons that cross the antimeridian
         (Afro-Eurasia at the Bering Strait among them) are split at ±180°, so
-        a flat map draws no slivers across the world. The web map draws CARTO
-        tiles; it falls back to this layer when they cannot be loaded or come
-        back as CARTO's "API KEY REQUIRED" image. Static: send
-        `If-None-Match`.
+        a flat map draws no slivers across the world. The web map draws
+        CARTO's tiles instead; this layer remains for clients that want a
+        background without a tile service. Static: send `If-None-Match`.
       responses:
         '200':
           description: A GeoJSON FeatureCollection of polygons.

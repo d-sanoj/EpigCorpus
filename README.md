@@ -50,10 +50,10 @@ Doddapaneni, S. (n.d.). EpigCorpus: A reproducible Latin epigraphy pipeline for 
 - Two cleaning outputs for analysis workflows:
   - Conservative Cleaned Inscriptions
   - Interpretive Cleaned Inscriptions
-- Interactive dark map on CARTO's label-free dark basemap. If CARTO cannot
-  be reached, it falls back to built-in land outlines. When zoomed out, known
-  places are grouped into a density grid; zoomed in, there is one solid
-  circle per place, sized by its inscription count. Stacked bottom to top: land, Roman provinces with their names (the
+- Interactive dark map on CARTO's label-free dark basemap, set up as on the
+  original Streamlit map. When zoomed out, known places are grouped into a
+  density grid; zoomed in, there is one solid circle per place, sized by its
+  inscription count. Stacked bottom to top: land, Roman provinces with their names (the
   base, on by default), teal known places, roads, yellow cities, and orange
   search results on top. No place names on the background.
 - Search across raw and cleaned text.
