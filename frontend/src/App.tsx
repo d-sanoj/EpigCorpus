@@ -11,7 +11,9 @@
  *   top, and the view fits them;
  * - the submitted query is kept in the address bar, so it can be shared;
  * - the pipeline (harvest, clean, reload the corpus) is offered when a server
- *   is behind the app, and left out of the serverless static build.
+ *   is behind the app, and left out of the serverless static build;
+ * - the static build says what it is, and how far its data goes, in a notice
+ *   under the top bar.
  */
 import {
   AlertTriangle,
@@ -38,6 +40,7 @@ import { fromSearch, isQuery, queryParams, toSearch, type Query } from "./api/qu
 import { Button, cx, IconButton, Segmented } from "./components/ui";
 import type { MapPlace } from "./features/map/epigMap";
 import { MapView } from "./features/map/MapView";
+import { StaticNotice } from "./features/notice/StaticNotice";
 import { PipelineSheet } from "./features/pipeline/PipelineSheet";
 import { usePipeline } from "./features/pipeline/usePipeline";
 import { ResultsDrawer } from "./features/results/ResultsDrawer";
@@ -251,6 +254,10 @@ export function App() {
           </a>
         </div>
       </header>
+
+      {/* The hosted build's own disclosure: it has no server, so its data has
+          a date and the pipeline is a clone away. */}
+      {STATIC_MODE && <StaticNotice />}
 
       <div className="relative flex min-h-0 flex-1">
         {/* ── search panel ── */}

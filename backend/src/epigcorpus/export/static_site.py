@@ -12,12 +12,12 @@ the two cannot drift. The container's rows are the API's search frame, in its
 order: the same rows the server would search, with the same missing-value
 rules.
 
-File names are fixed, and `manifest.json` carries the corpus fingerprint plus
-the byte length of each text blob. The browser fetches with `no-cache`, so it
-revalidates rather than trusts a stale copy, and it checks the fingerprint and
-the lengths before using what it gets: artifacts from two snapshots can never
-be mixed. The manifest is written last, so a half-written build is visible as
-one.
+File names are fixed, and `manifest.json` carries the corpus fingerprint, the
+date the corpus was scraped through, and the byte length of each text blob.
+The browser fetches with `no-cache`, so it revalidates rather than trusts a
+stale copy, and it checks the fingerprint and the lengths before using what it
+gets: artifacts from two snapshots can never be mixed. The manifest is written
+last, so a half-written build is visible as one.
 
 Usage (from backend/):
 
@@ -205,6 +205,31 @@ def _text_blob(texts: Iterable[object]) -> tuple[bytes, np.ndarray]:
     return b"".join(chunks), offsets
 
 
+def scrape_date(catalog: Catalog) -> str | None:
+    """The newest `retrieved_at` in the cleaned corpus, as `YYYY-MM-DD`.
+
+    The hosted page can only be as fresh as the corpus it was built from, so
+    it dates itself with this. Corpora cleaned before 2026-10-24 stamp epoch
+    milliseconds instead of ISO 8601 (see api/serialize.py), and both read
+    back here; a corpus without a readable stamp dates nothing.
+    """
+    column = catalog.full().get("retrieved_at")
+    if column is None:
+        return None
+    if pd.api.types.is_numeric_dtype(column):
+        stamps = pd.to_datetime(column, errors="coerce", unit="ms")
+    elif pd.api.types.is_datetime64_any_dtype(column):
+        stamps = column
+    else:
+        stamps = pd.to_datetime(column, errors="coerce", format="ISO8601")
+    newest = stamps.max()
+    if pd.isna(newest):
+        return None
+    if getattr(newest, "tzinfo", None) is not None:
+        newest = newest.tz_convert("UTC")
+    return newest.date().isoformat()
+
+
 def build_container(
     frame: pd.DataFrame, text_offsets: dict[str, np.ndarray], fingerprint: str
 ) -> bytes:
@@ -319,7 +344,9 @@ def write_static_site(
     log("Reading the cleaned corpus…")
     frame = catalog.inscriptions()
     fingerprint = catalog.fingerprint()
+    data_as_of = scrape_date(catalog)
     log(f"  {len(frame):,} rows in the search frame (fingerprint {fingerprint})")
+    log(f"  scraped through {data_as_of}" if data_as_of else "  no retrieved_at column")
 
     sizes: dict[str, int] = {}
     files: dict[str, object] = {"text": {}, "map": {}}
@@ -393,6 +420,8 @@ def write_static_site(
         "fingerprint": fingerprint,
         "rows": int(len(frame)),
         "modes": list(TEXT_COLUMNS),
+        # What the page's own notice dates the snapshot with.
+        "data_as_of": data_as_of,
         "text_bytes": text_bytes,
         "files": files,
     }

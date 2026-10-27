@@ -21,7 +21,8 @@ def small_frame() -> pd.DataFrame:
     """Three rows: a plain one, one missing province and place, one missing text.
 
     Rows 1 and 3 share a findspot, and row 3's coordinates differ from row 1's
-    beyond the fifth decimal, so the round-then-group rule is exercised.
+    beyond the fifth decimal, so the round-then-group rule is exercised. The
+    `retrieved_at` stamps are one scrape session, the newest last.
     """
     return pd.DataFrame(
         [
@@ -40,6 +41,7 @@ def small_frame() -> pd.DataFrame:
                 "inscription_text": "D M S",
                 "inscription_text_conservative": "D M S",
                 "inscription_text_interpretive": "Dis Manibus Sacrum",
+                "retrieved_at": "2026-08-19T16:32:11Z",
             },
             {
                 "record_id": "EDCS-00000002-0",
@@ -56,6 +58,7 @@ def small_frame() -> pd.DataFrame:
                 "inscription_text": "via",
                 "inscription_text_conservative": "via",
                 "inscription_text_interpretive": "via",
+                "retrieved_at": "2026-08-19T17:05:40Z",
             },
             {
                 "record_id": "EDCS-00000001-1",
@@ -72,6 +75,7 @@ def small_frame() -> pd.DataFrame:
                 "inscription_text": None,
                 "inscription_text_conservative": None,
                 "inscription_text_interpretive": None,
+                "retrieved_at": "2026-08-19T19:51:02Z",
             },
         ]
     )
@@ -186,6 +190,9 @@ class StubCatalog:
     def inscriptions(self) -> pd.DataFrame:
         return self._frame
 
+    def full(self) -> pd.DataFrame:
+        return self._frame
+
     def fingerprint(self) -> str:
         return "testfingerprint"
 
@@ -223,6 +230,21 @@ class StubCatalog:
         return [[41.9, 12.5, "Roma"]]
 
 
+def test_a_corpus_without_scrape_stamps_dates_nothing() -> None:
+    without = small_frame().drop(columns=["retrieved_at"])
+    assert static_site.scrape_date(StubCatalog(without)) is None
+
+    unreadable = small_frame().assign(retrieved_at=["", None, "not a date"])
+    assert static_site.scrape_date(StubCatalog(unreadable)) is None
+
+
+def test_epoch_millisecond_stamps_read_back_too() -> None:
+    """Corpora cleaned before 2026-10-24 hold epoch milliseconds."""
+    epoch_ms = int(pd.Timestamp("2026-08-19T19:51:02Z").timestamp() * 1000)
+    frame = small_frame().assign(retrieved_at=[epoch_ms, epoch_ms, epoch_ms])
+    assert static_site.scrape_date(StubCatalog(frame)) == "2026-08-19"
+
+
 def test_write_static_site_names_every_file_in_the_manifest(tmp_path) -> None:
     manifest = static_site.write_static_site(
         StubCatalog(small_frame()), tmp_path, log=lambda _: None
@@ -255,6 +277,8 @@ def test_write_static_site_names_every_file_in_the_manifest(tmp_path) -> None:
     assert written["fingerprint"] == "testfingerprint"
     assert written["modes"] == list(static_site.TEXT_COLUMNS)
     assert set(written["text_bytes"]) == set(static_site.TEXT_COLUMNS)
+    # The page dates its snapshot with the newest scrape stamp.
+    assert written["data_as_of"] == "2026-08-19"
 
     # The facets file carries the API's names, not the corpus column names.
     facets = json.loads((tmp_path / files["facets"]).read_text(encoding="utf-8"))

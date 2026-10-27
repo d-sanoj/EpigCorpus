@@ -56,6 +56,8 @@ nothing runs but the browser. The corpus is precomputed into the site's own
 files at build time and every query — filters, keyword, per-place counts,
 paging — is answered in the browser; the pipeline is left out, because there
 is nothing to harvest on. A clone keeps it: the API-served app is unchanged.
+The page says so itself, in a notice under the top bar: the date its data goes
+up to, and the commands that run a clone locally.
 
 Turn Pages on once (Settings → Pages → Source: "GitHub Actions"), then push to
 `main` and it deploys. See [docs/static-site.md](docs/static-site.md) for the

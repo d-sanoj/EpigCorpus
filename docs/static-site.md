@@ -48,11 +48,12 @@ filter-only browse, which is most of what the map does, never loads one. The
 blobs are gzipped and streamed through the browser's own decompressor.
 
 `manifest.json` (0.6 KB) ties them together: the corpus fingerprint, the row
-count and each blob's byte length. The page fetches with `no-cache`, checks
-the fingerprint and the lengths, and inlines its own reading of the binary
-format (`frontend/src/api/static/container.ts`), refusing anything it does not
-recognise. A redeploy can never leave the page holding half of one build and
-half of another.
+count, each blob's byte length, and `data_as_of` — the newest `retrieved_at`
+in the cleaned corpus, which is how far the data goes. The page fetches with
+`no-cache`, checks the fingerprint and the lengths, and inlines its own reading
+of the binary format (`frontend/src/api/static/container.ts`), refusing
+anything it does not recognise. A redeploy can never leave the page holding
+half of one build and half of another.
 
 ## Building it locally
 
@@ -77,6 +78,18 @@ at that path:
 mkdir -p /tmp/epigpages && ln -sfn "$PWD/frontend/dist" /tmp/epigpages/EpigCorpus
 python3 -m http.server 8123 --directory /tmp/epigpages   # http://localhost:8123/EpigCorpus/
 ```
+
+## What the page says about itself
+
+Under the top bar, the hosted page carries one notice
+(`frontend/src/features/notice/StaticNotice.tsx`): that it is a static
+snapshot, the date its data goes up to, and — behind one click — the commands
+that run the whole app locally, Docker included. The date is the manifest's
+`data_as_of`, read from the corpus's own `retrieved_at` stamps, so a rebuild
+with fresher data moves the notice with it; a corpus without them says its
+data is the corpus committed in the repository. It stays put — no close
+button, because the date belongs on the page. The API-served build shows none:
+it has the pipeline, so it has nothing to disclose.
 
 ## Deploying to GitHub Pages
 

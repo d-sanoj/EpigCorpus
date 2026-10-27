@@ -20,6 +20,8 @@ export interface Manifest {
   fingerprint: string;
   rows: number;
   modes: Mode[];
+  /** The newest `retrieved_at` in the corpus, `YYYY-MM-DD`; null if unknown. */
+  data_as_of: string | null;
   text_bytes: Record<Mode, number>;
   files: {
     corpus: string;
