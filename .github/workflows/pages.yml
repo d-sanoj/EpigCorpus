@@ -1,0 +1,80 @@
+name: Pages
+
+# The serverless build: the corpus is precomputed into the site's own files and
+# the browser answers every query, because GitHub Pages runs no code. The
+# pipeline is not part of this: harvesting and cleaning happen on a machine
+# that has Python, and this workflow only republishes what that produced.
+#
+# ci.yml keeps testing the API-served app, which is what a clone of the repo
+# runs locally.
+#
+# One-time setup: nothing. The first run enables Pages itself
+# (Settings -> Pages -> Source: "GitHub Actions") through configure-pages.
+
+# `workflow_dispatch` only appears in the Actions tab once this file is on the
+# default branch, so the working branch is listed here too and can deploy a
+# test build before it is merged. Drop it from the list once it is merged.
+on:
+  push:
+    branches: [main, EpigCorpus_static_plan]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; a running one is never cancelled halfway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build the corpus artifacts
+        working-directory: backend
+        run: |
+          uv sync --frozen --no-dev
+          uv run python -m epigcorpus.export.static_site --out ../frontend/public/data
+
+      - name: Build the site
+        working-directory: frontend
+        env:
+          # Queries are answered from the artifacts, the pipeline is left out,
+          # and the site is served from /<repository>/ on Pages.
+          VITE_DATA_MODE: static
+          VITE_BASE: /${{ github.event.repository.name }}/
+        run: |
+          npm ci
+          npm run build
+
+      # enablement: creates the Pages site on the first run, so a fresh clone
+      # or a fork needs no manual setting.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

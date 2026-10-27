@@ -1,7 +1,8 @@
 # EpigCorpus frontend
 
 The web UI is built with React, TypeScript, Vite, Tailwind and Leaflet. It is
-a client of the API in `backend/` and nothing else.
+a client of the API in `backend/`, or — in the static build — of the corpus
+files described in `docs/static-site.md`.
 
 ```bash
 npm ci
@@ -13,12 +14,18 @@ npm run gen:api    # regenerate src/api/schema.d.ts from the backend's openapi.y
 npm run e2e        # Playwright; needs a server with dist/ on :8000 (or E2E_BASE_URL)
 ```
 
+With `VITE_DATA_MODE=static` the same build answers its own queries and drops
+the things that need a server: `VITE_BASE` sets the path it is served from
+(`/EpigCorpus/` on Pages). See [../docs/static-site.md](../docs/static-site.md).
+
 ## Layout
 
 ```
 src/
 ├── api/              client.ts (typed fetch), query.ts (the query and its URL forms),
-│                     schema.d.ts (generated, do not edit)
+│                     schema.d.ts (generated, do not edit),
+│                     static/ (the serverless build: the corpus container, the
+│                     query port, the text worker, the /api/v1 paths it answers)
 ├── components/ui.tsx buttons, segmented controls, badges, popover dismissal
 ├── features/
 │   ├── search/       SearchPanel, MultiSelect: keyword, where to search, filters

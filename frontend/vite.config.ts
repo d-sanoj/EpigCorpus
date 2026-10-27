@@ -9,6 +9,10 @@ import { defineConfig } from "vite";
 const backend = process.env.EPIGCORPUS_API ?? "http://127.0.0.1:8000";
 
 export default defineConfig({
+  // GitHub Pages serves the site from /<repository>/, so that build sets
+  // VITE_BASE=/EpigCorpus/. The API-served build keeps the root, and the data
+  // files the static build fetches resolve against the same base.
+  base: process.env.VITE_BASE ?? "/",
   plugins: [react(), tailwindcss()],
   build: {
     // MapLibre (the basemap renderer) is one ~1 MB chunk, loaded on its own

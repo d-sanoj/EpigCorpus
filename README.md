@@ -49,6 +49,19 @@ To harvest from the EDCS, clean, and load the new corpus, use the
 curl -X POST localhost:8000/api/v1/pipeline-runs -H 'content-type: application/json' -d '{}'
 ```
 
+## Host it without a server
+
+`.github/workflows/pages.yml` publishes the same UI to GitHub Pages, where
+nothing runs but the browser. The corpus is precomputed into the site's own
+files at build time and every query — filters, keyword, per-place counts,
+paging — is answered in the browser; the pipeline is left out, because there
+is nothing to harvest on. A clone keeps it: the API-served app is unchanged.
+
+Push to `main` and it deploys; the job turns Pages on itself the first time
+(Settings → Pages → Source becomes "GitHub Actions"). See
+[docs/static-site.md](docs/static-site.md) for the build commands, the
+artifacts and what the static build does differently.
+
 ## Author
 
 - Sanoj Doddapaneni

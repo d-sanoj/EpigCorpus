@@ -109,6 +109,12 @@ export function darken(hex: string, amount: number): string {
   return `rgb(${channels.join(", ")})`;
 }
 
+/** How deep a canvas sits in the stack: its pane's z-index. */
+function paneDepth(canvas: HTMLCanvasElement): number {
+  const pane = canvas.closest(".leaflet-pane") ?? canvas.parentElement;
+  return pane ? Number(getComputedStyle(pane).zIndex) || 0 : 0;
+}
+
 function escapeHtml(value: unknown): string {
   return String(value).replace(
     /[&<>"']/g,
@@ -255,6 +261,50 @@ export class EpigMap {
     this.map.invalidateSize();
   }
 
+  /**
+   * The map as a PNG, for a build with no server to render one.
+   *
+   * The map is several canvases in stacked panes: the basemap at the bottom,
+   * then provinces, then the places and the results. This draws them onto one
+   * canvas in that order. The province names are HTML rather than canvas, so
+   * they are not in the picture. A canvas the browser will not let this page
+   * read (a tile served without CORS) gives no picture at all, rather than a
+   * half-drawn one.
+   */
+  async capturePng(): Promise<Blob | null> {
+    const container = this.map.getContainer();
+    const { clientWidth: width, clientHeight: height } = container;
+    if (!width || !height) return null;
+
+    const canvases = [...container.querySelectorAll("canvas")]
+      .map((canvas) => ({ canvas, depth: paneDepth(canvas) }))
+      .sort((left, right) => left.depth - right.depth);
+    if (!canvases.length) return null;
+
+    const composite = document.createElement("canvas");
+    composite.width = width;
+    composite.height = height;
+    const context = composite.getContext("2d");
+    if (!context) return null;
+
+    const frame = container.getBoundingClientRect();
+    for (const { canvas } of canvases) {
+      const box = canvas.getBoundingClientRect();
+      try {
+        context.drawImage(
+          canvas,
+          box.left - frame.left,
+          box.top - frame.top,
+          box.width,
+          box.height,
+        );
+      } catch {
+        return null;
+      }
+    }
+    return new Promise((resolve) => composite.toBlob((blob) => resolve(blob), "image/png"));
+  }
+
   // ─── data ──────────────────────────────────────────────────────────────────
 
   // ─── basemap ───────────────────────────────────────────────────────────────
@@ -273,7 +323,12 @@ export class EpigMap {
       .then(([plugin, , style]) => {
         // A newer theme switch, or the map's removal, wins.
         if (this.removed || request !== this.basemapRequest) return;
-        const next = plugin.maplibreGL({ style: withoutLabels(style) });
+        // preserveDrawingBuffer: the PNG export reads this canvas back, and a
+        // WebGL buffer that is not preserved is empty by the time it is read.
+        const next = plugin.maplibreGL({
+          style: withoutLabels(style),
+          canvasContextAttributes: { preserveDrawingBuffer: true },
+        });
         next.addTo(this.map);
         if (this.basemap) this.map.removeLayer(this.basemap);
         this.basemap = next;

@@ -68,5 +68,10 @@ data/processed/*.parquet.partial
 # Frontend dependencies and build output
 frontend/node_modules/
 frontend/dist/
+
+# The static site's corpus artifacts, written by
+# `python -m epigcorpus.export.static_site`. They are rebuilt from the cleaned
+# corpus on every Pages deployment, never committed.
+frontend/public/data/
 frontend/test-results/
 frontend/playwright-report/

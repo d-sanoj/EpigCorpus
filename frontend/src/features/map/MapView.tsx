@@ -8,7 +8,7 @@
 import "leaflet/dist/leaflet.css";
 import { Download, Layers, Map as MapIcon, Minus, Plus, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { getJson, type CityPoint, type ProvinceLabel } from "../../api/client";
+import { getJson, STATIC_MODE, type CityPoint, type ProvinceLabel } from "../../api/client";
 import { cx, IconButton, useDismiss } from "../../components/ui";
 import { formatInteger } from "../../lib/format";
 import {
@@ -80,6 +80,9 @@ export function MapView({ known, results, theme, pngHref, bottomBar, children }:
   const [layers, setLayers] = useState<LayerState | null>(null);
   const [layersOpen, setLayersOpen] = useState(false);
   const [legendOpen, setLegendOpen] = useState(false);
+  // The serverless build makes the picture itself; a browser that will not
+  // let it read the map's canvases says so and stops offering it.
+  const [pngFailed, setPngFailed] = useState(false);
   const layersRef = useRef<HTMLDivElement>(null);
   const legendRef = useRef<HTMLDivElement>(null);
   useDismiss(layersRef, layersOpen, () => setLayersOpen(false));
@@ -128,6 +131,20 @@ export function MapView({ known, results, theme, pngHref, bottomBar, children }:
 
   const activeLayers = layers ? TOGGLES.filter(({ key }) => layers[key]?.on).length : 0;
   const downloadHref = layers ? withLayers(pngHref, layers) : pngHref;
+
+  async function capture() {
+    const blob = await map?.capturePng();
+    if (!blob) {
+      setPngFailed(true);
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "edcs_map.png";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -210,15 +227,32 @@ export function MapView({ known, results, theme, pngHref, bottomBar, children }:
         </div>
 
         <ControlGroup>
-          <a
-            href={downloadHref}
-            download
-            aria-label="Download the map as PNG"
-            title="Download the map as a 4K PNG (3840 × 2798)"
-            className="inline-flex size-8 items-center justify-center rounded-lg text-fg-2 transition-colors hover:bg-surface-2 hover:text-fg"
-          >
-            <Download className="size-4" />
-          </a>
+          {STATIC_MODE ? (
+            <button
+              type="button"
+              onClick={capture}
+              disabled={pngFailed}
+              aria-label="Download the map as PNG"
+              title={
+                pngFailed
+                  ? "This browser will not let the map be captured as an image"
+                  : "Download the map as a PNG (what the map shows now)"
+              }
+              className="inline-flex size-8 items-center justify-center rounded-lg text-fg-2 transition-colors hover:bg-surface-2 hover:text-fg disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
+            >
+              <Download className="size-4" />
+            </button>
+          ) : (
+            <a
+              href={downloadHref}
+              download
+              aria-label="Download the map as PNG"
+              title="Download the map as a 4K PNG (3840 × 2798)"
+              className="inline-flex size-8 items-center justify-center rounded-lg text-fg-2 transition-colors hover:bg-surface-2 hover:text-fg"
+            >
+              <Download className="size-4" />
+            </a>
+          )}
         </ControlGroup>
       </div>
 

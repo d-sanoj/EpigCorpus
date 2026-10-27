@@ -5,6 +5,8 @@
  * fails the type check.
  */
 import type { components, operations } from "./schema";
+import { OPENAPI_URL as STATIC_OPENAPI_URL } from "./static/artifacts";
+import { staticGet } from "./static/engine";
 
 export type Schemas = components["schemas"];
 export type Facets = Schemas["Facets"];
@@ -27,6 +29,20 @@ export type KnownPlaces = GeoJsonOf<"getKnownPlacesGeoJson">;
 
 export const API = "/api/v1";
 
+/** How the app gets its data.
+ *
+ * "api" (the default): the FastAPI server answers /api/v1 - npm run dev, the
+ * Docker image, and the end-to-end tests all run this way.
+ * "static": the corpus is precomputed and queried in the browser, for hosting
+ * that cannot run anything (GitHub Pages, built with VITE_DATA_MODE=static).
+ * Everything that needs a server steps aside there: the pipeline is not
+ * offered, the TSV is built locally, and the PNG is a capture of the map.
+ */
+export const STATIC_MODE = import.meta.env.VITE_DATA_MODE === "static";
+
+/** The API reference: served by the backend, or a file in the static build. */
+export const OPENAPI_URL = STATIC_MODE ? STATIC_OPENAPI_URL : `${API}/openapi.yaml`;
+
 export class ApiError extends Error {
   readonly status: number;
   readonly problem: Partial<Problem>;
@@ -39,6 +55,9 @@ export class ApiError extends Error {
 }
 
 export async function getJson<T>(path: string, init?: RequestInit): Promise<T> {
+  // Without a server, the same paths are answered from the site's own files
+  // (see api/static/engine.ts).
+  if (STATIC_MODE) return staticGet<T>(path);
   const response = await fetch(API + path, {
     ...init,
     headers: { Accept: "application/json", ...init?.headers },

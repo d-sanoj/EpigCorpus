@@ -6,8 +6,15 @@
  * rows are fetched only once it is opened. */
 import { ChevronUp, Download, Loader2, Table2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { API, getJson, type InscriptionPage, type InscriptionSummary } from "../../api/client";
+import {
+  API,
+  getJson,
+  STATIC_MODE,
+  type InscriptionPage,
+  type InscriptionSummary,
+} from "../../api/client";
 import { filterParams, queryParams, SEARCH_MODES, type Query } from "../../api/query";
+import { staticTsv } from "../../api/static/engine";
 import { Button, cx, LinkButton } from "../../components/ui";
 import { dating, formatInteger, plural } from "../../lib/format";
 
@@ -36,6 +43,7 @@ export function ResultsDrawer({ query, inscriptions, places }: Props) {
   const [loading, setLoading] = useState(false);
   const [loadedFor, setLoadedFor] = useState<Query | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [preparing, setPreparing] = useState(false);
 
   // The first page loads when the drawer opens, and again for each new query
   // while it is open.
@@ -74,6 +82,26 @@ export function ResultsDrawer({ query, inscriptions, places }: Props) {
   const mode = SEARCH_MODES[query.searchIn];
   const tsvHref = `${API}/exports/search.tsv?${queryParams(query)}`;
 
+  // With no server to stream the export, the page builds it from the rows it
+  // holds and hands it over as a download.
+  async function downloadTsv() {
+    setPreparing(true);
+    setError(null);
+    try {
+      const { blob, filename } = await staticTsv(queryParams(query));
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (reason) {
+      setError((reason as Error).message);
+    } finally {
+      setPreparing(false);
+    }
+  }
+
   return (
     <section
       aria-label="Results"
@@ -91,16 +119,33 @@ export function ResultsDrawer({ query, inscriptions, places }: Props) {
           </span>
           <span className="text-muted"> at {plural(places, "place", "places")}</span>
         </div>
-        <LinkButton
-          href={tsvHref}
-          download
-          size="sm"
-          variant="ghost"
-          title="Every column of the matching inscriptions, tab-separated"
-        >
-          <Download className="size-3.5" aria-hidden="true" />
-          <span className="hidden sm:inline">Download</span> TSV
-        </LinkButton>
+        {STATIC_MODE ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={downloadTsv}
+            disabled={preparing}
+            title="The matching inscriptions, with the columns this site holds, tab-separated"
+          >
+            {preparing ? (
+              <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+            ) : (
+              <Download className="size-3.5" aria-hidden="true" />
+            )}
+            <span className="hidden sm:inline">{preparing ? "Preparing" : "Download"}</span> TSV
+          </Button>
+        ) : (
+          <LinkButton
+            href={tsvHref}
+            download
+            size="sm"
+            variant="ghost"
+            title="Every column of the matching inscriptions, tab-separated"
+          >
+            <Download className="size-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">Download</span> TSV
+          </LinkButton>
+        )}
         <Button
           size="sm"
           variant="secondary"

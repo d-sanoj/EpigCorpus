@@ -8,6 +8,7 @@ import {
   ApiError,
   getJson,
   postJson,
+  STATIC_MODE,
   type PipelineRun,
   type PipelineRunRequest,
 } from "../../api/client";
@@ -32,6 +33,7 @@ export function usePipeline(onCorpusReloaded: () => void): Pipeline {
 
   // The latest run, so a page opened mid-run shows it.
   useEffect(() => {
+    if (STATIC_MODE) return;
     getJson<{ data: PipelineRun[] }>("/pipeline-runs").then(
       (body) => {
         const latest = body.data[0] ?? null;
@@ -43,7 +45,7 @@ export function usePipeline(onCorpusReloaded: () => void): Pipeline {
   }, []);
 
   useEffect(() => {
-    if (!run || !ACTIVE.has(run.status)) return;
+    if (STATIC_MODE || !run || !ACTIVE.has(run.status)) return;
     const timer = window.setTimeout(() => {
       getJson<PipelineRun>(`/pipeline-runs/${run.id}`).then(
         (next) => {

@@ -9,7 +9,9 @@
  *   pressed (or Enter in the keyword field);
  * - with no query the map shows every known place; with one, the results on
  *   top, and the view fits them;
- * - the submitted query is kept in the address bar, so it can be shared.
+ * - the submitted query is kept in the address bar, so it can be shared;
+ * - the pipeline (harvest, clean, reload the corpus) is offered when a server
+ *   is behind the app, and left out of the serverless static build.
  */
 import {
   AlertTriangle,
@@ -23,7 +25,15 @@ import {
   Sun,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { API, getJson, type Facets, type KnownPlaces, type ResultPlaces } from "./api/client";
+import {
+  API,
+  getJson,
+  OPENAPI_URL,
+  STATIC_MODE,
+  type Facets,
+  type KnownPlaces,
+  type ResultPlaces,
+} from "./api/client";
 import { fromSearch, isQuery, queryParams, toSearch, type Query } from "./api/query";
 import { Button, cx, IconButton, Segmented } from "./components/ui";
 import type { MapPlace } from "./features/map/epigMap";
@@ -68,7 +78,12 @@ const THEMES: { value: ThemeChoice; label: ReactNode; title: string }[] = [
 
 function Logo() {
   return (
-    <img src="/epigcorpus-logo.png" className="size-7 flex-none" alt="" aria-hidden="true" />
+    <img
+      src={`${import.meta.env.BASE_URL}epigcorpus-logo.png`}
+      className="size-7 flex-none"
+      alt=""
+      aria-hidden="true"
+    />
   );
 }
 
@@ -207,25 +222,27 @@ export function App() {
               </span>
             </div>
           )}
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => setPipelineOpen(true)}
-            aria-haspopup="dialog"
-            className="relative"
-          >
-            <DatabaseZap className="size-3.5" aria-hidden="true" />
-            <span className="hidden sm:inline">Pipeline</span>
-            {pipeline.active && (
-              <span className="absolute -top-1 -right-1 flex size-2.5">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-accent opacity-60" />
-                <span className="relative inline-flex size-2.5 rounded-full bg-accent" />
-              </span>
-            )}
-          </Button>
+          {!STATIC_MODE && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setPipelineOpen(true)}
+              aria-haspopup="dialog"
+              className="relative"
+            >
+              <DatabaseZap className="size-3.5" aria-hidden="true" />
+              <span className="hidden sm:inline">Pipeline</span>
+              {pipeline.active && (
+                <span className="absolute -top-1 -right-1 flex size-2.5">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-accent opacity-60" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-accent" />
+                </span>
+              )}
+            </Button>
+          )}
           <Segmented label="Theme" value={themeChoice} options={THEMES} onChange={setThemeChoice} size="sm" />
           <a
-            href={`${API}/openapi.yaml`}
+            href={OPENAPI_URL}
             className="hidden size-9 items-center justify-center rounded-lg text-fg-2 transition-colors hover:bg-surface-2 hover:text-fg sm:inline-flex"
             title="API reference (OpenAPI)"
             aria-label="API reference"
@@ -295,7 +312,9 @@ export function App() {
         </main>
       </div>
 
-      <PipelineSheet open={pipelineOpen} onClose={() => setPipelineOpen(false)} pipeline={pipeline} />
+      {!STATIC_MODE && (
+        <PipelineSheet open={pipelineOpen} onClose={() => setPipelineOpen(false)} pipeline={pipeline} />
+      )}
     </div>
   );
 }
