@@ -57,10 +57,9 @@ files at build time and every query — filters, keyword, per-place counts,
 paging — is answered in the browser; the pipeline is left out, because there
 is nothing to harvest on. A clone keeps it: the API-served app is unchanged.
 
-Push to `main` and it deploys; the job turns Pages on itself the first time
-(Settings → Pages → Source becomes "GitHub Actions"). See
-[docs/static-site.md](docs/static-site.md) for the build commands, the
-artifacts and what the static build does differently.
+Turn Pages on once (Settings → Pages → Source: "GitHub Actions"), then push to
+`main` and it deploys. See [docs/static-site.md](docs/static-site.md) for the
+build commands, the artifacts and what the static build does differently.
 
 ## Author
 

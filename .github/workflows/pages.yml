@@ -8,8 +8,10 @@ name: Pages
 # ci.yml keeps testing the API-served app, which is what a clone of the repo
 # runs locally.
 #
-# One-time setup: nothing. The first run enables Pages itself
-# (Settings -> Pages -> Source: "GitHub Actions") through configure-pages.
+# One-time setup: Settings -> Pages -> Source: "GitHub Actions". The job
+# cannot do that itself: GITHUB_TOKEN is not allowed to create a Pages site
+# (configure-pages' `enablement: true` fails with "Resource not accessible by
+# integration"). Everything after that one click is automatic.
 
 # `workflow_dispatch` only appears in the Actions tab once this file is on the
 # default branch, so the working branch is listed here too and can deploy a
@@ -60,11 +62,7 @@ jobs:
           npm ci
           npm run build
 
-      # enablement: creates the Pages site on the first run, so a fresh clone
-      # or a fork needs no manual setting.
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist

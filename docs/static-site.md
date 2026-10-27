@@ -81,9 +81,12 @@ python3 -m http.server 8123 --directory /tmp/epigpages   # http://localhost:8123
 ## Deploying to GitHub Pages
 
 `.github/workflows/pages.yml` does the two steps above on every push to `main`
-and publishes `frontend/dist`. There is no setup: the job enables Pages itself
-(`configure-pages` with `enablement: true`), so **Settings → Pages → Source**
-flips to “GitHub Actions” on the first run. No secrets, no build service.
+and publishes `frontend/dist`. No secrets, no build service.
+
+One click is still manual: **Settings → Pages → Source: “GitHub Actions”**.
+The job cannot do it for you — `GITHUB_TOKEN` is not allowed to create a Pages
+site, so `configure-pages` with `enablement: true` fails with “Resource not
+accessible by integration”. Once the site exists, every run after it works.
 
 Pushes to a branch that is listed in the workflow's `branches:` also deploy,
 which is how the change that added this could be seen on the real URL before
