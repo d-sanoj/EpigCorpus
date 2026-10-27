@@ -5,9 +5,11 @@
     every layer   ->  config
 
 Services never import adapters: they receive them, typed by the Protocols in
-epigcorpus/services/ports.py, from the composition root, epigcorpus/api/server.py,
-which wires real adapters into services; it alone may import adapters from
-outside the adapter layer. See docs/adr/0001-layered-app-layout.md.
+epigcorpus/services/ports.py, from a composition root. There are two:
+epigcorpus/api/server.py wires real adapters into services for a served run,
+and epigcorpus/export/ builds the same Catalog to write the corpus out as
+files. Nothing else outside the adapter layer may import adapters. See
+docs/adr/0001-layered-app-layout.md.
 """
 
 import ast
@@ -29,6 +31,10 @@ ALLOWED = {
 COMPOSITION_ROOTS = {
     "api/server.py": ALLOWED["api"] | {"adapters"},
     "api/workers.py": ALLOWED["api"] | {"adapters"},
+    # The static exporter wires adapters into a Catalog and reuses the API's
+    # own names and serialisers, so it reads the API's allowance plus core.
+    "export/__init__.py": set(),
+    "export/static_site.py": ALLOWED["api"] | {"adapters", "core"},
 }
 
 # Third-party packages that belong to one layer only.
