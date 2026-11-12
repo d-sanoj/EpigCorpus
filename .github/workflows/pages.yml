@@ -55,9 +55,9 @@ jobs:
         working-directory: frontend
         env:
           # Queries are answered from the artifacts, the pipeline is left out,
-          # and the site is served from /<repository>/ on Pages.
+          # and the site is served from the root of its custom domain.
           VITE_DATA_MODE: static
-          VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_BASE: /
         run: |
           npm ci
           npm run build
