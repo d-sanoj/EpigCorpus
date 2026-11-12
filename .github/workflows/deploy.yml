@@ -1,0 +1,73 @@
+name: Deploy
+
+# The serverless build, published to Cloudflare Pages at epigcorpus.sanoj.dev.
+# The corpus is precomputed into the site's own files and the browser answers
+# every query, so the pipeline is not part of the site. Harvesting and cleaning
+# happen on a machine that has Python; this workflow only republishes what that
+# produced.
+#
+# ci.yml keeps testing the API-served app, which is what a clone of the repo
+# runs locally.
+#
+# One-time setup: add a repository secret CLOUDFLARE_API_TOKEN, a Cloudflare
+# API token with the "Cloudflare Pages: Edit" permission on this account.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; a running one is never cancelled halfway.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  CLOUDFLARE_ACCOUNT_ID: 092d0ddaf6b8b62f6ec393407a090063
+  PAGES_PROJECT: epigcorpus
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build the corpus artifacts
+        working-directory: backend
+        run: |
+          uv sync --frozen --no-dev
+          uv run python -m epigcorpus.export.static_site --out ../frontend/public/data
+
+      - name: Build the site
+        working-directory: frontend
+        env:
+          # Queries are answered from the artifacts, the pipeline is left out,
+          # and the site is served from the root of its custom domain.
+          VITE_DATA_MODE: static
+          VITE_BASE: /
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::Add the CLOUDFLARE_API_TOKEN repository secret (Cloudflare Pages: Edit) to deploy."
+            exit 1
+          fi
+          npx --yes wrangler@4 pages deploy frontend/dist \
+            --project-name "$PAGES_PROJECT" \
+            --branch main \
+            --commit-hash "$GITHUB_SHA"
