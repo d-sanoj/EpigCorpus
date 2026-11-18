@@ -1,0 +1,56 @@
+cff-version: 1.2.0
+message: >-
+  If you use EpigCorpus, please cite it as below, and cite the
+  Epigraphik-Datenbank Clauss / Slaby (EDCS), from which every inscription
+  comes (see the README's "Data and Software References").
+type: software
+title: >-
+  EpigCorpus: A reproducible Latin epigraphy pipeline for extracting,
+  cleaning, and exploring EDCS inscriptions
+authors:
+  - family-names: Doddapaneni
+    given-names: Sanoj
+version: 1.0.0
+license: MIT
+repository-code: "https://github.com/d-sanoj/EpigCorpus"
+url: "https://epigcorpus.sanoj.dev"
+abstract: >-
+  EpigCorpus is a reproducible Latin epigraphy pipeline for extracting
+  inscriptions from the Epigraphik-Datenbank Clauss / Slaby (EDCS), cleaning
+  inscription text into research-ready variants, and exploring results on an
+  interactive Roman Empire map.
+keywords:
+  - Latin epigraphy
+  - inscriptions
+  - EDCS
+  - Roman Empire
+  - digital humanities
+  - corpus
+  - text cleaning
+  - historical GIS
+references:
+  - type: database
+    title: Epigraphik-Datenbank Clauss / Slaby (EDCS)
+    authors:
+      - family-names: Clauss
+        given-names: M.
+      - family-names: Kolb
+        given-names: A.
+      - family-names: Slaby
+        given-names: W. A.
+      - family-names: Woitas
+        given-names: B.
+    url: "https://edcs.hist.uzh.ch/"
+  - type: software
+    title: LatEpig
+    version: "2.0"
+    year: 2024
+    authors:
+      - family-names: Ballsun-Stanton
+        given-names: B.
+      - family-names: Hermankova
+        given-names: P.
+      - family-names: Laurence
+        given-names: R.
+    repository-code: "https://github.com/mqAncientHistory/Lat-Epig/"
+    doi: 10.5281/zenodo.12036539

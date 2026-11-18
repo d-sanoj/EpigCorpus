@@ -8,6 +8,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Docs — README overhaul, screenshots and CITATION.cff (2026-11-18)
+
+- **Citations.** Every citation, source and licence notice from the README is
+  kept verbatim; the "Data and Software References" section is unchanged,
+  byte for byte. Checked by script: 67 citation lines and 62 URLs/DOIs, none
+  missing.
+- **New sections.** Why EpigCorpus, the corpus at a glance (from the harvest
+  manifest), trying it in the browser, API and pandas examples, the
+  conservative and interpretive texts with a worked example, research,
+  contributing, and how to cite.
+- **Screenshots.** Three captures of the live site in `docs/img/`.
+- **Hosting.** The GitHub Pages section described a workflow that was
+  removed; it now describes the Cloudflare Pages deploy (`deploy.yml`).
+- **CITATION.cff.** Software citation metadata (no DOI), validated with
+  cffconvert against schema 1.2.0.
+
 ### Docs — data sources, credits and an architecture diagram in the README (2026-10-24)
 
 - **Citations.** Every citation from the original README is kept verbatim.
