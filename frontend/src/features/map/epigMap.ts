@@ -67,6 +67,11 @@ const EMPTY_RADIUS = 1.5;
 export const LEGEND_STOPS = [1, 10, 100, 1000];
 const CENTER: L.LatLngTuple = [41.9028, 12.4964]; // Rome, as EDCS
 const ZOOM = 4;
+// A search that lands on one place has no area to fit: fitting it asks for an
+// infinite zoom, which the basemap cannot render and which blanks the page.
+// One place is shown at this zoom instead, close enough to see the place and
+// far enough to see where it sits.
+const SINGLE_PLACE_ZOOM = 10;
 // Known places are drawn one by one from this zoom in, grouped below it.
 export const DETAIL_ZOOM = 7;
 // Known places drawn one by one never grow past their default-zoom size.
@@ -163,6 +168,10 @@ export class EpigMap {
       preferCanvas: true,
       worldCopyJump: true,
       zoomControl: false,
+      // No layer sets a maximum zoom, so without one Leaflet's getMaxZoom
+      // returns Infinity and any unbounded zoom — a fit, a scroll, a zoom
+      // button — can ask the basemap for a zoom it cannot render.
+      maxZoom: 18,
     }).setView(CENTER, ZOOM);
     this.map = map;
 
@@ -370,6 +379,14 @@ export class EpigMap {
       // The pane may have just changed size (the results table opens under
       // it); fit against its current size, not the one Leaflet last measured.
       this.map.invalidateSize();
+      if (places.length === 1) {
+        // One place has no area: fitBounds divides by a zero-size bounds and
+        // asks for an infinite zoom, which the basemap cannot render and
+        // which blanks the page. Centre on the place at a fixed zoom instead.
+        const only = places[0];
+        this.map.setView([only.latitude, only.longitude], SINGLE_PLACE_ZOOM);
+        return;
+      }
       const lats = places.map((p) => p.latitude);
       const lons = places.map((p) => p.longitude);
       this.map.fitBounds(

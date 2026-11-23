@@ -1,14 +1,16 @@
 /* One search mode's inscription texts: searched and sliced off the main thread.
  *
- * The keyword is a case-insensitive substring, as the server's is. An ASCII
- * keyword is scanned byte by byte, which is what almost every search is; a
- * keyword carrying anything else falls back to decoding each row and comparing
- * strings, because folding UTF-8 case byte-wise is not the same as folding
- * text. Both paths are bounded by the loaded blob: the worker holds one mode
- * at a time, which is the largest object the page keeps.
+ * The keyword is a case-insensitive whole word, as the server's is: "tree"
+ * matches "tree" and not "Matree". An ASCII keyword is scanned byte by byte,
+ * which is what almost every search is; a keyword carrying anything else
+ * falls back to decoding each row and comparing strings, because folding
+ * UTF-8 case byte-wise is not the same as folding text. Both paths are
+ * bounded by the loaded blob: the worker holds one mode at a time, which is
+ * the largest object the page keeps.
  */
 import { fetchGzipUrl } from "./artifacts";
 import type { Mode } from "./container";
+import { rowHasWord, wholeWordPattern } from "./wordSearch";
 
 export interface LoadRequest {
   kind: "load";
@@ -65,11 +67,6 @@ let offsets: Uint32Array | null = null;
 
 const decoder = new TextDecoder();
 
-/** Fold an ASCII letter to lower case; every other byte is left alone. */
-function fold(byte: number): number {
-  return byte >= 65 && byte <= 90 ? byte + 32 : byte;
-}
-
 function slice(row: number): string {
   return decoder.decode(blob!.subarray(offsets![row], offsets![row + 1]));
 }
@@ -103,27 +100,16 @@ function search(request: SearchRequest): Reply {
 
   if (/^[\x20-\x7e]*$/.test(request.needle)) {
     const needle = new TextEncoder().encode(request.needle.toLowerCase());
-    const first = needle[0];
-    const width = needle.length;
     for (let row = 0; row < rows; row++) {
-      const end = offsets[row + 1] - width + 1;
-      for (let at = offsets[row]; at < end; at++) {
-        if (fold(blob[at]) !== first) continue;
-        let position = 1;
-        while (position < width && fold(blob[at + position]) === needle[position]) position++;
-        if (position === width) {
-          hits[row] = 1;
-          break;
-        }
-      }
+      if (rowHasWord(blob, offsets[row], offsets[row + 1], needle)) hits[row] = 1;
     }
     return { id: request.id, ok: true, kind: "search", hits };
   }
 
   // Anything outside ASCII: compare text, where case folding is Unicode's.
-  const needle = request.needle.toLowerCase();
+  const pattern = wholeWordPattern(request.needle.toLowerCase());
   for (let row = 0; row < rows; row++) {
-    if (slice(row).toLowerCase().includes(needle)) hits[row] = 1;
+    if (pattern.test(slice(row).toLowerCase())) hits[row] = 1;
   }
   return { id: request.id, ok: true, kind: "search", hits };
 }

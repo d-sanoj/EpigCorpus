@@ -6,7 +6,7 @@
  * - material, province and place match a value exactly; language and category
  *   match on token overlap, so "Greek, Latin" answers both filters;
  * - values within one filter are alternatives, different filters must all hold;
- * - the keyword is a case-insensitive substring, not a word or a regex;
+ * - the keyword is a case-insensitive whole word, not a substring or a regex;
  * - the map draws one circle per (place, 5-decimal coordinate), and places
  *   with the fewest inscriptions come first, so the largest draw on top.
  */

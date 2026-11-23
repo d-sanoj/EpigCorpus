@@ -3,13 +3,16 @@
 No I/O and no Streamlit: everything here takes a DataFrame and returns one,
 so the UI, the CLI and a future HTTP API share the same search behaviour.
 
-Search semantics: the keyword is a case-insensitive substring match (not a
-regex) on the column chosen by the search mode. material_en, province and
-place match exactly; category_en and language match on token overlap. Values
-within one filter are alternatives; different filters must all hold.
+Search semantics: the keyword is a case-insensitive whole-word match (not a
+regex) on the column chosen by the search mode, so "tree" matches "tree" and
+not "Matree". material_en, province and place match exactly; category_en and
+language match on token overlap. Values within one filter are alternatives;
+different filters must all hold.
 """
 
 from __future__ import annotations
+
+import re
 
 import pandas as pd
 
@@ -26,6 +29,18 @@ def _token_set(value: object) -> set[str]:
     if not text:
         return set()
     return {part.strip() for part in text.split(",") if part.strip()}
+
+
+def _whole_word_pattern(term: str) -> str:
+    """A regex that matches `term` only as a whole word (or phrase).
+
+    The lookarounds are the whole point: a word character on either side of
+    the term means it sits inside another word, as "tree" does in "Matree".
+    The term itself is escaped, so it is still not a regex. ``\\w`` is
+    Unicode-aware, so a Greek letter next to the term counts as part of a
+    word and a separator like · does not.
+    """
+    return rf"(?<!\w){re.escape(term)}(?!\w)"
 
 
 def apply_filters(
@@ -46,7 +61,7 @@ def apply_filters(
             result = result[result[column].map(lambda v, want=chosen: bool(want & _token_set(v)))]
     if term.strip():
         haystack = result[search_column].fillna("").astype(str)
-        result = result[haystack.str.contains(term, case=False, na=False, regex=False)]
+        result = result[haystack.str.contains(_whole_word_pattern(term), case=False, na=False, regex=True)]
     return result.reset_index(drop=True)
 
 
@@ -56,7 +71,7 @@ def filter_inscriptions(data: pd.DataFrame, search_column: str, term: str) -> pd
         return data.iloc[:0]  # Empty dataframe
 
     search_text = data[search_column].fillna("").astype(str)
-    matches = search_text.str.contains(term, case=False, na=False, regex=False)
+    matches = search_text.str.contains(_whole_word_pattern(term), case=False, na=False, regex=True)
     return data[matches].reset_index(drop=True)
 
 

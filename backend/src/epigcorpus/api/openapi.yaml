@@ -169,7 +169,7 @@ paths:
       operationId: searchInscriptions
       summary: Keyword search, combinable with the filters
       description: |
-        Case-insensitive substring search of `q` in the column chosen by
+        Case-insensitive whole-word search of `q` in the column chosen by
         `search_in`, then narrowed by the filters. Same results, in the same
         order, as the map's search for the same inputs.
       parameters:
@@ -1049,7 +1049,7 @@ components:
       name: q
       in: query
       required: true
-      description: Case-insensitive substring to find in the `search_in` column. Not a regex.
+      description: Case-insensitive whole word to find in the `search_in` column. Not a regex.
       schema:
         type: string
         minLength: 1
@@ -1059,7 +1059,7 @@ components:
       name: q
       in: query
       required: false
-      description: Case-insensitive substring to find in the `search_in` column. Not a regex.
+      description: Case-insensitive whole word to find in the `search_in` column. Not a regex.
       schema:
         type: string
         minLength: 1
