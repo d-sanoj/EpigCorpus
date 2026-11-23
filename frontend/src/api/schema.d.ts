@@ -58,7 +58,7 @@ export interface paths {
         };
         /**
          * Keyword search, combinable with the filters
-         * @description Case-insensitive substring search of `q` in the column chosen by
+         * @description Case-insensitive whole-word search of `q` in the column chosen by
          *     `search_in`, then narrowed by the filters. Same results, in the same
          *     order, as the map's search for the same inputs.
          */
@@ -1077,12 +1077,12 @@ export interface components {
     };
     parameters: {
         /**
-         * @description Case-insensitive substring to find in the `search_in` column. Not a regex.
+         * @description Case-insensitive whole word to find in the `search_in` column. Not a regex.
          * @example viator
          */
         QRequired: string;
         /**
-         * @description Case-insensitive substring to find in the `search_in` column. Not a regex.
+         * @description Case-insensitive whole word to find in the `search_in` column. Not a regex.
          * @example viator
          */
         QOptional: string;
@@ -1267,7 +1267,7 @@ export interface operations {
         parameters: {
             query: {
                 /**
-                 * @description Case-insensitive substring to find in the `search_in` column. Not a regex.
+                 * @description Case-insensitive whole word to find in the `search_in` column. Not a regex.
                  * @example viator
                  */
                 q: components["parameters"]["QRequired"];
@@ -1435,7 +1435,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Case-insensitive substring to find in the `search_in` column. Not a regex.
+                 * @description Case-insensitive whole word to find in the `search_in` column. Not a regex.
                  * @example viator
                  */
                 q?: components["parameters"]["QOptional"];
@@ -1554,7 +1554,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Case-insensitive substring to find in the `search_in` column. Not a regex.
+                 * @description Case-insensitive whole word to find in the `search_in` column. Not a regex.
                  * @example viator
                  */
                 q?: components["parameters"]["QOptional"];
@@ -1804,7 +1804,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Case-insensitive substring to find in the `search_in` column. Not a regex.
+                 * @description Case-insensitive whole word to find in the `search_in` column. Not a regex.
                  * @example viator
                  */
                 q?: components["parameters"]["QOptional"];
@@ -1878,7 +1878,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Case-insensitive substring to find in the `search_in` column. Not a regex.
+                 * @description Case-insensitive whole word to find in the `search_in` column. Not a regex.
                  * @example viator
                  */
                 q?: components["parameters"]["QOptional"];
