@@ -14,6 +14,7 @@ name: Deploy
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -30,6 +31,8 @@ env:
 
 jobs:
   deploy:
+    # Production: only a push to main (or a manual run) deploys the live site.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,4 +73,49 @@ jobs:
           npx --yes wrangler@4 pages deploy frontend/dist \
             --project-name "$PAGES_PROJECT" \
             --branch main \
+            --commit-hash "$GITHUB_SHA"
+
+  preview:
+    # A pull request gets its own preview deployment, so the change can be
+    # tried before it is merged. Production is untouched: a branch deployment
+    # never serves the custom domain.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build the corpus artifacts
+        working-directory: backend
+        run: |
+          uv sync --frozen --no-dev
+          uv run python -m epigcorpus.export.static_site --out ../frontend/public/data
+
+      - name: Build the site
+        working-directory: frontend
+        env:
+          VITE_DATA_MODE: static
+          VITE_BASE: /
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy preview to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::Add the CLOUDFLARE_API_TOKEN repository secret (Cloudflare Pages: Edit) to deploy."
+            exit 1
+          fi
+          npx --yes wrangler@4 pages deploy frontend/dist \
+            --project-name "$PAGES_PROJECT" \
+            --branch "${{ github.head_ref }}" \
             --commit-hash "$GITHUB_SHA"
