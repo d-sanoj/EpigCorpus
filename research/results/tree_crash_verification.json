@@ -1,0 +1,109 @@
+{
+  "corpus_rows": 588509,
+  "modes": {
+    "Raw inscriptions": {
+      "old_substring_tree_rows": 1,
+      "old_substring_tree_places": [
+        "Budapest / Aquincum"
+      ],
+      "fixed_whole_word_tree_rows": 0,
+      "fixed_whole_word_TREE_rows": 0,
+      "old_substring_tree_aggregate": [
+        {
+          "place": "Budapest / Aquincum",
+          "latitude": 47.49842,
+          "longitude": 19.04051,
+          "count": 1
+        }
+      ],
+      "old_substring_tree_match": [
+        {
+          "edcs_id": "EDCS-29900632",
+          "place": "Budapest / Aquincum",
+          "province": "Pannonia inferior",
+          "text": "Matree[3]"
+        }
+      ]
+    },
+    "Interpretive Cleaned Inscriptions": {
+      "old_substring_tree_rows": 2,
+      "old_substring_tree_places": [
+        "Budapest / Aquincum",
+        "Roma"
+      ],
+      "fixed_whole_word_tree_rows": 0,
+      "fixed_whole_word_TREE_rows": 0,
+      "old_substring_tree_aggregate": [
+        {
+          "place": "Roma",
+          "latitude": 41.89332,
+          "longitude": 12.48293,
+          "count": 1
+        },
+        {
+          "place": "Budapest / Aquincum",
+          "latitude": 47.49842,
+          "longitude": 19.04051,
+          "count": 1
+        }
+      ],
+      "old_substring_tree_match": [
+        {
+          "edcs_id": "EDCS-29200159",
+          "place": "Roma",
+          "province": "Roma",
+          "text": "Ex praecepto Iovis Optimi Maximi Dolicheni patroni et candidati huius loci tabulam marmoream Aurelius Asclepiodotus Suaetrius Clodianus Flavius Campanus Aurelius Vitalio Annii Iulianus et Victor senior et iunior patroni per Marcum Aurelium Hoinopionem Acacium sacerdotem et patreEm candidatorum et Eutychianus lecticarii dei et candidati IAM V"
+        },
+        {
+          "edcs_id": "EDCS-29900632",
+          "place": "Budapest / Aquincum",
+          "province": "Pannonia inferior",
+          "text": "Matree"
+        }
+      ]
+    },
+    "Conservative Cleaned Inscriptions": {
+      "old_substring_tree_rows": 1,
+      "old_substring_tree_places": [
+        "Budapest / Aquincum"
+      ],
+      "fixed_whole_word_tree_rows": 0,
+      "fixed_whole_word_TREE_rows": 0,
+      "old_substring_tree_aggregate": [
+        {
+          "place": "Budapest / Aquincum",
+          "latitude": 47.49842,
+          "longitude": 19.04051,
+          "count": 1
+        }
+      ],
+      "old_substring_tree_match": [
+        {
+          "edcs_id": "EDCS-29900632",
+          "place": "Budapest / Aquincum",
+          "province": "Pannonia inferior",
+          "text": "Matree"
+        }
+      ]
+    }
+  },
+  "contrasts": {
+    "tre_substring_rows_conservative": 3599,
+    "matree": {
+      "rows": 1,
+      "places": 1
+    },
+    "popidium": {
+      "rows": 154,
+      "places": 1
+    },
+    "viator": {
+      "rows": 379,
+      "places": 213
+    },
+    "vixit": {
+      "rows": 24724,
+      "places": 2092
+    }
+  }
+}
